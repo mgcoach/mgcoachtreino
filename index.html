@@ -1,0 +1,2694 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>TRAIN.FUEL · Calculadora Profissional de Treinos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<!-- ============== PWA / iOS ============== -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="description" content="Sistema profissional de prescrição de treinos com banco de exercícios animados">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TrainFuel">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icon-152.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icon-167.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="shortcut icon" href="favicon.png">
+
+<!-- Splash Screens iOS -->
+<link rel="apple-touch-startup-image" href="splash-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
+<link rel="apple-touch-startup-image" href="splash-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)">
+<link rel="apple-touch-startup-image" href="splash-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)">
+<link rel="apple-touch-startup-image" href="splash-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)">
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  :root {
+    --bg: #0a0a0a;
+    --bg-elev: #141414;
+    --bg-card: #1a1a1a;
+    --bg-input: #252525;
+    --border: #2e2e2e;
+    --border-soft: #1f1f1f;
+    
+    --orange: #ff6b1a;
+    --orange-bright: #ff8533;
+    --orange-deep: #d94e00;
+    --orange-soft: rgba(255, 107, 26, 0.12);
+    --orange-glow: rgba(255, 107, 26, 0.4);
+    
+    --text: #f5f5f5;
+    --text-muted: #999;
+    --text-dim: #666;
+    
+    --success: #4ade80;
+    --warn: #fbbf24;
+    --danger: #ef4444;
+    
+    --font-display: 'Bebas Neue', 'Impact', sans-serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  }
+  
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.5;
+    background-image: 
+      radial-gradient(circle at 15% 20%, rgba(255, 107, 26, 0.06) 0%, transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(255, 107, 26, 0.04) 0%, transparent 40%);
+    background-attachment: fixed;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .container { max-width: 1280px; margin: 0 auto; padding: 16px; }
+  
+  /* === HEADER === */
+  .brand-header {
+    background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .brand-header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--orange-deep), var(--orange), var(--orange-bright), var(--orange));
+  }
+  .brand-header::after {
+    content: '';
+    position: absolute;
+    top: -50%; right: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, var(--orange-glow) 0%, transparent 60%);
+    opacity: 0.3;
+    pointer-events: none;
+  }
+  .brand-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px; flex-wrap: wrap; position: relative; z-index: 1;
+  }
+  .brand-logo { display: flex; align-items: center; gap: 14px; }
+  .logo-mark {
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, var(--orange) 0%, var(--orange-deep) 100%);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 20px var(--orange-glow);
+  }
+  .logo-mark svg { width: 30px; height: 30px; fill: var(--bg); }
+  .brand-text h1 {
+    font-family: var(--font-display);
+    font-size: 2.4rem; line-height: 0.9;
+    letter-spacing: 0.02em; color: var(--text);
+  }
+  .brand-text h1 span { color: var(--orange); }
+  .brand-tagline {
+    font-size: 0.72rem; color: var(--text-muted);
+    letter-spacing: 0.18em; text-transform: uppercase;
+    margin-top: 4px; font-weight: 600;
+  }
+  .brand-meta {
+    display: flex; gap: 24px;
+    font-size: 0.7rem; color: var(--text-muted);
+    letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500;
+  }
+  .brand-meta-item { display: flex; flex-direction: column; gap: 2px; }
+  .brand-meta-item strong {
+    color: var(--orange); font-size: 1rem;
+    font-family: var(--font-mono); letter-spacing: 0;
+  }
+  
+  /* === NAVEGAÇÃO === */
+  .nav-tabs {
+    display: flex; gap: 4px;
+    margin-bottom: 16px;
+    background: var(--bg-card);
+    padding: 5px; border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .nav-tab {
+    flex: 1; min-width: 110px;
+    padding: 11px 14px;
+    background: transparent; border: none;
+    color: var(--text-muted); cursor: pointer;
+    font-size: 0.74rem; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    border-radius: 8px;
+    transition: all 0.25s; white-space: nowrap;
+    font-family: var(--font-body);
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active {
+    background: var(--orange); color: var(--bg);
+    box-shadow: 0 4px 14px var(--orange-glow);
+  }
+  
+  .panel { display: none; }
+  .panel.active { display: block; }
+  
+  /* === SEÇÕES === */
+  .section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px; margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 1.3rem; letter-spacing: 0.04em;
+    color: var(--text); margin-bottom: 16px;
+    display: flex; align-items: center; gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .section-title::before {
+    content: ''; width: 3px; height: 20px;
+    background: var(--orange); border-radius: 2px;
+  }
+  
+  /* === CAMPOS === */
+  .field-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+  }
+  .field { display: flex; flex-direction: column; }
+  .field label {
+    font-size: 0.68rem; color: var(--text-muted);
+    margin-bottom: 6px; text-transform: uppercase;
+    letter-spacing: 0.1em; font-weight: 600;
+  }
+  .field input, .field select, .field textarea {
+    width: 100%; padding: 11px 13px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text);
+    font-size: 0.92rem; font-family: var(--font-body);
+    transition: all 0.2s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none; border-color: var(--orange);
+    box-shadow: 0 0 0 3px var(--orange-soft);
+  }
+  
+  .info-card {
+    background: linear-gradient(135deg, var(--orange-soft) 0%, transparent 100%);
+    border: 1px solid var(--orange-soft);
+    border-left: 3px solid var(--orange);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+  .info-card strong { color: var(--orange); font-weight: 700; }
+  
+  /* === FICHA DO PACIENTE === */
+  .client-form {
+    background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-elev) 100%);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px; margin-bottom: 16px;
+    position: relative;
+  }
+  .client-form::before {
+    content: 'FICHA DO ALUNO';
+    position: absolute; top: -8px; left: 16px;
+    background: var(--orange); color: var(--bg);
+    padding: 2px 10px; border-radius: 4px;
+    font-size: 0.65rem; font-weight: 800;
+    letter-spacing: 0.12em;
+  }
+  
+  /* === DIAS DA SEMANA === */
+  .day-tabs {
+    display: flex; gap: 6px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .day-tab {
+    flex: 1; min-width: 90px;
+    padding: 10px 8px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-muted); cursor: pointer;
+    font-size: 0.74rem; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    transition: all 0.2s;
+    text-align: center;
+    position: relative;
+  }
+  .day-tab:hover { border-color: var(--orange); color: var(--text); }
+  .day-tab.active {
+    background: var(--orange-soft);
+    border-color: var(--orange);
+    color: var(--orange);
+  }
+  .day-tab .day-count {
+    display: block;
+    font-size: 0.62rem;
+    color: var(--text-dim);
+    margin-top: 2px;
+    font-family: var(--font-mono);
+  }
+  .day-tab.active .day-count { color: var(--orange); opacity: 0.7; }
+  .day-tab .focus-label {
+    display: block;
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    margin-top: 2px;
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+  .day-tab.active .focus-label { color: var(--orange); opacity: 0.85; }
+  
+  /* === BUSCA EXERCÍCIOS === */
+  .exercise-search-box {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  
+  .filters-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  
+  .filters-row .field input,
+  .filters-row .field select {
+    padding: 10px 12px;
+    font-size: 0.88rem;
+  }
+  
+  /* Lista de exercícios encontrados */
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+    max-height: 480px;
+    overflow-y: auto;
+    padding: 4px;
+  }
+  
+  .exercise-card {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  
+  .exercise-card:hover {
+    border-color: var(--orange);
+    transform: translateY(-2px);
+  }
+  
+  .exercise-card-img {
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: #fff;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  
+  .exercise-card-img::after {
+    content: '🎬';
+    position: absolute;
+    top: 6px; right: 6px;
+    background: rgba(0,0,0,0.7);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+  }
+  
+  .exercise-card-body {
+    padding: 10px 12px;
+  }
+  
+  .exercise-card-name {
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 3px;
+    line-height: 1.3;
+  }
+  
+  .exercise-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    font-size: 0.65rem;
+  }
+  
+  .exercise-tag {
+    padding: 1px 6px;
+    border-radius: 3px;
+    background: var(--bg-card);
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  
+  .exercise-tag.muscle {
+    background: var(--orange-soft);
+    color: var(--orange);
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+  }
+  
+  .empty-state-icon {
+    font-size: 3rem;
+    opacity: 0.3;
+    margin-bottom: 12px;
+  }
+  
+  /* === MODAL EXERCÍCIO === */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(6px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 16px;
+  }
+  .modal-overlay.active { display: flex; }
+  
+  .modal {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+  }
+  
+  .modal-close {
+    position: absolute;
+    top: 14px; right: 14px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.4rem;
+    cursor: pointer;
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    z-index: 10;
+  }
+  .modal-close:hover { background: var(--bg-input); color: var(--text); }
+  
+  .exercise-detail-img {
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: #fff;
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+    margin-bottom: 14px;
+  }
+  
+  .exercise-detail-name {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    margin-bottom: 4px;
+    line-height: 1.1;
+  }
+  
+  .exercise-detail-en {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-bottom: 10px;
+  }
+  
+  .exercise-detail-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  
+  .detail-tag {
+    padding: 4px 10px;
+    background: var(--bg-input);
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  .detail-tag.primary {
+    background: var(--orange-soft);
+    color: var(--orange);
+  }
+  
+  .detail-section {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-soft);
+  }
+  .detail-section-title {
+    font-size: 0.74rem;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .detail-instructions {
+    font-size: 0.86rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .detail-instructions ol {
+    padding-left: 18px;
+  }
+  .detail-instructions li {
+    margin-bottom: 6px;
+  }
+  
+  /* Form prescrição no modal */
+  .prescription-form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 12px;
+  }
+  
+  .prescription-form .field input,
+  .prescription-form .field textarea {
+    padding: 9px 11px;
+    font-size: 0.86rem;
+  }
+  
+  .prescription-form .full {
+    grid-column: 1 / -1;
+  }
+  
+  .add-to-day-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--orange);
+    color: var(--bg);
+    border: none;
+    border-radius: 10px;
+    font-weight: 800;
+    cursor: pointer;
+    font-size: 0.88rem;
+    margin-top: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    box-shadow: 0 4px 14px var(--orange-glow);
+    transition: all 0.2s;
+  }
+  .add-to-day-btn:hover {
+    background: var(--orange-bright);
+    transform: translateY(-1px);
+  }
+  
+  /* === EXERCÍCIOS DO DIA === */
+  .day-exercises {
+    margin-top: 14px;
+  }
+  
+  .day-exercise-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  
+  .day-ex-header {
+    padding: 12px 16px;
+    background: linear-gradient(90deg, #1f1f1f 0%, var(--bg-card) 100%);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  
+  .day-ex-thumb {
+    width: 50px; height: 50px;
+    border-radius: 8px;
+    background: #fff;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  
+  .day-ex-info {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .day-ex-name {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--orange);
+    letter-spacing: 0.03em;
+    margin-bottom: 2px;
+  }
+  
+  .day-ex-tags {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+  
+  .day-ex-actions {
+    display: flex;
+    gap: 6px;
+  }
+  
+  .icon-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .icon-btn.gif:hover {
+    background: var(--orange-soft);
+    color: var(--orange);
+    border-color: var(--orange);
+  }
+  .icon-btn.up:hover, .icon-btn.down:hover {
+    background: var(--bg-input);
+    color: var(--text);
+  }
+  .icon-btn.remove:hover {
+    background: var(--danger);
+    color: white;
+    border-color: var(--danger);
+  }
+  
+  .day-ex-body {
+    padding: 14px 16px;
+  }
+  
+  .day-ex-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 10px;
+  }
+  
+  .ex-field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  
+  .ex-field label {
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+  
+  .ex-field input, .ex-field textarea {
+    padding: 8px 10px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 0.84rem;
+    font-family: var(--font-body);
+  }
+  
+  .ex-field input:focus, .ex-field textarea:focus {
+    outline: none;
+    border-color: var(--orange);
+  }
+  
+  .ex-obs {
+    margin-top: 10px;
+  }
+  
+  .ex-obs textarea {
+    width: 100%;
+    min-height: 50px;
+    padding: 8px 10px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 0.84rem;
+    font-family: var(--font-body);
+    resize: vertical;
+  }
+  
+  .ex-obs textarea:focus {
+    outline: none;
+    border-color: var(--orange);
+  }
+  
+  .empty-day {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    font-style: italic;
+  }
+  
+  .empty-day-icon {
+    font-size: 4rem;
+    opacity: 0.2;
+    margin-bottom: 14px;
+  }
+  
+  /* === FOCO DO DIA === */
+  .day-focus-input {
+    width: 100%;
+    padding: 11px 13px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 0.92rem;
+    font-family: var(--font-body);
+    margin-bottom: 14px;
+  }
+  
+  .day-focus-input:focus {
+    outline: none;
+    border-color: var(--orange);
+    box-shadow: 0 0 0 3px var(--orange-soft);
+  }
+  
+  /* === ACTIONS === */
+  .actions {
+    display: flex; gap: 8px;
+    margin-top: 16px; flex-wrap: wrap;
+  }
+  
+  .action-btn {
+    flex: 1; min-width: 100px;
+    padding: 11px 14px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px; cursor: pointer;
+    font-size: 0.74rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    transition: all 0.2s;
+    font-family: var(--font-body);
+  }
+  .action-btn:hover { border-color: var(--orange); color: var(--orange); }
+  .action-btn.primary {
+    background: var(--orange); color: var(--bg);
+    border-color: var(--orange);
+    box-shadow: 0 3px 12px var(--orange-glow);
+  }
+  .action-btn.primary:hover {
+    background: var(--orange-bright); color: var(--bg);
+  }
+  .action-btn.danger:hover {
+    border-color: var(--danger); color: var(--danger);
+  }
+  
+  /* === LOGO ESTRELA-HALTERE PARA TRAIN === */
+  
+  /* === SCROLLBAR === */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--orange); }
+  
+  .footer-note {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    padding: 16px;
+    line-height: 1.6;
+  }
+  .footer-note strong { color: var(--orange); }
+  
+  /* === RESPONSIVE === */
+  @media (max-width: 640px) {
+    .container { padding: 12px; }
+    .filters-row { grid-template-columns: 1fr; }
+    .results-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    .brand-text h1 { font-size: 1.8rem; }
+    .nav-tab { min-width: 100px; padding: 10px; font-size: 0.7rem; }
+    .day-tab { min-width: 75px; font-size: 0.68rem; }
+    .prescription-form { grid-template-columns: 1fr; }
+    .day-ex-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  
+  /* ===========================================================
+     PDF / PRINT — ficha de treino estilizada
+     =========================================================== */
+  
+  #pdfArea { display: none; }
+  
+  @media print {
+    @page { size: A4; margin: 12mm; }
+    body {
+      background: #fff !important;
+      background-image: none !important;
+      color: #000 !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    .container > *:not(#pdfArea) { display: none !important; }
+    #pdfArea {
+      display: block !important;
+      padding: 0;
+      max-width: 100%;
+    }
+    .pdf-day, .pdf-exercise, .pdf-client {
+      page-break-inside: avoid;
+    }
+  }
+  
+  #pdfArea {
+    background: #fff;
+    color: #1a1a1a;
+    font-family: 'Inter', system-ui, sans-serif;
+    width: 100%;
+    max-width: 794px;
+    margin: 0 auto;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  #pdfArea *,
+  #pdfArea *::before,
+  #pdfArea *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  .pdf-header {
+    background: #0a0a0a !important;
+    color: #fff !important;
+    padding: 24px 28px;
+    border-radius: 12px;
+    margin-bottom: 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .pdf-header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: #ff6b1a !important;
+  }
+  
+  .pdf-brand-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px; position: relative; z-index: 1;
+  }
+  
+  .pdf-brand { display: flex; align-items: center; gap: 14px; }
+  
+  .pdf-logo {
+    width: 50px; height: 50px;
+    background: linear-gradient(135deg, #ff6b1a 0%, #d94e00 100%);
+    border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    color: #0a0a0a;
+    font-family: 'Bebas Neue', Impact, sans-serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+  }
+  
+  .pdf-title-block h1 {
+    font-family: 'Bebas Neue', Impact, sans-serif;
+    font-size: 2rem;
+    line-height: 0.95;
+    letter-spacing: 0.03em;
+    color: #fff !important;
+  }
+  .pdf-title-block h1 span { color: #ff6b1a !important; }
+  
+  .pdf-tagline {
+    font-size: 0.62rem;
+    color: #999 !important;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-top: 3px;
+  }
+  
+  .pdf-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: #ff6b1a !important;
+    letter-spacing: 0.1em;
+    text-align: right;
+  }
+  .pdf-date-label {
+    font-size: 0.58rem;
+    color: #999 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 2px;
+    font-weight: 600;
+  }
+  
+  .pdf-client {
+    background: #ffffff !important;
+    border: 1.5px solid #e5e5e5;
+    border-left: 4px solid #ff6b1a !important;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+  }
+  
+  .pdf-client-label {
+    font-size: 0.62rem;
+    color: #ff6b1a !important;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+  
+  .pdf-client-name {
+    font-family: 'Bebas Neue', Impact, sans-serif;
+    font-size: 1.7rem;
+    color: #0a0a0a !important;
+    letter-spacing: 0.02em;
+    margin-bottom: 8px;
+    line-height: 1;
+  }
+  
+  .pdf-client-meta {
+    display: flex; gap: 18px;
+    flex-wrap: wrap;
+    font-size: 0.78rem;
+    color: #555;
+  }
+  
+  .pdf-client-meta strong { color: #1a1a1a; font-weight: 700; }
+  
+  /* Dia de treino no PDF */
+  .pdf-day {
+    background: #fff;
+    border: 1.5px solid #e5e5e5;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  
+  .pdf-day-header {
+    background: #ff6b1a !important;
+    color: #fff !important;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .pdf-day-name {
+    font-family: 'Bebas Neue', Impact, sans-serif;
+    font-size: 1.3rem;
+    color: #fff !important;
+    letter-spacing: 0.04em;
+    font-weight: 700;
+  }
+  
+  .pdf-day-focus {
+    font-size: 0.78rem;
+    color: #fff !important;
+    background: rgba(255,255,255,0.2);
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+  }
+  
+  .pdf-day-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: #fff !important;
+    background: rgba(0,0,0,0.25);
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-weight: 700;
+  }
+  
+  .pdf-exercises {
+    padding: 0;
+  }
+  
+  .pdf-exercise {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .pdf-exercise:last-child { border-bottom: none; }
+  
+  .pdf-exercise-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  
+  .pdf-exercise-num {
+    font-family: 'Bebas Neue', Impact, sans-serif;
+    font-size: 1.5rem;
+    color: #ff6b1a !important;
+    line-height: 1;
+    margin-right: 6px;
+  }
+  
+  .pdf-exercise-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a1a1a !important;
+    flex: 1;
+  }
+  
+  .pdf-exercise-tags {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .pdf-prescription {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+    background: #fafafa;
+    padding: 10px;
+    border-radius: 6px;
+  }
+  
+  .pdf-presc-item {
+    text-align: center;
+  }
+  
+  .pdf-presc-label {
+    font-size: 0.58rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    margin-bottom: 3px;
+  }
+  
+  .pdf-presc-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.92rem;
+    color: #1a1a1a !important;
+    font-weight: 700;
+  }
+  
+  .pdf-exercise-obs {
+    margin-top: 8px;
+    padding: 8px 10px;
+    background: #fff8f3;
+    border-left: 3px solid #ff6b1a;
+    border-radius: 4px;
+    font-size: 0.78rem;
+    color: #555;
+    line-height: 1.5;
+  }
+  
+  .pdf-exercise-obs strong {
+    color: #d94e00 !important;
+    font-weight: 700;
+  }
+  
+  .pdf-disclaimer {
+    margin-top: 16px;
+    padding: 10px 14px;
+    background: #f8f8f8;
+    border-left: 3px solid #999;
+    border-radius: 6px;
+    font-size: 0.66rem;
+    color: #666;
+    line-height: 1.5;
+  }
+  
+  .pdf-footer {
+    margin-top: 16px;
+    padding: 14px 18px;
+    background: #0a0a0a !important;
+    color: #fff !important;
+    border-radius: 10px;
+    font-size: 0.68rem;
+    line-height: 1.6;
+    text-align: center;
+  }
+  
+  .pdf-footer strong { color: #ff6b1a !important; }
+  .pdf-footer div { color: #cccccc !important; }
+  .pdf-footer div:first-child strong { color: #fff !important; }
+</style>
+</head>
+<body>
+<div class="container">
+  
+  <!-- ============== HEADER ============== -->
+  <header class="brand-header">
+    <div class="brand-row">
+      <div class="brand-logo">
+        <div class="logo-mark">
+          <!-- Ícone de haltere com estrela -->
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14 4.14 5.57 2 7.71 3.43 9.14 2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22 14.86 20.57 16.29 22 18.43 19.86 19.86 21.29 21.29 19.86 19.86 18.43 22 16.29z"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>TRAIN<span>.</span>FUEL</h1>
+          <div class="brand-tagline">Prescrição · Treino · Ciência</div>
+        </div>
+      </div>
+      <div class="brand-meta">
+        <div class="brand-meta-item">
+          <span>Exercícios</span>
+          <strong id="metaTotalEx">—</strong>
+        </div>
+        <div class="brand-meta-item">
+          <span>Versão</span>
+          <strong>1.0</strong>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============== NAVEGAÇÃO ============== -->
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-panel="aluno">👤 Aluno</button>
+    <button class="nav-tab" data-panel="treino">🏋️ Treino</button>
+    <button class="nav-tab" data-panel="export">📄 Exportar</button>
+  </div>
+
+  <!-- ============== PAINEL ALUNO ============== -->
+  <div class="panel active" id="panel-aluno">
+    
+    <div class="client-form">
+      <div style="margin-top: 8px;">
+        <div class="field-grid" style="grid-template-columns: 2fr 1fr 1fr;">
+          <div class="field">
+            <label>Nome do Aluno</label>
+            <input type="text" id="cliNome" placeholder="ex: João Silva">
+          </div>
+          <div class="field">
+            <label>Idade</label>
+            <input type="number" id="cliIdade" placeholder="anos" min="1" max="120">
+          </div>
+          <div class="field">
+            <label>Telefone</label>
+            <input type="text" id="cliTel" placeholder="(00) 00000-0000">
+          </div>
+        </div>
+        
+        <div class="field-grid" style="margin-top: 12px; grid-template-columns: 1fr 1fr 1fr 1fr;">
+          <div class="field">
+            <label>Peso (kg)</label>
+            <input type="number" id="cliPeso" placeholder="kg" step="0.1">
+          </div>
+          <div class="field">
+            <label>Altura (cm)</label>
+            <input type="number" id="cliAltura" placeholder="cm">
+          </div>
+          <div class="field">
+            <label>Objetivo</label>
+            <select id="cliObjetivo">
+              <option value="">—</option>
+              <option>Hipertrofia</option>
+              <option>Emagrecimento</option>
+              <option>Definição</option>
+              <option>Força</option>
+              <option>Resistência</option>
+              <option>Performance esportiva</option>
+              <option>Saúde geral</option>
+              <option>Reabilitação</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Nível</label>
+            <select id="cliNivel">
+              <option value="">—</option>
+              <option>Iniciante</option>
+              <option>Intermediário</option>
+              <option>Avançado</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="field-grid" style="margin-top: 12px; grid-template-columns: 1fr 1fr;">
+          <div class="field">
+            <label>Profissional Responsável</label>
+            <input type="text" id="profNome" placeholder="ex: Prof. Matheus — CREF X-00000">
+          </div>
+          <div class="field">
+            <label>Data do Plano</label>
+            <input type="date" id="planData">
+          </div>
+        </div>
+        
+        <div class="field" style="margin-top: 12px;">
+          <label>Restrições / Lesões / Observações</label>
+          <textarea id="cliObs" rows="3" placeholder="ex: Lesão no ombro direito; evitar exercícios de impacto..."></textarea>
+        </div>
+      </div>
+    </div>
+    
+    <div class="info-card">
+      Esses dados aparecerão no PDF do treino enviado ao aluno. Preencha com cuidado para passar credibilidade profissional.
+    </div>
+  </div>
+
+  <!-- ============== PAINEL TREINO ============== -->
+  <div class="panel" id="panel-treino">
+    
+    <div class="section">
+      <div class="section-title">Programação Semanal</div>
+      
+      <!-- Tabs dos dias da semana -->
+      <div class="day-tabs" id="dayTabs">
+        <div class="day-tab active" data-day="seg">
+          Segunda
+          <span class="focus-label" data-focus="seg">—</span>
+          <span class="day-count" data-count="seg">0 exs</span>
+        </div>
+        <div class="day-tab" data-day="ter">
+          Terça
+          <span class="focus-label" data-focus="ter">—</span>
+          <span class="day-count" data-count="ter">0 exs</span>
+        </div>
+        <div class="day-tab" data-day="qua">
+          Quarta
+          <span class="focus-label" data-focus="qua">—</span>
+          <span class="day-count" data-count="qua">0 exs</span>
+        </div>
+        <div class="day-tab" data-day="qui">
+          Quinta
+          <span class="focus-label" data-focus="qui">—</span>
+          <span class="day-count" data-count="qui">0 exs</span>
+        </div>
+        <div class="day-tab" data-day="sex">
+          Sexta
+          <span class="focus-label" data-focus="sex">—</span>
+          <span class="day-count" data-count="sex">0 exs</span>
+        </div>
+        <div class="day-tab" data-day="sab">
+          Sábado
+          <span class="focus-label" data-focus="sab">—</span>
+          <span class="day-count" data-count="sab">0 exs</span>
+        </div>
+        <div class="day-tab" data-day="dom">
+          Domingo
+          <span class="focus-label" data-focus="dom">—</span>
+          <span class="day-count" data-count="dom">0 exs</span>
+        </div>
+      </div>
+      
+      <!-- Foco do dia -->
+      <input type="text" class="day-focus-input" id="dayFocus" placeholder="Foco do dia (ex: Peito + Tríceps, Pernas, Cardio + Core...)">
+      
+      <!-- Busca de exercícios -->
+      <div class="exercise-search-box">
+        <div class="filters-row">
+          <div class="field">
+            <label>Buscar Exercício</label>
+            <input type="text" id="exSearch" placeholder="ex: supino, agachamento..." autocomplete="off">
+          </div>
+          <div class="field">
+            <label>Músculo</label>
+            <select id="filterMusc">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Equipamento</label>
+            <select id="filterEq">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Nível</label>
+            <select id="filterLvl">
+              <option value="">Todos</option>
+              <option value="beginner">Iniciante</option>
+              <option value="intermediate">Intermediário</option>
+              <option value="expert">Avançado</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="results-grid" id="resultsGrid">
+          <!-- Preenchido via JS -->
+        </div>
+      </div>
+      
+      <!-- Lista de exercícios do dia -->
+      <div class="day-exercises" id="dayExercises">
+        <!-- Preenchido via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== PAINEL EXPORT ============== -->
+  <div class="panel" id="panel-export">
+    
+    <div class="section">
+      <div class="section-title">Exportar Treino</div>
+      
+      <div class="actions" style="margin-top: 0;">
+        <button class="action-btn primary" onclick="gerarPDF()">📄 Baixar PDF</button>
+        <button class="action-btn primary" onclick="imprimir()">🖨️ Imprimir</button>
+        <button class="action-btn" onclick="exportarJSON()">💾 Salvar JSON</button>
+        <button class="action-btn" onclick="document.getElementById('importFile').click()">📂 Importar JSON</button>
+        <button class="action-btn danger" onclick="limparTudo()">🗑️ Limpar Tudo</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importarJSON(event)">
+      </div>
+    </div>
+    
+    <div class="info-card">
+      <strong>Dica:</strong> Antes de gerar o PDF, preencha os dados do aluno na aba <strong>Aluno</strong>. O PDF inclui todos os dias da semana com exercícios e prescrições, formatado profissionalmente.
+    </div>
+  </div>
+
+  <p class="footer-note">
+    <strong>TRAIN.FUEL · v1.0</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
+  </p>
+  
+  <!-- Área PDF (oculta em tela) -->
+  <div id="pdfArea"></div>
+
+</div>
+
+<!-- ============== MODAL EXERCÍCIO ============== -->
+<div class="modal-overlay" id="exModal">
+  <div class="modal">
+    <button class="modal-close" onclick="fecharModalEx()">×</button>
+    <div class="exercise-detail-img" id="modalImg"></div>
+    <div class="exercise-detail-name" id="modalName">—</div>
+    <div class="exercise-detail-en" id="modalNameEn">—</div>
+    <div class="exercise-detail-tags" id="modalTags"></div>
+    
+    <div class="detail-section">
+      <div class="detail-section-title">📋 Como Executar</div>
+      <div class="detail-instructions" id="modalIns"></div>
+    </div>
+    
+    <div class="detail-section" id="prescriptionSection">
+      <div class="detail-section-title">⚙️ Prescrever para o dia</div>
+      <div class="prescription-form">
+        <div class="field">
+          <label>Aquecimento</label>
+          <input type="text" id="prescAquecimento" placeholder="ex: 2x12 c/ 50%">
+        </div>
+        <div class="field">
+          <label>Feeder Sets</label>
+          <input type="text" id="prescFeeder" placeholder="ex: 1x8 c/ 70%">
+        </div>
+        <div class="field">
+          <label>Séries</label>
+          <input type="text" id="prescSeries" placeholder="ex: 4">
+        </div>
+        <div class="field">
+          <label>Repetições</label>
+          <input type="text" id="prescReps" placeholder="ex: 8-10">
+        </div>
+        <div class="field full">
+          <label>Descanso</label>
+          <input type="text" id="prescDescanso" placeholder="ex: 90 segundos">
+        </div>
+        <div class="field full">
+          <label>Observações</label>
+          <textarea id="prescObs" rows="2" placeholder="ex: Cadência 3-1-1, focar na contração..."></textarea>
+        </div>
+      </div>
+      <button class="add-to-day-btn" onclick="adicionarAoDia()" id="addToDayBtn">+ Adicionar ao Dia</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============== MODAL VISUALIZAR GIF ============== -->
+<div class="modal-overlay" id="gifModal">
+  <div class="modal" style="max-width: 500px;">
+    <button class="modal-close" onclick="fecharModalGif()">×</button>
+    <div class="exercise-detail-img" id="gifModalImg" style="margin-bottom: 10px;"></div>
+    <div class="exercise-detail-name" id="gifModalName">—</div>
+    <div class="exercise-detail-en" id="gifModalNameEn">—</div>
+    <div class="detail-section">
+      <div class="detail-section-title">📋 Como Executar</div>
+      <div class="detail-instructions" id="gifModalIns"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// BANCO DE EXERCÍCIOS — TRAIN.FUEL
+// Imagens: domínio público via free-exercise-db (Unlicense)
+// Animação: alterna entre /0.jpg e /1.jpg simulando GIF
+// ============================================================
+
+const GIF_BASE = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/";
+
+// Helpers de tradução
+const MUSC = {
+  chest: "Peito",
+  back: "Costas",
+  lats: "Dorsais",
+  middle_back: "Costas (meio)",
+  lower_back: "Lombar",
+  traps: "Trapézio",
+  neck: "Pescoço",
+  shoulders: "Ombros",
+  biceps: "Bíceps",
+  triceps: "Tríceps",
+  forearms: "Antebraço",
+  abdominals: "Abdômen",
+  obliques: "Oblíquos",
+  glutes: "Glúteos",
+  quadriceps: "Quadríceps",
+  hamstrings: "Posteriores",
+  calves: "Panturrilhas",
+  adductors: "Adutores",
+  abductors: "Abdutores",
+  cardio: "Cardio"
+};
+
+const EQUIP = {
+  "barbell": "Barra",
+  "dumbbell": "Halter",
+  "kettlebells": "Kettlebell",
+  "cable": "Polia/Cabo",
+  "machine": "Máquina",
+  "body only": "Peso corporal",
+  "bands": "Elástico",
+  "medicine ball": "Med ball",
+  "exercise ball": "Bola suíça",
+  "foam roll": "Rolo",
+  "e-z curl bar": "Barra W",
+  "other": "Outro",
+  "none": "Sem equipamento"
+};
+
+const LEVEL = {
+  beginner: "Iniciante",
+  intermediate: "Intermediário",
+  expert: "Avançado"
+};
+
+const FORCE = {
+  pull: "Puxar",
+  push: "Empurrar",
+  static: "Isométrico"
+};
+
+const MECH = {
+  compound: "Composto",
+  isolation: "Isolado"
+};
+
+// ============================================================
+// LISTA CURADA: ~250 exercícios mais comuns em academia
+// id = pasta no GitHub | n = nome PT-BR | nameEn = nome original
+// pm = músculos primários (códigos MUSC) | sm = secundários
+// eq = equipamento | lvl = nível | mec = mecânica | force
+// ins = instruções traduzidas (array)
+// ============================================================
+
+const EXERCICIOS = [
+  // ============ PEITO ============
+  { id: "Barbell_Bench_Press_-_Medium_Grip", n: "Supino Reto com Barra", nameEn: "Barbell Bench Press", pm: ["chest"], sm: ["shoulders","triceps"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Deite no banco com pés firmes no chão. Pegue a barra com pegada um pouco mais aberta que os ombros.","Retire a barra do suporte e desça lentamente até tocar a parte média do peito.","Empurre a barra para cima até estender os braços, sem travar os cotovelos.","Mantenha as escápulas retraídas durante todo o movimento."] },
+  
+  { id: "Dumbbell_Bench_Press", n: "Supino Reto com Halteres", nameEn: "Dumbbell Bench Press", pm: ["chest"], sm: ["shoulders","triceps"], eq: "dumbbell", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Deite no banco segurando um halter em cada mão na altura do peito.","Empurre os halteres para cima de forma controlada até quase tocarem.","Desça lentamente até a altura do peito.","Mantenha os punhos firmes e cotovelos a ~45° do tronco."] },
+  
+  { id: "Incline_Dumbbell_Press", n: "Supino Inclinado com Halteres", nameEn: "Incline Dumbbell Press", pm: ["chest"], sm: ["shoulders","triceps"], eq: "dumbbell", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Ajuste o banco em ~30-45°. Sente segurando os halteres na coxa.","Deite-se levando os halteres para a altura do peito.","Empurre para cima de forma controlada.","Foco no peito superior — não jogue os halteres."] },
+  
+  { id: "Barbell_Incline_Bench_Press_Medium-Grip", n: "Supino Inclinado com Barra", nameEn: "Barbell Incline Bench Press", pm: ["chest"], sm: ["shoulders","triceps"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Ajuste o banco em 30-45°.","Desça a barra controladamente até a parte alta do peito.","Empurre verticalmente.","Mantenha os pés firmes no chão."] },
+  
+  { id: "Decline_Dumbbell_Bench_Press", n: "Supino Declinado com Halteres", nameEn: "Decline Dumbbell Press", pm: ["chest"], sm: ["shoulders","triceps"], eq: "dumbbell", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Banco em declínio (~15-30°), prenda os pés.","Halteres na altura da parte baixa do peito.","Empurre verticalmente até estender os braços."] },
+  
+  { id: "Pushups", n: "Flexão de Braço", nameEn: "Push-ups", pm: ["chest"], sm: ["shoulders","triceps"], eq: "body only", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Apoie as mãos no chão um pouco mais abertas que os ombros.","Mantenha o corpo reto da cabeça aos calcanhares.","Desça até o peito quase tocar o chão.","Empurre de volta sem travar os cotovelos."] },
+  
+  { id: "Dumbbell_Flyes", n: "Crucifixo Reto com Halteres", nameEn: "Dumbbell Flyes", pm: ["chest"], sm: ["shoulders"], eq: "dumbbell", lvl: "intermediate", mec: "isolation", force: "push",
+    ins: ["Deite no banco com halteres acima do peito, palmas frente a frente.","Abra os braços lateralmente com leve flexão dos cotovelos.","Sinta o alongamento e retorne pelo mesmo caminho.","Imagine abraçar uma árvore grande."] },
+  
+  { id: "Cable_Crossover", n: "Crossover na Polia", nameEn: "Cable Crossover", pm: ["chest"], sm: ["shoulders"], eq: "cable", lvl: "intermediate", mec: "isolation", force: "push",
+    ins: ["Polias na altura mais alta. Pegue uma alça em cada mão.","Dê um passo à frente, ligeiro avanço do tronco.","Cruze as mãos à frente do corpo na linha do umbigo.","Retorne controladamente sentindo o alongamento."] },
+  
+  { id: "Pec_Deck", n: "Voador (Pec Deck)", nameEn: "Pec Deck", pm: ["chest"], sm: [], eq: "machine", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["Sente-se com as costas firmes no encosto.","Cotovelos apoiados nas almofadas, braços na altura do ombro.","Aproxime as almofadas até quase se tocarem.","Retorne controladamente."] },
+  
+  { id: "Bench_Dips", n: "Mergulho no Banco", nameEn: "Bench Dips", pm: ["triceps"], sm: ["chest","shoulders"], eq: "body only", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Mãos apoiadas no banco, pés no chão.","Desça flexionando os cotovelos a 90°.","Empurre de volta para cima."] },
+  
+  { id: "Dips_-_Chest_Version", n: "Paralelas para Peito", nameEn: "Chest Dips", pm: ["chest"], sm: ["triceps","shoulders"], eq: "body only", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Suspenso nas paralelas, incline o tronco à frente.","Desça flexionando os cotovelos, levando o peito para baixo.","Empurre de volta sentindo o peito."] },
+  
+  // ============ COSTAS ============
+  { id: "Pullups", n: "Barra Fixa (Pull-up)", nameEn: "Pull-ups", pm: ["lats"], sm: ["biceps","middle_back"], eq: "body only", lvl: "intermediate", mec: "compound", force: "pull",
+    ins: ["Pegue a barra com pegada pronada, mãos um pouco mais abertas que os ombros.","Puxe o corpo até o queixo passar a barra.","Desça controladamente sem balançar.","Foco em puxar com as costas, não com os braços."] },
+  
+  { id: "Chin-Ups", n: "Chin-up (Pegada Supinada)", nameEn: "Chin-ups", pm: ["biceps"], sm: ["lats","middle_back"], eq: "body only", lvl: "intermediate", mec: "compound", force: "pull",
+    ins: ["Pegada supinada (palmas voltadas para você), na largura dos ombros.","Puxe até o queixo passar a barra.","Desça controladamente."] },
+  
+  { id: "Wide-Grip_Lat_Pulldown", n: "Puxada Aberta (Pulldown)", nameEn: "Wide-Grip Lat Pulldown", pm: ["lats"], sm: ["biceps","middle_back"], eq: "cable", lvl: "beginner", mec: "compound", force: "pull",
+    ins: ["Sente-se na máquina, pegada pronada bem aberta.","Puxe a barra até a parte alta do peito.","Mantenha o tronco ligeiramente inclinado para trás.","Foco em puxar com os dorsais."] },
+  
+  { id: "Close-Grip_Front_Lat_Pulldown", n: "Puxada Fechada", nameEn: "Close-Grip Lat Pulldown", pm: ["lats"], sm: ["biceps","middle_back"], eq: "cable", lvl: "beginner", mec: "compound", force: "pull",
+    ins: ["Use o triângulo de pegada neutra ou pegada supinada.","Puxe até a barra/cabo tocar o peito superior.","Mantenha o tronco firme."] },
+  
+  { id: "Bent_Over_Barbell_Row", n: "Remada Curvada com Barra", nameEn: "Bent Over Barbell Row", pm: ["middle_back"], sm: ["biceps","lats"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "pull",
+    ins: ["Tronco inclinado a ~45°, joelhos levemente flexionados.","Barra na frente, pegada pronada na largura dos ombros.","Puxe a barra em direção ao abdômen.","Mantenha as costas neutras durante todo o movimento."] },
+  
+  { id: "Bent_Over_Two-Dumbbell_Row", n: "Remada Curvada com Halteres", nameEn: "Two-Dumbbell Row", pm: ["middle_back"], sm: ["biceps","lats"], eq: "dumbbell", lvl: "beginner", mec: "compound", force: "pull",
+    ins: ["Tronco inclinado, halteres pendurados.","Puxe os halteres até a altura do tronco.","Aproxime as escápulas no topo do movimento."] },
+  
+  { id: "One-Arm_Dumbbell_Row", n: "Remada Unilateral (Serrote)", nameEn: "One-Arm Dumbbell Row", pm: ["middle_back"], sm: ["biceps","lats"], eq: "dumbbell", lvl: "beginner", mec: "compound", force: "pull",
+    ins: ["Apoie um joelho e a mão no banco. A outra perna firme no chão.","Halter na mão livre, braço estendido.","Puxe o halter até a altura da costela.","Desça controladamente sem girar o tronco."] },
+  
+  { id: "Seated_Cable_Rows", n: "Remada Sentada na Polia", nameEn: "Seated Cable Row", pm: ["middle_back"], sm: ["biceps","lats"], eq: "cable", lvl: "beginner", mec: "compound", force: "pull",
+    ins: ["Sente-se com pés apoiados, joelhos levemente flexionados.","Tronco ereto, pegue o triângulo.","Puxe em direção ao abdômen aproximando as escápulas.","Retorne controladamente sem arredondar as costas."] },
+  
+  { id: "T-Bar_Row_with_Handle", n: "Remada T-Bar", nameEn: "T-Bar Row", pm: ["middle_back"], sm: ["biceps","lats"], eq: "other", lvl: "intermediate", mec: "compound", force: "pull",
+    ins: ["Posicione-se sobre a barra, tronco a ~45°.","Pegada neutra ou pronada.","Puxe em direção ao tronco mantendo cotovelos próximos.","Desça com controle."] },
+  
+  { id: "Barbell_Deadlift", n: "Levantamento Terra", nameEn: "Deadlift", pm: ["hamstrings"], sm: ["lower_back","glutes","quadriceps","traps"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "pull",
+    ins: ["Pés na largura do quadril, barra próxima às canelas.","Pegada pronada ou alternada na largura dos ombros.","Inicie o movimento empurrando o chão com as pernas.","Mantenha as costas neutras durante toda a subida.","Quadril e joelhos estendem juntos."] },
+  
+  { id: "Romanian_Deadlift", n: "Stiff (Romanian Deadlift)", nameEn: "Romanian Deadlift", pm: ["hamstrings"], sm: ["glutes","lower_back"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "pull",
+    ins: ["Em pé com a barra à frente do quadril.","Empurre o quadril para trás descendo a barra próxima às pernas.","Desça até sentir alongamento nos posteriores.","Volte estendendo o quadril."] },
+  
+  { id: "Pullover_With_Straight_Bar", n: "Pullover com Barra", nameEn: "Pullover with Bar", pm: ["lats"], sm: ["chest","triceps"], eq: "barbell", lvl: "intermediate", mec: "isolation", force: "pull",
+    ins: ["Deite no banco com a barra acima do peito.","Mantenha leve flexão de cotovelos durante todo movimento.","Leve a barra para trás da cabeça em arco.","Retorne pela mesma trajetória."] },
+  
+  { id: "Hyperextensions", n: "Hiperextensão Lombar", nameEn: "Hyperextensions", pm: ["lower_back"], sm: ["glutes","hamstrings"], eq: "other", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Posicione-se no aparelho com quadril apoiado.","Desça o tronco mantendo a coluna neutra.","Suba até alinhar com as pernas (não hiperestenda)."] },
+  
+  // ============ OMBROS ============
+  { id: "Standing_Military_Press", n: "Desenvolvimento Militar em Pé", nameEn: "Standing Military Press", pm: ["shoulders"], sm: ["triceps"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Em pé, barra na altura do ombro.","Empurre verticalmente até estender os braços.","Mantenha o core firme — não arqueie a lombar.","Desça controladamente."] },
+  
+  { id: "Seated_Dumbbell_Press", n: "Desenvolvimento Sentado com Halteres", nameEn: "Seated Dumbbell Press", pm: ["shoulders"], sm: ["triceps"], eq: "dumbbell", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Sentado em banco com encosto.","Halteres na altura dos ombros, palmas pra frente.","Empurre verticalmente sem travar os cotovelos.","Desça controladamente até a altura inicial."] },
+  
+  { id: "Arnold_Dumbbell_Press", n: "Desenvolvimento Arnold", nameEn: "Arnold Press", pm: ["shoulders"], sm: ["triceps"], eq: "dumbbell", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Inicie com halteres na frente, palmas voltadas para o corpo.","Suba girando os punhos até as palmas ficarem para frente.","Continue subindo até estender os braços.","Volte fazendo o caminho inverso."] },
+  
+  { id: "Side_Lateral_Raise", n: "Elevação Lateral", nameEn: "Side Lateral Raise", pm: ["shoulders"], sm: [], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["Em pé, halteres ao lado do corpo, leve flexão de cotovelo.","Eleve lateralmente até a altura dos ombros.","Pause e desça controladamente.","Não use impulso do corpo."] },
+  
+  { id: "Front_Dumbbell_Raise", n: "Elevação Frontal", nameEn: "Front Dumbbell Raise", pm: ["shoulders"], sm: [], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["Em pé, halteres à frente das coxas.","Eleve um halter à frente até a altura do ombro.","Desça controladamente e alterne os braços."] },
+  
+  { id: "Bent_Over_Dumbbell_Rear_Delt_Raise_With_Head_On_Bench", n: "Crucifixo Invertido (Posterior)", nameEn: "Bent Over Rear Delt Raise", pm: ["shoulders"], sm: ["middle_back"], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Tronco inclinado, halteres pendurados.","Eleve os braços lateralmente até a altura dos ombros.","Aperte as escápulas no topo.","Desça controladamente."] },
+  
+  { id: "Upright_Barbell_Row", n: "Remada Alta com Barra", nameEn: "Upright Row", pm: ["shoulders"], sm: ["traps","biceps"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "pull",
+    ins: ["Em pé, barra na frente das coxas, pegada pronada.","Puxe a barra verticalmente próxima ao corpo.","Cotovelos sobem mais alto que os punhos.","Pare na altura do peito e desça controladamente."] },
+  
+  { id: "Face_Pull", n: "Face Pull", nameEn: "Face Pull", pm: ["shoulders"], sm: ["middle_back","traps"], eq: "cable", lvl: "intermediate", mec: "isolation", force: "pull",
+    ins: ["Polia alta, corda dupla.","Puxe em direção à testa, mantendo cotovelos altos.","Aperte as escápulas e o posterior do ombro.","Retorne controladamente."] },
+  
+  { id: "Barbell_Shrug", n: "Encolhimento com Barra", nameEn: "Barbell Shrug", pm: ["traps"], sm: [], eq: "barbell", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Em pé com a barra à frente das coxas.","Eleve os ombros em direção às orelhas.","Pause no topo.","Desça controladamente."] },
+  
+  { id: "Dumbbell_Shrug", n: "Encolhimento com Halteres", nameEn: "Dumbbell Shrug", pm: ["traps"], sm: [], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Halteres ao lado do corpo.","Eleve os ombros em direção às orelhas.","Não rotacione os ombros — movimento puramente vertical."] },
+  
+  // ============ BÍCEPS ============
+  { id: "Barbell_Curl", n: "Rosca Direta com Barra", nameEn: "Barbell Curl", pm: ["biceps"], sm: ["forearms"], eq: "barbell", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Em pé, barra com pegada supinada na largura dos ombros.","Mantenha cotovelos colados ao tronco.","Flexione os braços trazendo a barra ao peito.","Desça controladamente sem balançar."] },
+  
+  { id: "Dumbbell_Bicep_Curl", n: "Rosca Direta com Halteres", nameEn: "Dumbbell Curl", pm: ["biceps"], sm: ["forearms"], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Em pé, halteres ao lado do corpo, pegada supinada.","Flexione um braço por vez ou ambos juntos.","Cotovelos fixos ao lado do corpo.","Desça controladamente."] },
+  
+  { id: "Hammer_Curls", n: "Rosca Martelo (Hammer)", nameEn: "Hammer Curls", pm: ["biceps"], sm: ["forearms"], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Pegada neutra (palmas voltadas uma pra outra).","Flexione mantendo a pegada neutra.","Foco no braquiorradial e cabeça longa do bíceps."] },
+  
+  { id: "Concentration_Curls", n: "Rosca Concentrada", nameEn: "Concentration Curls", pm: ["biceps"], sm: ["forearms"], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Sentado, cotovelo apoiado na parte interna da coxa.","Flexione o braço com foco total no bíceps.","Desça controladamente."] },
+  
+  { id: "Preacher_Curl", n: "Rosca Scott", nameEn: "Preacher Curl", pm: ["biceps"], sm: ["forearms"], eq: "barbell", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Sente no banco Scott, axilas apoiadas.","Pegue a barra W com pegada supinada.","Flexione até quase tocar o peito.","Desça controlado, sem estender totalmente embaixo."] },
+  
+  { id: "Incline_Dumbbell_Curl", n: "Rosca Inclinada", nameEn: "Incline Dumbbell Curl", pm: ["biceps"], sm: ["forearms"], eq: "dumbbell", lvl: "intermediate", mec: "isolation", force: "pull",
+    ins: ["Banco inclinado a ~45°.","Halteres pendurados, braços alongados.","Flexione mantendo cotovelos fixos.","Excelente alongamento da cabeça longa."] },
+  
+  { id: "Cable_Curl", n: "Rosca na Polia", nameEn: "Cable Curl", pm: ["biceps"], sm: ["forearms"], eq: "cable", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Polia baixa, barra reta ou W.","Cotovelos fixos ao tronco.","Tensão constante durante todo o movimento."] },
+  
+  // ============ TRÍCEPS ============
+  { id: "Triceps_Pushdown", n: "Tríceps Pulley", nameEn: "Triceps Pushdown", pm: ["triceps"], sm: [], eq: "cable", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["Polia alta, barra reta ou corda.","Cotovelos colados ao tronco.","Estenda os braços completamente.","Volte controladamente sem afastar os cotovelos."] },
+  
+  { id: "Tricep_Dumbbell_Kickback", n: "Tríceps Coice", nameEn: "Tricep Kickback", pm: ["triceps"], sm: [], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["Tronco inclinado, cotovelo na altura do tronco.","Estenda o braço para trás mantendo cotovelo fixo.","Pause na extensão completa.","Volte controladamente."] },
+  
+  { id: "Lying_Triceps_Press", n: "Testa (Skullcrusher)", nameEn: "Lying Triceps Press", pm: ["triceps"], sm: [], eq: "barbell", lvl: "intermediate", mec: "isolation", force: "push",
+    ins: ["Deitado no banco, barra W acima do peito.","Flexione os cotovelos descendo a barra em direção à testa.","Estenda os braços de volta sem mexer os cotovelos."] },
+  
+  { id: "Seated_Triceps_Press", n: "Tríceps Francês Sentado", nameEn: "Seated Triceps Press", pm: ["triceps"], sm: [], eq: "dumbbell", lvl: "intermediate", mec: "isolation", force: "push",
+    ins: ["Sentado, halter segurado com ambas as mãos acima da cabeça.","Flexione os cotovelos descendo o halter atrás da cabeça.","Estenda completamente sem mexer os cotovelos."] },
+  
+  { id: "Triceps_Overhead_Extension_with_Rope", n: "Tríceps Francês na Polia (Corda)", nameEn: "Overhead Tricep Extension", pm: ["triceps"], sm: [], eq: "cable", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["Polia alta com corda. De costas pra polia.","Cotovelos altos próximos à cabeça.","Estenda os braços para frente.","Excelente alongamento da cabeça longa."] },
+  
+  { id: "Dips_-_Triceps_Version", n: "Paralelas para Tríceps", nameEn: "Triceps Dips", pm: ["triceps"], sm: ["chest","shoulders"], eq: "body only", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Suspenso nas paralelas, tronco vertical.","Desça flexionando os cotovelos para trás.","Empurre de volta sem balançar.","Foco no tríceps — diferente do mergulho de peito."] },
+  
+  { id: "Close-Grip_Barbell_Bench_Press", n: "Supino Pegada Fechada", nameEn: "Close-Grip Bench Press", pm: ["triceps"], sm: ["chest","shoulders"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Deitado, barra com pegada na largura dos ombros (não muito fechada).","Cotovelos próximos ao tronco.","Desça à altura do peito médio.","Empurre de volta com foco no tríceps."] },
+  
+  // ============ PERNAS / QUADRÍCEPS ============
+  { id: "Barbell_Squat", n: "Agachamento Livre com Barra", nameEn: "Barbell Squat", pm: ["quadriceps"], sm: ["glutes","hamstrings","lower_back"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Barra apoiada nos trapézios, pés na largura dos ombros.","Empurre o quadril para trás e flexione os joelhos.","Desça até as coxas ficarem paralelas ao chão.","Suba empurrando o chão com os calcanhares.","Joelhos alinhados com os pés."] },
+  
+  { id: "Front_Barbell_Squat", n: "Agachamento Frontal", nameEn: "Front Squat", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "barbell", lvl: "expert", mec: "compound", force: "push",
+    ins: ["Barra apoiada no clavícula, cotovelos altos.","Tronco mais ereto que no agachamento tradicional.","Desça mantendo cotovelos altos.","Foco maior em quadríceps."] },
+  
+  { id: "Dumbbell_Squat", n: "Agachamento com Halteres", nameEn: "Dumbbell Squat", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "dumbbell", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Halteres ao lado do corpo.","Pés na largura dos ombros.","Agache mantendo o tronco ereto.","Suba empurrando o chão."] },
+  
+  { id: "Goblet_Squat", n: "Agachamento Goblet", nameEn: "Goblet Squat", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "kettlebells", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Segure um halter ou kettlebell na frente do peito.","Agache mantendo o peso próximo ao corpo.","Desça abaixo da paralela se possível.","Excelente para aprender o padrão do agachamento."] },
+  
+  { id: "Leg_Press", n: "Leg Press", nameEn: "Leg Press", pm: ["quadriceps"], sm: ["glutes","hamstrings","calves"], eq: "machine", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Sente-se na máquina com pés na plataforma na largura dos ombros.","Desça até os joelhos chegarem perto do peito (sem arredondar lombar).","Empurre de volta sem travar os joelhos.","Quadril fica firme no encosto."] },
+  
+  { id: "Hack_Squat", n: "Hack Squat (Máquina)", nameEn: "Hack Squat", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "machine", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Costas apoiadas na máquina, pés na plataforma.","Desça até as coxas ficarem paralelas.","Empurre de volta com foco nos quadríceps."] },
+  
+  { id: "Leg_Extensions", n: "Cadeira Extensora", nameEn: "Leg Extensions", pm: ["quadriceps"], sm: [], eq: "machine", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["Sente-se com tornozelos atrás do rolo.","Estenda as pernas até quase travar os joelhos.","Pause no topo.","Desça controladamente."] },
+  
+  { id: "Dumbbell_Lunges", n: "Avanço com Halteres", nameEn: "Dumbbell Lunges", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "dumbbell", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Halteres ao lado do corpo, pés juntos.","Dê um passo grande à frente.","Desça até o joelho de trás quase tocar o chão.","Volte empurrando com a perna da frente."] },
+  
+  { id: "Bodyweight_Walking_Lunge", n: "Avanço Caminhando", nameEn: "Walking Lunge", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "body only", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Em pé, dê um passo grande à frente.","Desça até o joelho de trás quase tocar o chão.","Suba e dê o próximo passo com a outra perna.","Continue alternando enquanto caminha."] },
+  
+  { id: "Bulgarian_Split_Squat", n: "Búlgaro (Split Squat)", nameEn: "Bulgarian Split Squat", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "dumbbell", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Pé de trás apoiado em banco. Pé da frente firme à frente.","Desça flexionando o joelho da frente.","Mantenha o tronco ereto.","Suba empurrando com a perna da frente."] },
+  
+  // ============ POSTERIORES / GLÚTEOS ============
+  { id: "Lying_Leg_Curls", n: "Mesa Flexora (Deitado)", nameEn: "Lying Leg Curls", pm: ["hamstrings"], sm: [], eq: "machine", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Deitado de bruços, tornozelos atrás do rolo.","Flexione as pernas trazendo os calcanhares ao glúteo.","Pause no topo.","Desça controladamente."] },
+  
+  { id: "Seated_Leg_Curl", n: "Cadeira Flexora", nameEn: "Seated Leg Curl", pm: ["hamstrings"], sm: [], eq: "machine", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Sentado, pernas estendidas, rolo na parte de trás dos tornozelos.","Flexione os joelhos puxando o rolo para baixo.","Pause e retorne controladamente."] },
+  
+  { id: "Stiff-Legged_Dumbbell_Deadlift", n: "Stiff com Halteres", nameEn: "Stiff Legged Dumbbell Deadlift", pm: ["hamstrings"], sm: ["glutes","lower_back"], eq: "dumbbell", lvl: "intermediate", mec: "compound", force: "pull",
+    ins: ["Em pé com halteres à frente das coxas.","Pernas semi-estendidas (não totalmente travadas).","Empurre o quadril para trás descendo os halteres.","Desça até sentir alongamento, retorne estendendo o quadril."] },
+  
+  { id: "Glute_Bridge", n: "Ponte de Glúteo", nameEn: "Glute Bridge", pm: ["glutes"], sm: ["hamstrings","lower_back"], eq: "body only", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["Deitado de costas, joelhos flexionados, pés no chão.","Eleve o quadril contraindo os glúteos.","Pause no topo formando linha reta dos joelhos aos ombros.","Desça controladamente."] },
+  
+  { id: "Barbell_Hip_Thrust", n: "Hip Thrust com Barra", nameEn: "Barbell Hip Thrust", pm: ["glutes"], sm: ["hamstrings"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Costas apoiadas no banco, barra sobre o quadril (use proteção).","Pés firmes no chão, pernas dobradas.","Eleve o quadril contraindo os glúteos.","Pause no topo, desça controladamente."] },
+  
+  { id: "Cable_Hip_Adduction", n: "Adução de Quadril (Polia)", nameEn: "Cable Hip Adduction", pm: ["adductors"], sm: [], eq: "cable", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Tornozelo preso na polia baixa, em pé de lado.","Cruze a perna por dentro da outra.","Foco nos adutores.","Retorne controladamente."] },
+  
+  { id: "Cable_Hip_Abduction", n: "Abdução de Quadril (Polia)", nameEn: "Cable Hip Abduction", pm: ["abductors"], sm: ["glutes"], eq: "cable", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["Tornozelo preso na polia, em pé de lado.","Eleve a perna lateralmente.","Foco no glúteo médio e abdutores."] },
+  
+  // ============ PANTURRILHA ============
+  { id: "Standing_Calf_Raises", n: "Panturrilha em Pé", nameEn: "Standing Calf Raises", pm: ["calves"], sm: [], eq: "machine", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["Pés na plataforma, calcanhares pendurados.","Eleve os calcanhares ao máximo.","Pause no topo.","Desça lentamente sentindo o alongamento."] },
+  
+  { id: "Seated_Calf_Raise", n: "Panturrilha Sentado", nameEn: "Seated Calf Raise", pm: ["calves"], sm: [], eq: "machine", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["Sentado, joelhos flexionados a 90°, pés na plataforma.","Eleve os calcanhares.","Foque mais no sóleo nessa variação."] },
+  
+  { id: "Donkey_Calf_Raises", n: "Panturrilha Burrinho", nameEn: "Donkey Calf Raises", pm: ["calves"], sm: [], eq: "body only", lvl: "intermediate", mec: "isolation", force: "push",
+    ins: ["Tronco inclinado, mãos apoiadas em superfície.","Pés na plataforma elevada.","Eleve os calcanhares ao máximo."] },
+  
+  // ============ ABDÔMEN / CORE ============
+  { id: "Crunches", n: "Abdominal Crunch", nameEn: "Crunches", pm: ["abdominals"], sm: [], eq: "body only", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Deitado, joelhos flexionados, pés no chão.","Mãos atrás da cabeça (sem puxar).","Eleve os ombros do chão contraindo o abdômen.","Desça controladamente."] },
+  
+  { id: "Plank", n: "Prancha (Plank)", nameEn: "Plank", pm: ["abdominals"], sm: ["lower_back"], eq: "body only", lvl: "beginner", mec: "isolation", force: "static",
+    ins: ["Apoie antebraços e ponta dos pés no chão.","Corpo reto da cabeça aos calcanhares.","Contraia abdômen e glúteos.","Mantenha por tempo determinado."] },
+  
+  { id: "Hanging_Leg_Raise", n: "Elevação de Pernas Suspenso", nameEn: "Hanging Leg Raise", pm: ["abdominals"], sm: [], eq: "body only", lvl: "intermediate", mec: "isolation", force: "pull",
+    ins: ["Suspenso na barra fixa.","Eleve as pernas estendidas até a horizontal (ou mais).","Desça controladamente sem balançar."] },
+  
+  { id: "Decline_Crunch", n: "Abdominal Declinado", nameEn: "Decline Crunch", pm: ["abdominals"], sm: [], eq: "body only", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Banco em declínio, pés presos.","Eleve o tronco contraindo o abdômen.","Não puxe pelo pescoço."] },
+  
+  { id: "Cable_Crunch", n: "Abdominal na Polia", nameEn: "Cable Crunch", pm: ["abdominals"], sm: [], eq: "cable", lvl: "intermediate", mec: "isolation", force: "pull",
+    ins: ["Ajoelhado de costas para a polia alta.","Segure a corda atrás da cabeça.","Flexione o tronco contraindo o abdômen.","Volte controladamente."] },
+  
+  { id: "Russian_Twist", n: "Russian Twist", nameEn: "Russian Twist", pm: ["abdominals"], sm: ["obliques"], eq: "body only", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Sentado, joelhos flexionados, tronco inclinado para trás.","Gire o tronco de um lado ao outro.","Pés podem ficar elevados para mais dificuldade."] },
+  
+  { id: "Side_Bridge", n: "Prancha Lateral", nameEn: "Side Plank", pm: ["obliques"], sm: ["abdominals"], eq: "body only", lvl: "beginner", mec: "isolation", force: "static",
+    ins: ["Deitado de lado, apoiado no antebraço.","Corpo reto, eleve o quadril.","Mantenha o tempo determinado.","Faça nos dois lados."] },
+  
+  { id: "Mountain_Climbers", n: "Mountain Climbers (Escalador)", nameEn: "Mountain Climbers", pm: ["abdominals"], sm: ["quadriceps","shoulders"], eq: "body only", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Posição de prancha alta.","Traga um joelho ao peito alternadamente.","Mantenha o quadril estável.","Velocidade controlada ou rápida (cardio)."] },
+  
+  // ============ CARDIO ============
+  { id: "Jumping_Jacks", n: "Polichinelo", nameEn: "Jumping Jacks", pm: ["cardio"], sm: ["quadriceps","shoulders"], eq: "body only", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Em pé, pés juntos, braços ao lado do corpo.","Salte abrindo pernas e levantando braços acima da cabeça.","Volte ao início e repita ritmadamente."] },
+  
+  { id: "Burpee", n: "Burpee", nameEn: "Burpee", pm: ["cardio"], sm: ["chest","quadriceps"], eq: "body only", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Em pé, agache, apoie as mãos no chão.","Estenda as pernas para trás (prancha).","Volte e dê um salto vertical com as mãos acima da cabeça."] },
+  
+  { id: "Rope_Jumping", n: "Pular Corda", nameEn: "Rope Jumping", pm: ["cardio"], sm: ["calves"], eq: "other", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Pegue a corda, comprimento até as axilas dobrada.","Pule com os pulsos (não com os braços).","Saltos baixos e rítmicos.","Foco em ritmo e respiração."] },
+  
+  // ============ MAIS EXERCÍCIOS DE PEITO ============
+  { id: "Incline_Hammer_Curls", n: "Rosca Martelo Inclinado", nameEn: "Incline Hammer Curls", pm: ["biceps"], sm: ["forearms"], eq: "dumbbell", lvl: "intermediate", mec: "isolation", force: "pull",
+    ins: ["Banco inclinado a 45°, pegada neutra.","Flexione mantendo punhos neutros.","Foco no braquiorradial."] },
+  
+  { id: "Smith_Machine_Bench_Press", n: "Supino na Smith", nameEn: "Smith Machine Bench Press", pm: ["chest"], sm: ["shoulders","triceps"], eq: "machine", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Banco posicionado sob a barra na Smith.","Desça à altura do peito médio.","Excelente para iniciantes — trajetória guiada."] },
+  
+  { id: "Smith_Incline_Bench_Press", n: "Supino Inclinado na Smith", nameEn: "Smith Incline Press", pm: ["chest"], sm: ["shoulders","triceps"], eq: "machine", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Banco em ~30-45° sob a Smith.","Movimento guiado, ideal pra hipertrofia controlada."] },
+  
+  { id: "Incline_Dumbbell_Flyes", n: "Crucifixo Inclinado com Halteres", nameEn: "Incline Dumbbell Flyes", pm: ["chest"], sm: ["shoulders"], eq: "dumbbell", lvl: "intermediate", mec: "isolation", force: "push",
+    ins: ["Banco inclinado a 30-45°.","Halteres acima do peito, palmas frente a frente.","Abra os braços com leve flexão de cotovelos.","Volte sentindo a contração do peito superior."] },
+  
+  { id: "Decline_Dumbbell_Flyes", n: "Crucifixo Declinado", nameEn: "Decline Flyes", pm: ["chest"], sm: ["shoulders"], eq: "dumbbell", lvl: "intermediate", mec: "isolation", force: "push",
+    ins: ["Banco em declínio com pés presos.","Halteres acima do peito.","Abra lateralmente, sinta a parte baixa do peito."] },
+  
+  { id: "Low_Cable_Crossover", n: "Crossover Polia Baixa", nameEn: "Low Cable Crossover", pm: ["chest"], sm: [], eq: "cable", lvl: "intermediate", mec: "isolation", force: "push",
+    ins: ["Polias na altura mais baixa.","Trabalhe peito superior cruzando os cabos para cima."] },
+  
+  { id: "Wide-Grip_Decline_Barbell_Bench_Press", n: "Supino Declinado com Barra", nameEn: "Decline Barbell Press", pm: ["chest"], sm: ["triceps"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Banco declinado, pés presos.","Pegada um pouco mais aberta que ombros.","Foco no peitoral inferior."] },
+  
+  { id: "Machine_Bench_Press", n: "Supino na Máquina", nameEn: "Machine Chest Press", pm: ["chest"], sm: ["triceps","shoulders"], eq: "machine", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Sente-se ajustando o banco para que as alças fiquem na altura do peito.","Empurre as alças à frente.","Volte controladamente."] },
+  
+  // ============ MAIS COSTAS ============
+  { id: "Reverse_Grip_Bent-Over_Rows", n: "Remada Curvada Pegada Supinada", nameEn: "Reverse Grip Row", pm: ["middle_back"], sm: ["biceps","lats"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "pull",
+    ins: ["Tronco inclinado, barra com pegada supinada.","Puxe em direção ao abdômen baixo.","Foco maior em dorsais e bíceps."] },
+  
+  { id: "Yates_Row", n: "Remada Yates", nameEn: "Yates Row", pm: ["middle_back"], sm: ["biceps","lats"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "pull",
+    ins: ["Tronco inclinado a 45° (mais ereto que a curvada tradicional).","Pegada supinada.","Puxe em direção ao umbigo."] },
+  
+  { id: "Pendlay_Row", n: "Remada Pendlay", nameEn: "Pendlay Row", pm: ["middle_back"], sm: ["biceps","lats"], eq: "barbell", lvl: "expert", mec: "compound", force: "pull",
+    ins: ["Tronco paralelo ao chão, barra começa do solo a cada repetição.","Puxe explosivamente até a parte baixa do peito.","Volte completamente ao chão."] },
+  
+  { id: "Reverse_Grip_Lat_Pulldown", n: "Puxada Pegada Supinada", nameEn: "Reverse Grip Pulldown", pm: ["lats"], sm: ["biceps","middle_back"], eq: "cable", lvl: "beginner", mec: "compound", force: "pull",
+    ins: ["Pegada supinada na barra, largura dos ombros.","Puxe para a parte alta do peito.","Trabalha mais bíceps que a versão pronada."] },
+  
+  { id: "Standing_Cable_Pullover", n: "Pullover na Polia em Pé", nameEn: "Standing Cable Pullover", pm: ["lats"], sm: [], eq: "cable", lvl: "intermediate", mec: "isolation", force: "pull",
+    ins: ["Polia alta, barra reta. Em pé de frente para a polia.","Braços estendidos à frente, leve flexão.","Puxe a barra em arco até as coxas.","Excelente isolamento dos dorsais."] },
+  
+  { id: "Inverted_Row_with_Underhand_Grip", n: "Remada Invertida (Inverted Row)", nameEn: "Inverted Row", pm: ["middle_back"], sm: ["biceps","lats"], eq: "body only", lvl: "beginner", mec: "compound", force: "pull",
+    ins: ["Barra na altura do quadril, deite-se sob ela.","Pegada na largura dos ombros.","Puxe o peito em direção à barra.","Mantenha o corpo reto."] },
+  
+  { id: "Rack_Pulls", n: "Rack Pull (Terra Parcial)", nameEn: "Rack Pull", pm: ["middle_back"], sm: ["lower_back","traps","glutes","hamstrings"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "pull",
+    ins: ["Barra apoiada no rack na altura dos joelhos.","Puxe em pé estendendo quadril e joelhos.","Aperte escápulas no topo.","Permite cargas maiores que o terra completo."] },
+  
+  // ============ MAIS OMBROS ============
+  { id: "Seated_Barbell_Military_Press", n: "Desenvolvimento Sentado com Barra", nameEn: "Seated Barbell Press", pm: ["shoulders"], sm: ["triceps"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Sentado no banco com encosto.","Barra na altura dos ombros, pegada um pouco mais aberta que ombros.","Empurre verticalmente.","Mantenha core firme."] },
+  
+  { id: "Smith_Machine_Overhead_Shoulder_Press", n: "Desenvolvimento Smith", nameEn: "Smith Shoulder Press", pm: ["shoulders"], sm: ["triceps"], eq: "machine", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Banco sob a Smith, costas firmes no encosto.","Empurre verticalmente — movimento guiado."] },
+  
+  { id: "Reverse_Flyes", n: "Crucifixo Inverso (Voador Inverso)", nameEn: "Reverse Flyes", pm: ["shoulders"], sm: ["middle_back"], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Tronco inclinado ou em máquina pec-deck invertida.","Abra os braços lateralmente.","Aperte escápulas no topo."] },
+  
+  { id: "Cable_Lateral_Raise", n: "Elevação Lateral na Polia", nameEn: "Cable Lateral Raise", pm: ["shoulders"], sm: [], eq: "cable", lvl: "intermediate", mec: "isolation", force: "push",
+    ins: ["Polia baixa, em pé de lado.","Eleve lateralmente até a altura do ombro.","Tensão constante — diferencial vs halteres."] },
+  
+  { id: "Machine_Shoulder_(Military)_Press", n: "Desenvolvimento na Máquina", nameEn: "Machine Shoulder Press", pm: ["shoulders"], sm: ["triceps"], eq: "machine", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Sente-se ajustando alças na altura dos ombros.","Empurre verticalmente.","Ideal pra iniciantes."] },
+  
+  { id: "Push_Press", n: "Push Press", nameEn: "Push Press", pm: ["shoulders"], sm: ["triceps","quadriceps"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Barra na altura dos ombros.","Use leve impulso das pernas para iniciar o movimento.","Empurre verticalmente.","Permite cargas maiores que o militar puro."] },
+  
+  // ============ MAIS BÍCEPS ============
+  { id: "EZ-Bar_Curl", n: "Rosca com Barra W", nameEn: "EZ-Bar Curl", pm: ["biceps"], sm: ["forearms"], eq: "e-z curl bar", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Barra W com pegada supinada nas curvas internas.","Mais conforto para os punhos vs barra reta.","Cotovelos fixos ao tronco."] },
+  
+  { id: "Spider_Curl", n: "Rosca Spider", nameEn: "Spider Curl", pm: ["biceps"], sm: [], eq: "dumbbell", lvl: "intermediate", mec: "isolation", force: "pull",
+    ins: ["Tronco apoiado em banco inclinado (peito no encosto).","Braços pendurados.","Flexione mantendo cotovelos fixos.","Excelente isolamento — sem possibilidade de trapaça."] },
+  
+  { id: "Cable_Hammer_Curls_-_Rope_Attachment", n: "Rosca Martelo na Polia (Corda)", nameEn: "Cable Hammer Curl Rope", pm: ["biceps"], sm: ["forearms"], eq: "cable", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Polia baixa com corda.","Pegada neutra.","Tensão constante durante o movimento."] },
+  
+  { id: "Standing_Biceps_Cable_Curl", n: "Rosca em Pé na Polia", nameEn: "Standing Cable Curl", pm: ["biceps"], sm: [], eq: "cable", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Polia baixa, barra reta.","Em pé, cotovelos fixos.","Tensão constante — vantagem da polia."] },
+  
+  // ============ MAIS TRÍCEPS ============
+  { id: "Cable_Rope_Tricep_Pushdown", n: "Tríceps Pulley com Corda", nameEn: "Cable Rope Pushdown", pm: ["triceps"], sm: [], eq: "cable", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["Polia alta com corda.","Estenda os braços abrindo a corda no final.","Foco na cabeça lateral do tríceps."] },
+  
+  { id: "One_Arm_Dumbbell_Triceps_Extension", n: "Tríceps Francês Unilateral", nameEn: "One Arm Tricep Extension", pm: ["triceps"], sm: [], eq: "dumbbell", lvl: "intermediate", mec: "isolation", force: "push",
+    ins: ["Em pé ou sentado, halter acima da cabeça.","Flexione o cotovelo descendo o halter atrás da cabeça.","Estenda completamente."] },
+  
+  { id: "Tricep_Dumbbell_Kickback", n: "Tríceps Coice na Polia", nameEn: "Cable Tricep Kickback", pm: ["triceps"], sm: [], eq: "cable", lvl: "intermediate", mec: "isolation", force: "push",
+    ins: ["Polia baixa, tronco inclinado.","Cotovelo na altura do tronco, fixo.","Estenda o braço para trás."] },
+  
+  { id: "Bench_Press_-_Powerlifting", n: "Supino Pegada Fechada", nameEn: "Close Grip Press Variation", pm: ["triceps"], sm: ["chest","shoulders"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Cotovelos próximos ao tronco.","Foco no tríceps com massa."] },
+  
+  // ============ MAIS PERNAS ============
+  { id: "Box_Squat", n: "Agachamento no Box", nameEn: "Box Squat", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Caixa atrás, agache até sentar levemente.","Pause sem relaxar.","Suba explosivamente.","Ensina padrão correto de agachamento."] },
+  
+  { id: "Smith_Machine_Squat", n: "Agachamento na Smith", nameEn: "Smith Machine Squat", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "machine", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Pés ligeiramente à frente da linha do quadril.","Trajetória guiada — bom para iniciantes.","Desça mantendo costas firmes."] },
+  
+  { id: "Smith_Machine_Hack_Squat", n: "Hack na Smith", nameEn: "Smith Hack Squat", pm: ["quadriceps"], sm: ["glutes"], eq: "machine", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Costas apoiadas, pés à frente.","Foco maior em quadríceps."] },
+  
+  { id: "Single_Leg_Press", n: "Leg Press Unilateral", nameEn: "Single Leg Press", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "machine", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Use apenas uma perna na plataforma.","Foco unilateral — corrige assimetrias.","Cargas menores que bilateral."] },
+  
+  { id: "Reverse_Barbell_Lunge", n: "Avanço Reverso", nameEn: "Reverse Lunge", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Barra nas costas, dê passo para trás.","Desça flexionando o joelho de trás.","Volte empurrando com a perna da frente."] },
+  
+  { id: "Step_Up_with_Knee_Raise", n: "Subir no Step com Elevação", nameEn: "Step Up with Knee Raise", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "body only", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Suba no banco com uma perna.","No topo, eleve o joelho oposto.","Desça controladamente."] },
+  
+  { id: "Sumo_Deadlift", n: "Levantamento Terra Sumô", nameEn: "Sumo Deadlift", pm: ["quadriceps"], sm: ["glutes","hamstrings","lower_back"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "pull",
+    ins: ["Pés bem afastados, pontas para fora.","Mãos pegam a barra entre as pernas.","Tronco mais ereto que no terra convencional.","Foco maior em quadríceps e adutores."] },
+  
+  { id: "Seated_Calf_Raise", n: "Panturrilha Sentado (Sóleo)", nameEn: "Seated Calf Raise", pm: ["calves"], sm: [], eq: "machine", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["Sentado com joelhos a 90°.","Foco no músculo sóleo.","Movimento completo para máximo recrutamento."] },
+  
+  { id: "Calf_Press", n: "Panturrilha no Leg Press", nameEn: "Calf Press on Leg Press", pm: ["calves"], sm: [], eq: "machine", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["No leg press, pés na borda inferior da plataforma.","Empurre apenas com a panturrilha.","Sem dobrar os joelhos."] },
+  
+  // ============ MAIS ABDÔMEN ============
+  { id: "Ab_Crunch_Machine", n: "Abdominal na Máquina", nameEn: "Ab Machine Crunch", pm: ["abdominals"], sm: [], eq: "machine", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Sente-se com pés presos.","Flexione o tronco contra a resistência.","Foco no abdômen superior."] },
+  
+  { id: "Air_Bike", n: "Bicicleta no Solo", nameEn: "Air Bike", pm: ["abdominals"], sm: ["obliques"], eq: "body only", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Deitado, mãos atrás da cabeça.","Alterne cotovelo direito ao joelho esquerdo (e vice-versa).","Movimento contínuo e controlado."] },
+  
+  { id: "Toe_Touchers", n: "Toque nos Pés (V-Up)", nameEn: "Toe Touches", pm: ["abdominals"], sm: [], eq: "body only", lvl: "intermediate", mec: "isolation", force: "pull",
+    ins: ["Deitado, pernas elevadas perpendicular ao chão.","Tente tocar os pés com as mãos.","Foco no abdômen superior."] },
+  
+  { id: "Flat_Bench_Lying_Leg_Raise", n: "Elevação de Pernas no Banco", nameEn: "Lying Leg Raise", pm: ["abdominals"], sm: [], eq: "body only", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Deitado no banco, mãos segurando as bordas.","Eleve as pernas estendidas até a vertical.","Desça controladamente sem tocar o solo."] },
+  
+  { id: "Spider_Crawl", n: "Spider Crawl", nameEn: "Spider Crawl", pm: ["abdominals"], sm: ["obliques"], eq: "body only", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Posição de prancha alta.","Traga o joelho à lateral do cotovelo do mesmo lado.","Alterne os lados."] },
+  
+  { id: "Stomach_Vacuum", n: "Vácuo Abdominal", nameEn: "Stomach Vacuum", pm: ["abdominals"], sm: [], eq: "body only", lvl: "intermediate", mec: "isolation", force: "static",
+    ins: ["Em pé ou ajoelhado, expire todo o ar.","Sugue o abdômen para dentro como se quisesse colar nas costas.","Mantenha por 15-30 segundos.","Trabalha o transverso do abdômen."] },
+  
+  // ============ ANTEBRAÇO ============
+  { id: "Wrist_Roller", n: "Enrolador de Punho", nameEn: "Wrist Roller", pm: ["forearms"], sm: [], eq: "other", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Segure o cabo com peso pendurado.","Enrole a corda usando os punhos.","Desenrole controladamente."] },
+  
+  { id: "Wrist_Curl", n: "Rosca de Punho", nameEn: "Wrist Curl", pm: ["forearms"], sm: [], eq: "barbell", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Sentado com antebraços apoiados na coxa.","Pegada supinada, barra escorregando até as pontas dos dedos.","Enrole a barra de volta com a força do antebraço."] },
+  
+  { id: "Wrist_Curl_-_Reverse", n: "Rosca Inversa de Punho", nameEn: "Reverse Wrist Curl", pm: ["forearms"], sm: [], eq: "barbell", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Igual à rosca de punho, mas com pegada pronada.","Estenda o punho contra a resistência.","Trabalha extensores do antebraço."] },
+  
+  { id: "Reverse_Barbell_Curl", n: "Rosca Inversa", nameEn: "Reverse Curl", pm: ["biceps"], sm: ["forearms"], eq: "barbell", lvl: "intermediate", mec: "isolation", force: "pull",
+    ins: ["Pegada pronada na barra (palmas para baixo).","Flexione os cotovelos.","Foco no braquiorradial e antebraço."] }
+];
+
+// Estatística rápida
+console.log(`📚 Banco TRAIN.FUEL: ${EXERCICIOS.length} exercícios carregados`);
+
+
+// ============================================================
+// ESTADO E CONSTANTES
+// ============================================================
+const DIAS = {
+  seg: "Segunda-feira",
+  ter: "Terça-feira",
+  qua: "Quarta-feira",
+  qui: "Quinta-feira",
+  sex: "Sexta-feira",
+  sab: "Sábado",
+  dom: "Domingo"
+};
+
+let treino = {
+  seg: { focus: '', exercicios: [] },
+  ter: { focus: '', exercicios: [] },
+  qua: { focus: '', exercicios: [] },
+  qui: { focus: '', exercicios: [] },
+  sex: { focus: '', exercicios: [] },
+  sab: { focus: '', exercicios: [] },
+  dom: { focus: '', exercicios: [] }
+};
+
+let diaAtivo = "seg";
+let exercicioAtivo = null;
+let gifAnimationIntervals = {}; // controla animações GIF ativas
+
+// Atualiza badge total
+document.getElementById('metaTotalEx').textContent = EXERCICIOS.length + '+';
+
+// Data padrão = hoje
+document.getElementById('planData').valueAsDate = new Date();
+
+// ============================================================
+// PREENCHER FILTROS DINAMICAMENTE
+// ============================================================
+function preencherFiltros() {
+  // Músculos únicos (só os primary)
+  const muscSet = new Set();
+  EXERCICIOS.forEach(e => e.pm.forEach(m => muscSet.add(m)));
+  const muscSel = document.getElementById('filterMusc');
+  Array.from(muscSet).sort((a,b) => (MUSC[a]||a).localeCompare(MUSC[b]||b)).forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m;
+    opt.textContent = MUSC[m] || m;
+    muscSel.appendChild(opt);
+  });
+  
+  // Equipamentos únicos
+  const eqSet = new Set();
+  EXERCICIOS.forEach(e => eqSet.add(e.eq));
+  const eqSel = document.getElementById('filterEq');
+  Array.from(eqSet).sort((a,b) => (EQUIP[a]||a).localeCompare(EQUIP[b]||b)).forEach(eq => {
+    const opt = document.createElement('option');
+    opt.value = eq;
+    opt.textContent = EQUIP[eq] || eq;
+    eqSel.appendChild(opt);
+  });
+}
+preencherFiltros();
+
+// ============================================================
+// NAVEGAÇÃO ENTRE PAINÉIS
+// ============================================================
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.panel).classList.add('active');
+    pararTodasAnimacoes(); // para animações ao trocar de painel
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+
+// ============================================================
+// TABS DOS DIAS
+// ============================================================
+document.querySelectorAll('.day-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    diaAtivo = tab.dataset.day;
+    
+    // Atualiza foco do dia
+    document.getElementById('dayFocus').value = treino[diaAtivo].focus || '';
+    
+    // Re-renderiza
+    renderDia();
+    pararTodasAnimacoes();
+    buscarExercicios(); // re-renderiza busca pra animações limparem
+  });
+});
+
+// Atualiza foco quando muda
+document.getElementById('dayFocus').addEventListener('input', (e) => {
+  treino[diaAtivo].focus = e.target.value;
+  // Atualiza no tab também
+  const focusLabel = document.querySelector(`.focus-label[data-focus="${diaAtivo}"]`);
+  if (focusLabel) {
+    const txt = e.target.value.trim();
+    focusLabel.textContent = txt.length > 0 ? (txt.length > 16 ? txt.substring(0, 16) + '…' : txt) : '—';
+  }
+});
+
+// ============================================================
+// BUSCA DE EXERCÍCIOS
+// ============================================================
+function normalizar(s) {
+  return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function buscarExercicios() {
+  const termo = document.getElementById('exSearch').value;
+  const filMusc = document.getElementById('filterMusc').value;
+  const filEq = document.getElementById('filterEq').value;
+  const filLvl = document.getElementById('filterLvl').value;
+  
+  const t = normalizar(termo);
+  
+  let resultados = EXERCICIOS.filter(ex => {
+    // Filtro músculo
+    if (filMusc && !ex.pm.includes(filMusc) && !(ex.sm || []).includes(filMusc)) return false;
+    // Filtro equipamento
+    if (filEq && ex.eq !== filEq) return false;
+    // Filtro nível
+    if (filLvl && ex.lvl !== filLvl) return false;
+    // Busca textual
+    if (t) {
+      const nomePt = normalizar(ex.n);
+      const nomeEn = normalizar(ex.nameEn || '');
+      const muscNomes = (ex.pm.concat(ex.sm || [])).map(m => normalizar(MUSC[m] || m)).join(' ');
+      if (!nomePt.includes(t) && !nomeEn.includes(t) && !muscNomes.includes(t)) return false;
+    }
+    return true;
+  });
+  
+  renderResultadosBusca(resultados);
+}
+
+function renderResultadosBusca(lista) {
+  const grid = document.getElementById('resultsGrid');
+  
+  // Para todas as animações antes de re-renderizar
+  pararTodasAnimacoes();
+  
+  if (lista.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column: 1 / -1;">
+        <div class="empty-state-icon">🔍</div>
+        <div>Nenhum exercício encontrado.<br>Tente outros filtros ou termos.</div>
+      </div>
+    `;
+    return;
+  }
+  
+  // Limita a 60 para performance
+  const slice = lista.slice(0, 60);
+  
+  grid.innerHTML = slice.map((ex, idx) => {
+    const img0 = `${GIF_BASE}${ex.id}/0.jpg`;
+    const muscPm = ex.pm.map(m => MUSC[m] || m).join(', ');
+    const eqLabel = EQUIP[ex.eq] || ex.eq;
+    const lvlLabel = LEVEL[ex.lvl] || ex.lvl;
+    return `
+      <div class="exercise-card" onclick="abrirModalEx('${ex.id}')" data-ex-id="${ex.id}">
+        <div class="exercise-card-img" data-img-base="${GIF_BASE}${ex.id}/" style="background-image: url('${img0}')"></div>
+        <div class="exercise-card-body">
+          <div class="exercise-card-name">${ex.n}</div>
+          <div class="exercise-card-tags">
+            <span class="exercise-tag muscle">${muscPm}</span>
+            <span class="exercise-tag">${eqLabel}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  // Inicia animação automática nos cards visíveis (alterna 0.jpg e 1.jpg)
+  iniciarAnimacoes();
+  
+  if (lista.length > 60) {
+    grid.innerHTML += `<div style="grid-column: 1 / -1; text-align: center; padding: 12px; font-size: 0.78rem; color: var(--text-dim);">+ ${lista.length - 60} resultados — refine os filtros para ver mais.</div>`;
+  }
+}
+
+// ============================================================
+// ANIMAÇÃO TIPO GIF (alterna 0.jpg / 1.jpg)
+// ============================================================
+function iniciarAnimacoes() {
+  const cards = document.querySelectorAll('.exercise-card-img[data-img-base]');
+  cards.forEach((card, idx) => {
+    const base = card.dataset.imgBase;
+    let frame = 0;
+    // Pequeno delay escalonado pra não animar tudo igual
+    setTimeout(() => {
+      const interval = setInterval(() => {
+        frame = frame === 0 ? 1 : 0;
+        card.style.backgroundImage = `url('${base}${frame}.jpg')`;
+      }, 600);
+      gifAnimationIntervals['card_' + idx] = interval;
+    }, idx * 50);
+  });
+}
+
+function pararTodasAnimacoes() {
+  Object.values(gifAnimationIntervals).forEach(i => clearInterval(i));
+  gifAnimationIntervals = {};
+}
+
+// Eventos de busca
+['exSearch', 'filterMusc', 'filterEq', 'filterLvl'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener(el.tagName === 'INPUT' ? 'input' : 'change', () => {
+    buscarExercicios();
+  });
+});
+
+// Carga inicial
+buscarExercicios();
+
+// ============================================================
+// MODAL DE EXERCÍCIO
+// ============================================================
+function abrirModalEx(exId) {
+  const ex = EXERCICIOS.find(e => e.id === exId);
+  if (!ex) return;
+  exercicioAtivo = ex;
+  
+  // Imagem com animação
+  const imgEl = document.getElementById('modalImg');
+  imgEl.style.backgroundImage = `url('${GIF_BASE}${ex.id}/0.jpg')`;
+  imgEl.dataset.imgBase = `${GIF_BASE}${ex.id}/`;
+  iniciarAnimacaoModal('modalImg');
+  
+  // Nome e tags
+  document.getElementById('modalName').textContent = ex.n;
+  document.getElementById('modalNameEn').textContent = ex.nameEn || '';
+  
+  const tagsEl = document.getElementById('modalTags');
+  const muscPm = ex.pm.map(m => `<span class="detail-tag primary">${MUSC[m] || m}</span>`).join('');
+  const muscSm = (ex.sm || []).map(m => `<span class="detail-tag">${MUSC[m] || m}</span>`).join('');
+  const eqTag = `<span class="detail-tag">${EQUIP[ex.eq] || ex.eq}</span>`;
+  const lvlTag = `<span class="detail-tag">${LEVEL[ex.lvl] || ex.lvl}</span>`;
+  const mecTag = ex.mec ? `<span class="detail-tag">${MECH[ex.mec] || ex.mec}</span>` : '';
+  const forceTag = ex.force ? `<span class="detail-tag">${FORCE[ex.force] || ex.force}</span>` : '';
+  tagsEl.innerHTML = muscPm + muscSm + eqTag + lvlTag + mecTag + forceTag;
+  
+  // Instruções
+  const insEl = document.getElementById('modalIns');
+  insEl.innerHTML = '<ol>' + (ex.ins || []).map(i => `<li>${i}</li>`).join('') + '</ol>';
+  
+  // Limpa form de prescrição
+  ['prescAquecimento','prescFeeder','prescSeries','prescReps','prescDescanso','prescObs'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  
+  // Atualiza label do botão com o dia atual
+  document.getElementById('addToDayBtn').textContent = `+ Adicionar à ${DIAS[diaAtivo]}`;
+  
+  document.getElementById('exModal').classList.add('active');
+}
+
+function fecharModalEx() {
+  document.getElementById('exModal').classList.remove('active');
+  pararAnimacaoModal('modalImg');
+  exercicioAtivo = null;
+}
+
+// Animação no modal
+let modalIntervals = {};
+function iniciarAnimacaoModal(elId) {
+  const el = document.getElementById(elId);
+  if (!el || !el.dataset.imgBase) return;
+  let frame = 0;
+  modalIntervals[elId] = setInterval(() => {
+    frame = frame === 0 ? 1 : 0;
+    el.style.backgroundImage = `url('${el.dataset.imgBase}${frame}.jpg')`;
+  }, 600);
+}
+function pararAnimacaoModal(elId) {
+  if (modalIntervals[elId]) {
+    clearInterval(modalIntervals[elId]);
+    delete modalIntervals[elId];
+  }
+}
+
+// Modal apenas pra ver GIF (clicado a partir do dia)
+function abrirModalGif(exId) {
+  const ex = EXERCICIOS.find(e => e.id === exId);
+  if (!ex) return;
+  
+  const imgEl = document.getElementById('gifModalImg');
+  imgEl.style.backgroundImage = `url('${GIF_BASE}${ex.id}/0.jpg')`;
+  imgEl.dataset.imgBase = `${GIF_BASE}${ex.id}/`;
+  iniciarAnimacaoModal('gifModalImg');
+  
+  document.getElementById('gifModalName').textContent = ex.n;
+  document.getElementById('gifModalNameEn').textContent = ex.nameEn || '';
+  
+  const insEl = document.getElementById('gifModalIns');
+  insEl.innerHTML = '<ol>' + (ex.ins || []).map(i => `<li>${i}</li>`).join('') + '</ol>';
+  
+  document.getElementById('gifModal').classList.add('active');
+}
+
+function fecharModalGif() {
+  document.getElementById('gifModal').classList.remove('active');
+  pararAnimacaoModal('gifModalImg');
+}
+
+// Fechar clicando fora
+document.getElementById('exModal').addEventListener('click', (e) => {
+  if (e.target.id === 'exModal') fecharModalEx();
+});
+document.getElementById('gifModal').addEventListener('click', (e) => {
+  if (e.target.id === 'gifModal') fecharModalGif();
+});
+
+// ============================================================
+// ADICIONAR EXERCÍCIO AO DIA
+// ============================================================
+function adicionarAoDia() {
+  if (!exercicioAtivo) return;
+  
+  const item = {
+    id: exercicioAtivo.id,
+    n: exercicioAtivo.n,
+    nameEn: exercicioAtivo.nameEn,
+    pm: exercicioAtivo.pm,
+    eq: exercicioAtivo.eq,
+    aquecimento: document.getElementById('prescAquecimento').value || '',
+    feeder: document.getElementById('prescFeeder').value || '',
+    series: document.getElementById('prescSeries').value || '',
+    reps: document.getElementById('prescReps').value || '',
+    descanso: document.getElementById('prescDescanso').value || '',
+    obs: document.getElementById('prescObs').value || ''
+  };
+  
+  treino[diaAtivo].exercicios.push(item);
+  
+  // Feedback
+  const btn = document.getElementById('addToDayBtn');
+  const original = btn.textContent;
+  btn.textContent = '✓ Adicionado!';
+  btn.style.background = 'var(--success)';
+  setTimeout(() => {
+    btn.textContent = original;
+    btn.style.background = '';
+    fecharModalEx();
+    renderDia();
+    atualizarContadores();
+  }, 800);
+}
+
+// ============================================================
+// RENDER DO DIA
+// ============================================================
+function renderDia() {
+  const container = document.getElementById('dayExercises');
+  const exs = treino[diaAtivo].exercicios;
+  
+  if (exs.length === 0) {
+    container.innerHTML = `
+      <div class="empty-day">
+        <div class="empty-day-icon">💪</div>
+        <div>Nenhum exercício adicionado a <strong>${DIAS[diaAtivo]}</strong> ainda.<br>Use a busca acima para encontrar e prescrever exercícios.</div>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = exs.map((ex, i) => {
+    const muscPm = ex.pm.map(m => MUSC[m] || m).join(', ');
+    const eqLabel = EQUIP[ex.eq] || ex.eq;
+    return `
+      <div class="day-exercise-card">
+        <div class="day-ex-header">
+          <div class="day-ex-thumb" 
+               style="background-image: url('${GIF_BASE}${ex.id}/0.jpg')"
+               onclick="abrirModalGif('${ex.id}')"
+               title="Ver execução"></div>
+          <div class="day-ex-info">
+            <div class="day-ex-name">${i + 1}. ${ex.n}</div>
+            <div class="day-ex-tags">${muscPm} · ${eqLabel}</div>
+          </div>
+          <div class="day-ex-actions">
+            <button class="icon-btn gif" onclick="abrirModalGif('${ex.id}')" title="Ver GIF">🎬</button>
+            ${i > 0 ? `<button class="icon-btn up" onclick="moverEx(${i}, -1)" title="Subir">↑</button>` : ''}
+            ${i < exs.length - 1 ? `<button class="icon-btn down" onclick="moverEx(${i}, 1)" title="Descer">↓</button>` : ''}
+            <button class="icon-btn remove" onclick="removerEx(${i})" title="Remover">×</button>
+          </div>
+        </div>
+        <div class="day-ex-body">
+          <div class="day-ex-grid">
+            <div class="ex-field">
+              <label>Aquecimento</label>
+              <input type="text" value="${escapeHtml(ex.aquecimento)}" 
+                     onchange="atualizarCampo(${i}, 'aquecimento', this.value)" 
+                     placeholder="ex: 2x12 c/ 50%">
+            </div>
+            <div class="ex-field">
+              <label>Feeder Sets</label>
+              <input type="text" value="${escapeHtml(ex.feeder)}" 
+                     onchange="atualizarCampo(${i}, 'feeder', this.value)" 
+                     placeholder="ex: 1x8 c/ 70%">
+            </div>
+            <div class="ex-field">
+              <label>Séries</label>
+              <input type="text" value="${escapeHtml(ex.series)}" 
+                     onchange="atualizarCampo(${i}, 'series', this.value)" 
+                     placeholder="ex: 4">
+            </div>
+            <div class="ex-field">
+              <label>Reps</label>
+              <input type="text" value="${escapeHtml(ex.reps)}" 
+                     onchange="atualizarCampo(${i}, 'reps', this.value)" 
+                     placeholder="ex: 8-10">
+            </div>
+            <div class="ex-field">
+              <label>Descanso</label>
+              <input type="text" value="${escapeHtml(ex.descanso)}" 
+                     onchange="atualizarCampo(${i}, 'descanso', this.value)" 
+                     placeholder="ex: 90s">
+            </div>
+          </div>
+          <div class="ex-obs">
+            <label style="font-size: 0.62rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; display: block; margin-bottom: 4px;">Observações</label>
+            <textarea onchange="atualizarCampo(${i}, 'obs', this.value)" 
+                      placeholder="ex: Cadência 3-1-1, foco na contração...">${escapeHtml(ex.obs)}</textarea>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+function atualizarCampo(idx, campo, valor) {
+  treino[diaAtivo].exercicios[idx][campo] = valor;
+}
+
+function removerEx(idx) {
+  treino[diaAtivo].exercicios.splice(idx, 1);
+  renderDia();
+  atualizarContadores();
+}
+
+function moverEx(idx, delta) {
+  const novoIdx = idx + delta;
+  if (novoIdx < 0 || novoIdx >= treino[diaAtivo].exercicios.length) return;
+  const arr = treino[diaAtivo].exercicios;
+  [arr[idx], arr[novoIdx]] = [arr[novoIdx], arr[idx]];
+  renderDia();
+}
+
+function atualizarContadores() {
+  Object.keys(DIAS).forEach(d => {
+    const count = treino[d].exercicios.length;
+    const el = document.querySelector(`.day-count[data-count="${d}"]`);
+    if (el) el.textContent = count + ' ex' + (count === 1 ? '' : 's');
+    
+    const focusLabel = document.querySelector(`.focus-label[data-focus="${d}"]`);
+    if (focusLabel) {
+      const txt = (treino[d].focus || '').trim();
+      focusLabel.textContent = txt.length > 0 ? (txt.length > 16 ? txt.substring(0, 16) + '…' : txt) : '—';
+    }
+  });
+}
+
+// Init
+renderDia();
+atualizarContadores();
+
+function limparTudo() {
+  if (!confirm('Limpar todos os exercícios de TODOS os dias da semana?')) return;
+  Object.keys(DIAS).forEach(d => {
+    treino[d] = { focus: '', exercicios: [] };
+  });
+  document.getElementById('dayFocus').value = '';
+  renderDia();
+  atualizarContadores();
+}
+
+// ============================================================
+// COLETAR DADOS DO ALUNO
+// ============================================================
+function coletarCliente() {
+  return {
+    nome: document.getElementById('cliNome').value || '—',
+    idade: document.getElementById('cliIdade').value,
+    tel: document.getElementById('cliTel').value,
+    peso: document.getElementById('cliPeso').value,
+    altura: document.getElementById('cliAltura').value,
+    objetivo: document.getElementById('cliObjetivo').value,
+    nivel: document.getElementById('cliNivel').value,
+    obs: document.getElementById('cliObs').value,
+    profNome: document.getElementById('profNome').value,
+    planData: document.getElementById('planData').value
+  };
+}
+
+// ============================================================
+// PDF — CONSTRUÇÃO DO LAYOUT
+// ============================================================
+function buildPDFContent() {
+  const c = coletarCliente();
+  const dataF = c.planData
+    ? new Date(c.planData + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
+    : new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+  
+  // Total de exercícios
+  let totalEx = 0;
+  Object.keys(DIAS).forEach(d => totalEx += treino[d].exercicios.length);
+  
+  let html = `
+    <div class="pdf-header">
+      <div class="pdf-brand-row">
+        <div class="pdf-brand">
+          <div class="pdf-logo">⚡</div>
+          <div class="pdf-title-block">
+            <h1>TRAIN<span>.</span>FUEL</h1>
+            <div class="pdf-tagline">Prescrição · Treino · Ciência</div>
+          </div>
+        </div>
+        <div>
+          <div class="pdf-date-label">Data do Plano</div>
+          <div class="pdf-date">${dataF}</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="pdf-client">
+      <div class="pdf-client-label">Programa de Treinamento Personalizado</div>
+      <div class="pdf-client-name">${c.nome.toUpperCase()}</div>
+      <div class="pdf-client-meta">
+        ${c.idade ? `<div><strong>Idade:</strong> ${c.idade} anos</div>` : ''}
+        ${c.peso ? `<div><strong>Peso:</strong> ${c.peso} kg</div>` : ''}
+        ${c.altura ? `<div><strong>Altura:</strong> ${c.altura} cm</div>` : ''}
+        ${c.objetivo ? `<div><strong>Objetivo:</strong> ${c.objetivo}</div>` : ''}
+        ${c.nivel ? `<div><strong>Nível:</strong> ${c.nivel}</div>` : ''}
+      </div>
+      ${c.obs ? `<div style="margin-top:10px; padding-top:10px; border-top:1px solid #eee; font-size:0.78rem; color:#555;"><strong style="color:#1a1a1a;">Restrições/Observações:</strong> ${escapeHtml(c.obs)}</div>` : ''}
+    </div>
+  `;
+  
+  // Dias com exercícios
+  let temAlgum = false;
+  Object.keys(DIAS).forEach(d => {
+    const dia = treino[d];
+    if (dia.exercicios.length === 0) return;
+    temAlgum = true;
+    
+    html += `
+      <div class="pdf-day">
+        <div class="pdf-day-header">
+          <div class="pdf-day-name">${DIAS[d]}</div>
+          ${dia.focus ? `<div class="pdf-day-focus">${escapeHtml(dia.focus)}</div>` : ''}
+          <div class="pdf-day-count">${dia.exercicios.length} ${dia.exercicios.length === 1 ? 'exercício' : 'exercícios'}</div>
+        </div>
+        <div class="pdf-exercises">
+    `;
+    
+    dia.exercicios.forEach((ex, i) => {
+      const muscPm = ex.pm.map(m => MUSC[m] || m).join(', ');
+      const eqLabel = EQUIP[ex.eq] || ex.eq;
+      
+      html += `
+        <div class="pdf-exercise">
+          <div class="pdf-exercise-header">
+            <span class="pdf-exercise-num">${i + 1}</span>
+            <span class="pdf-exercise-name">${ex.n}</span>
+          </div>
+          <div class="pdf-exercise-tags" style="margin-bottom: 6px;">${muscPm} · ${eqLabel}</div>
+          <div class="pdf-prescription">
+            <div class="pdf-presc-item">
+              <div class="pdf-presc-label">Aquecimento</div>
+              <div class="pdf-presc-value">${ex.aquecimento || '—'}</div>
+            </div>
+            <div class="pdf-presc-item">
+              <div class="pdf-presc-label">Feeder</div>
+              <div class="pdf-presc-value">${ex.feeder || '—'}</div>
+            </div>
+            <div class="pdf-presc-item">
+              <div class="pdf-presc-label">Séries</div>
+              <div class="pdf-presc-value">${ex.series || '—'}</div>
+            </div>
+            <div class="pdf-presc-item">
+              <div class="pdf-presc-label">Reps</div>
+              <div class="pdf-presc-value">${ex.reps || '—'}</div>
+            </div>
+            <div class="pdf-presc-item">
+              <div class="pdf-presc-label">Descanso</div>
+              <div class="pdf-presc-value">${ex.descanso || '—'}</div>
+            </div>
+          </div>
+          ${ex.obs ? `<div class="pdf-exercise-obs"><strong>OBS:</strong> ${escapeHtml(ex.obs)}</div>` : ''}
+        </div>
+      `;
+    });
+    
+    html += `</div></div>`;
+  });
+  
+  if (!temAlgum) {
+    html += `<div style="text-align:center; padding:40px; color:#666; font-style:italic;">Nenhum exercício prescrito ainda.</div>`;
+  }
+  
+  // Footer
+  html += `
+    <div class="pdf-disclaimer">
+      <strong>⚠️ Importante:</strong> Realize sempre aquecimento adequado antes do treino. Em caso de dor, formigamento ou desconforto, interrompa o exercício imediatamente. Hidrate-se durante toda a sessão. Em caso de dúvida sobre a execução, consulte o profissional responsável. As séries e repetições devem ser ajustadas conforme evolução individual.
+    </div>
+    
+    <div class="pdf-footer">
+      ${c.profNome ? `<div style="font-size:0.78rem; color:#fff; margin-bottom:6px;"><strong>${escapeHtml(c.profNome)}</strong></div>` : ''}
+      <div>Plano gerado em ${dataF} · TRAIN<strong>.</strong>FUEL · Sistema Profissional de Prescrição de Treinos</div>
+    </div>
+  `;
+  
+  return html;
+}
+
+// ============================================================
+// GERAR PDF
+// ============================================================
+async function gerarPDF() {
+  let totalEx = 0;
+  Object.keys(DIAS).forEach(d => totalEx += treino[d].exercicios.length);
+  if (totalEx === 0) {
+    alert('Adicione pelo menos um exercício antes de gerar o PDF.');
+    return;
+  }
+  
+  const c = coletarCliente();
+  if (c.nome === '—' || !c.nome.trim()) {
+    if (!confirm('O nome do aluno não foi preenchido. Deseja continuar mesmo assim?')) return;
+  }
+  
+  if (typeof html2pdf === 'undefined') {
+    alert('Biblioteca PDF não carregou. Use o botão "Imprimir" como alternativa.');
+    return;
+  }
+  
+  const filename = `Treino-${(c.nome || 'aluno').replace(/[^a-zA-Z0-9]/g, '_')}-${new Date().toISOString().split('T')[0]}.pdf`;
+  
+  const pdfWrapper = document.createElement('div');
+  pdfWrapper.id = 'pdfRenderWrapper';
+  pdfWrapper.style.cssText = `
+    position: fixed; top: 0; left: 0;
+    width: 794px;
+    background: #ffffff;
+    padding: 24px;
+    z-index: -1;
+    opacity: 0;
+    pointer-events: none;
+    box-sizing: border-box;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #1a1a1a;
+  `;
+  pdfWrapper.innerHTML = `<div id="pdfRenderInner" style="width: 100%;">${buildPDFContent()}</div>`;
+  document.body.appendChild(pdfWrapper);
+  
+  const btn = event && event.target ? event.target : null;
+  let originalText = '';
+  if (btn) {
+    originalText = btn.textContent;
+    btn.textContent = '⏳ Gerando PDF...';
+    btn.disabled = true;
+  }
+  
+  try {
+    if (document.fonts && document.fonts.ready) {
+      await document.fonts.ready;
+    }
+    await new Promise(r => setTimeout(r, 250));
+    
+    const opt = {
+      margin: [10, 8, 10, 8],
+      filename,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        windowWidth: 794,
+        scrollX: 0,
+        scrollY: 0,
+        onclone: function(clonedDoc) {
+          const cloned = clonedDoc.getElementById('pdfRenderWrapper');
+          if (cloned) {
+            cloned.style.opacity = '1';
+            cloned.style.position = 'static';
+            cloned.style.zIndex = 'auto';
+          }
+        }
+      },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
+      pagebreak: { mode: ['css', 'legacy'], avoid: ['.pdf-day', '.pdf-exercise', '.pdf-client', '.pdf-header'] }
+    };
+    
+    await html2pdf().set(opt).from(document.getElementById('pdfRenderInner')).save();
+    
+  } catch (err) {
+    console.error('Erro PDF:', err);
+    alert('Erro ao gerar PDF: ' + (err.message || 'desconhecido') + '\n\nUse o botão "Imprimir" como alternativa.');
+  } finally {
+    const wrap = document.getElementById('pdfRenderWrapper');
+    if (wrap) wrap.remove();
+    if (btn) {
+      btn.textContent = originalText;
+      btn.disabled = false;
+    }
+  }
+}
+
+function imprimir() {
+  let totalEx = 0;
+  Object.keys(DIAS).forEach(d => totalEx += treino[d].exercicios.length);
+  if (totalEx === 0) {
+    alert('Adicione pelo menos um exercício antes de imprimir.');
+    return;
+  }
+  
+  const pdfArea = document.getElementById('pdfArea');
+  pdfArea.innerHTML = buildPDFContent();
+  
+  setTimeout(() => {
+    window.print();
+    setTimeout(() => { pdfArea.innerHTML = ''; }, 1000);
+  }, 100);
+}
+
+// ============================================================
+// EXPORT/IMPORT JSON
+// ============================================================
+function exportarJSON() {
+  const data = {
+    versao: '1.0',
+    treino,
+    cliente: coletarCliente(),
+    dataCriacao: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const nomeCli = (data.cliente.nome || 'treino').replace(/[^a-zA-Z0-9]/g, '_');
+  a.href = url;
+  a.download = `trainfuel-${nomeCli}-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importarJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try {
+      const data = JSON.parse(evt.target.result);
+      if (data.treino) treino = data.treino;
+      if (data.cliente) {
+        const c = data.cliente;
+        if (c.nome && c.nome !== '—') document.getElementById('cliNome').value = c.nome;
+        if (c.idade) document.getElementById('cliIdade').value = c.idade;
+        if (c.tel) document.getElementById('cliTel').value = c.tel;
+        if (c.peso) document.getElementById('cliPeso').value = c.peso;
+        if (c.altura) document.getElementById('cliAltura').value = c.altura;
+        if (c.objetivo) document.getElementById('cliObjetivo').value = c.objetivo;
+        if (c.nivel) document.getElementById('cliNivel').value = c.nivel;
+        if (c.obs) document.getElementById('cliObs').value = c.obs;
+        if (c.profNome) document.getElementById('profNome').value = c.profNome;
+        if (c.planData) document.getElementById('planData').value = c.planData;
+      }
+      // Atualiza foco do dia atual
+      document.getElementById('dayFocus').value = treino[diaAtivo].focus || '';
+      renderDia();
+      atualizarContadores();
+      alert('Treino importado com sucesso!');
+    } catch (err) {
+      alert('Erro ao importar: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ============================================================
+// PWA — Service Worker
+// ============================================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('✅ TRAIN.FUEL PWA registrado:', reg.scope))
+      .catch(err => console.warn('⚠️ SW falhou:', err));
+  });
+}
+
+if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+  console.log('📱 TRAIN.FUEL rodando como PWA');
+}
+
+console.log(`💪 TRAIN.FUEL v1.0 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
+
+</script>
+</body>
+</html>
