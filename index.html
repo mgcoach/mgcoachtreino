@@ -339,10 +339,36 @@
   .exercise-card-img {
     width: 100%;
     aspect-ratio: 4/3;
-    background: #fff;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
     background-size: cover;
     background-position: center;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .exercise-card-img.has-image {
+    background: #fff;
+    background-size: cover;
+    background-position: center;
+  }
+  
+  .exercise-card-img.broken {
+    background: linear-gradient(135deg, #ff6b1a 0%, #cc4f10 100%) !important;
+  }
+  
+  .exercise-card-img.broken::before {
+    content: '🏋️';
+    font-size: 2.4rem;
+    filter: grayscale(1) brightness(0.3);
+    opacity: 0.65;
+  }
+  
+  .exercise-card-img:not(.has-image):not(.broken)::before {
+    content: '⏳';
+    font-size: 1.6rem;
+    opacity: 0.4;
   }
   
   .exercise-card-img::after {
@@ -353,6 +379,13 @@
     padding: 2px 6px;
     border-radius: 4px;
     font-size: 0.7rem;
+    z-index: 2;
+  }
+  
+  .exercise-card-img.broken::after {
+    content: '⚠️ sem GIF';
+    font-size: 0.62rem;
+    background: rgba(0,0,0,0.85);
   }
   
   .exercise-card-body {
@@ -577,11 +610,26 @@
   .day-ex-thumb {
     width: 50px; height: 50px;
     border-radius: 8px;
-    background: #fff;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
     background-size: cover;
     background-position: center;
     flex-shrink: 0;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  
+  .day-ex-thumb.broken {
+    background: linear-gradient(135deg, #ff6b1a 0%, #cc4f10 100%) !important;
+  }
+  
+  .day-ex-thumb.broken::before {
+    content: '🏋️';
+    font-size: 1.3rem;
+    filter: grayscale(1) brightness(0.3);
+    opacity: 0.65;
   }
   
   .day-ex-info {
@@ -994,6 +1042,73 @@
   .pdf-exercise {
     padding: 14px 16px;
     border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  
+  .pdf-exercise-thumb-col {
+    flex-shrink: 0;
+    width: 110px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .pdf-exercise-thumb {
+    width: 110px;
+    height: 110px;
+    border-radius: 8px;
+    background: #fafafa;
+    background-size: cover;
+    background-position: center;
+    border: 1px solid #e5e5e5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  
+  .pdf-exercise-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  
+  .pdf-exercise-thumb.broken {
+    background: linear-gradient(135deg, #ff6b1a 0%, #cc4f10 100%);
+    color: #1a1a1a;
+    font-size: 2rem;
+  }
+  
+  .pdf-exercise-thumb.broken::before {
+    content: '🏋️';
+    filter: grayscale(1) brightness(0.3);
+    opacity: 0.7;
+  }
+  
+  .pdf-exercise-link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.58rem;
+    color: #ff6b1a !important;
+    text-decoration: none;
+    text-align: center;
+    line-height: 1.3;
+    padding: 3px 6px;
+    border: 1px solid #ff6b1a;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+  }
+  
+  .pdf-exercise-content {
+    flex: 1;
+    min-width: 0;
   }
   
   .pdf-exercise:last-child { border-bottom: none; }
@@ -1874,6 +1989,258 @@ const EXERCICIOS = [
     ins: ["Pegada pronada na barra (palmas para baixo).","Flexione os cotovelos.","Foco no braquiorradial e antebraço."] }
 ];
 
+// ====================================================================
+// TRAIN.FUEL v1.1 — EXPANSÃO DO BANCO DE EXERCÍCIOS (foco em MÁQUINAS)
+// IDs verificados no free-exercise-db (yuhonas/free-exercise-db)
+// Cada exercício tem 2 imagens: {id}/0.jpg e {id}/1.jpg
+// ====================================================================
+
+const EXERCICIOS_EXTRA = [
+  // ============ PEITO — MÁQUINAS E CABOS ============
+  { id: "Butterfly", n: "Voador (Pec Deck)", nameEn: "Pec Deck / Butterfly", pm: ["chest"], sm: ["shoulders"], eq: "machine", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["Sente na máquina com costas firmes no encosto, pés apoiados.","Posicione antebraços nos pads (cotovelos a 90°) ou segure as pegadas.","Empurre os braços para frente apertando o peito até quase encostar.","Volte controladamente sem deixar os pads baterem nas placas."] },
+  
+  { id: "Cable_Crossover", n: "Crossover (Cabo Cruzado)", nameEn: "Cable Crossover", pm: ["chest"], sm: ["shoulders"], eq: "cable", lvl: "intermediate", mec: "isolation", force: "push",
+    ins: ["Posicione as polias altas, segure as pegadas com pegada neutra.","Dê um passo à frente em afundo curto, tronco levemente inclinado.","Traga as mãos para frente do corpo em arco descendente, cruzando levemente.","Aperte o peito no fim do movimento e volte controlado."] },
+  
+  { id: "Cable_Crossover_Variations", n: "Crossover Polia Baixa", nameEn: "Low Cable Crossover", pm: ["chest"], sm: ["shoulders","biceps"], eq: "cable", lvl: "intermediate", mec: "isolation", force: "push",
+    ins: ["Polias na posição mais baixa, segure as pegadas.","Tronco levemente inclinado à frente, braços abertos lateralmente.","Traga as mãos para cima e para o centro, em frente ao peito alto.","Foco no peito superior — não suba demais (não vira elevação frontal)."] },
+  
+  { id: "Cable_Chest_Press", n: "Supino na Polia (em pé)", nameEn: "Cable Chest Press", pm: ["chest"], sm: ["shoulders","triceps"], eq: "cable", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Posicione polias na altura do peito, fique de costas para a máquina.","Segure as pegadas com pegada pronada na altura do peito.","Empurre as mãos à frente até quase estender os braços.","Volte controlado sem perder a tensão dos cabos."] },
+  
+  { id: "Smith_Machine_Bench_Press", n: "Supino na Smith", nameEn: "Smith Machine Bench Press", pm: ["chest"], sm: ["shoulders","triceps"], eq: "machine", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Banco no centro da Smith, barra alinhada com o meio do peito.","Pegada pouco mais aberta que ombros, destrave a barra.","Desça controlado até a parte média do peito.","Empurre verticalmente focando no peito."] },
+  
+  { id: "Machine_Bench_Press", n: "Supino na Máquina (Hammer)", nameEn: "Machine Chest Press / Hammer Strength", pm: ["chest"], sm: ["shoulders","triceps"], eq: "machine", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Ajuste o assento para que as pegadas fiquem na altura do peito.","Sente com costas firmes no encosto, pés no chão.","Empurre as alavancas à frente até quase estender os braços.","Volte controlado, sem deixar as placas baterem."] },
+  
+  { id: "Incline_Hammer_Curls", n: "Supino Inclinado na Máquina", nameEn: "Incline Machine Press", pm: ["chest"], sm: ["shoulders","triceps"], eq: "machine", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Ajuste a máquina inclinada, sente com encosto firme.","Pegada na altura do peito alto.","Empurre as alavancas à frente em ângulo ascendente.","Foco no peito superior — não jogue os ombros à frente."] },
+  
+  // ============ COSTAS — MÁQUINAS, CABOS E PUXADAS ============
+  { id: "Wide-Grip_Lat_Pulldown", n: "Puxada Pegada Aberta", nameEn: "Wide-Grip Lat Pulldown", pm: ["lats"], sm: ["biceps","middle back"], eq: "cable", lvl: "beginner", mec: "compound", force: "pull",
+    ins: ["Sente na máquina com coxas presas pelos rolos.","Pegada bem mais aberta que os ombros, palmas para frente.","Puxe a barra até a parte alta do peito, peito estufado.","Volte controlado sentindo o alongamento das dorsais."] },
+  
+  { id: "Reverse_Grip_Bent-Over_Rows", n: "Puxada Pegada Supinada", nameEn: "Reverse Grip Lat Pulldown", pm: ["lats"], sm: ["biceps"], eq: "cable", lvl: "beginner", mec: "compound", force: "pull",
+    ins: ["Pegada supinada (palmas para você), largura dos ombros.","Sente firme, peito estufado.","Puxe a barra até a parte alta do peito.","Foco maior nas dorsais inferiores e bíceps."] },
+  
+  { id: "Close-Grip_Front_Lat_Pulldown", n: "Puxada Pegada Fechada (Triângulo)", nameEn: "Close-Grip Lat Pulldown", pm: ["lats"], sm: ["biceps","middle back"], eq: "cable", lvl: "beginner", mec: "compound", force: "pull",
+    ins: ["Use o triângulo (barra V) ou pegada fechada neutra.","Sente firme, peito estufado.","Puxe até a barra encostar no peito médio/alto.","Aperte as escápulas no fim do movimento."] },
+  
+  { id: "Seated_Cable_Rows", n: "Remada Sentada no Cabo", nameEn: "Seated Cable Row", pm: ["middle back"], sm: ["biceps","lats"], eq: "cable", lvl: "beginner", mec: "compound", force: "pull",
+    ins: ["Sente com pés apoiados, joelhos levemente flexionados.","Segure o triângulo, costas eretas e peito estufado.","Puxe o cabo até o abdômen, cotovelos rente ao corpo.","Aperte as escápulas e volte controlado sem arredondar a coluna."] },
+  
+  { id: "T-Bar_Row_with_Handle", n: "Remada Cavalinho (T-Bar)", nameEn: "T-Bar Row", pm: ["middle back"], sm: ["lats","biceps"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "pull",
+    ins: ["Posicione-se sobre a barra com pegada fechada (triângulo ou alça).","Tronco inclinado a ~45°, joelhos semi-flexionados.","Puxe a barra em direção ao peito médio.","Aperte as escápulas no topo e desça controlado."] },
+  
+  { id: "Lying_T-Bar_Row", n: "Remada T-Bar Apoiada", nameEn: "Chest-Supported T-Bar Row", pm: ["middle back"], sm: ["lats","biceps"], eq: "machine", lvl: "intermediate", mec: "compound", force: "pull",
+    ins: ["Deite no banco inclinado da máquina, peito apoiado.","Pegada larga ou neutra na barra.","Puxe a barra em direção ao peito, cotovelos abertos.","Aperte escápulas e volte controlado."] },
+  
+  { id: "Hammer_Strength_Row", n: "Remada na Máquina (Hammer)", nameEn: "Machine Row / Hammer Strength Row", pm: ["middle back"], sm: ["lats","biceps"], eq: "machine", lvl: "beginner", mec: "compound", force: "pull",
+    ins: ["Ajuste o assento para que as pegadas fiquem na linha do peito.","Peito firme contra o pad, pés apoiados.","Puxe as alavancas em direção às costelas.","Aperte escápulas e volte sentindo o alongamento."] },
+  
+  { id: "Machine_Lat_Pulldown", n: "Pulldown na Máquina (placa)", nameEn: "Plate-Loaded Lat Pulldown Machine", pm: ["lats"], sm: ["biceps"], eq: "machine", lvl: "beginner", mec: "compound", force: "pull",
+    ins: ["Sente com coxas presas, segure as pegadas (geralmente neutras).","Peito estufado, levemente inclinado para trás.","Puxe as pegadas para baixo até a altura dos ombros.","Foco em puxar com os cotovelos, não com os bíceps."] },
+  
+  { id: "Pullups", n: "Barra Fixa (Pull-up)", nameEn: "Pull-ups", pm: ["lats"], sm: ["biceps","middle back"], eq: "body only", lvl: "intermediate", mec: "compound", force: "pull",
+    ins: ["Pegada pronada, mais aberta que os ombros.","Pendure-se com braços estendidos, ombros ativos.","Puxe o corpo até o queixo passar a barra.","Desça controlado até a extensão completa."] },
+  
+  { id: "Chin-Up", n: "Barra Fixa Supinada (Chin-up)", nameEn: "Chin-up", pm: ["lats"], sm: ["biceps","middle back"], eq: "body only", lvl: "intermediate", mec: "compound", force: "pull",
+    ins: ["Pegada supinada (palmas para você), largura dos ombros.","Pendure-se com braços estendidos.","Puxe até o queixo passar a barra, foco em apertar dorsais e bíceps.","Desça controlado."] },
+  
+  { id: "Smith_Machine_Bent_Over_Row", n: "Remada Curvada na Smith", nameEn: "Smith Machine Bent-Over Row", pm: ["middle back"], sm: ["lats","biceps"], eq: "machine", lvl: "intermediate", mec: "compound", force: "pull",
+    ins: ["Posicione a barra na altura dos joelhos.","Tronco inclinado a ~45°, joelhos semi-flexionados.","Puxe a barra em direção ao abdômen.","Volte controlado sem arredondar a lombar."] },
+  
+  { id: "Standing_Pulldown", n: "Pulldown em Pé (Polia Alta)", nameEn: "Standing Cable Pulldown", pm: ["lats"], sm: ["middle back","triceps"], eq: "cable", lvl: "beginner", mec: "compound", force: "pull",
+    ins: ["Em pé de frente para a polia alta, pegue uma barra reta.","Braços estendidos à frente, tronco levemente inclinado.","Puxe a barra para baixo em direção às coxas, mantendo braços retos.","Foco isolado nas dorsais — não dobre os cotovelos."] },
+  
+  { id: "Straight-Arm_Pulldown", n: "Pulldown com Braço Reto", nameEn: "Straight-Arm Pulldown", pm: ["lats"], sm: ["middle back"], eq: "cable", lvl: "intermediate", mec: "isolation", force: "pull",
+    ins: ["De pé na polia alta com barra ou corda.","Braços levemente flexionados, mantendo essa angulação fixa.","Puxe os braços para baixo até as coxas em arco.","Aperte as dorsais no fim do movimento."] },
+  
+  // ============ PERNAS — MÁQUINAS ESSENCIAIS ============
+  { id: "Leg_Press", n: "Leg Press 45°", nameEn: "Leg Press", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "machine", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Sente na máquina com pés na largura dos ombros, no centro da plataforma.","Destrave os suportes e desça controlado até ~90° nos joelhos.","Empurre a plataforma sem travar os joelhos no topo.","Mantenha lombar apoiada o tempo todo."] },
+  
+  { id: "Hack_Squat", n: "Hack Squat (Agachamento Hack)", nameEn: "Hack Squat Machine", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "machine", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Posicione-se na máquina com costas firmes, pés na plataforma.","Destrave e desça controlado até ~90° nos joelhos.","Empurre de volta sem travar joelhos.","Mantenha core ativo durante todo movimento."] },
+  
+  { id: "Pendulum_Squat", n: "Agachamento Pendular", nameEn: "Pendulum Squat", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "machine", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Posicione-se na máquina com ombros nos pads e pés na plataforma.","Destrave os suportes laterais.","Desça controlado em arco pendular até ~90°.","Empurre de volta sentindo os quadríceps trabalhando intensamente."] },
+  
+  { id: "Smith_Machine_Squat", n: "Agachamento na Smith", nameEn: "Smith Machine Squat", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "machine", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Barra apoiada na parte alta das costas (trapézio).","Pés ligeiramente à frente da barra (postura levemente inclinada).","Desça até as coxas paralelas ao chão.","Empurre de volta focando nos calcanhares."] },
+  
+  { id: "Front_Squats", n: "Agachamento Frontal", nameEn: "Front Squat", pm: ["quadriceps"], sm: ["glutes","hamstrings","abdominals"], eq: "barbell", lvl: "expert", mec: "compound", force: "push",
+    ins: ["Barra apoiada nos deltoides anteriores, cotovelos altos.","Pés na largura dos ombros, ligeiramente abertos.","Desça mantendo o tronco bem ereto.","Empurre de volta sem deixar os cotovelos caírem."] },
+  
+  { id: "Leg_Extensions", n: "Cadeira Extensora", nameEn: "Leg Extension", pm: ["quadriceps"], sm: [], eq: "machine", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["Sente na máquina com costas firmes no encosto.","Posicione os tornozelos atrás do rolo, joelhos alinhados com o eixo.","Estenda as pernas até quase travar (não trave).","Volte controlado sem deixar as placas baterem."] },
+  
+  { id: "Lying_Leg_Curls", n: "Mesa Flexora", nameEn: "Lying Leg Curl", pm: ["hamstrings"], sm: ["calves"], eq: "machine", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Deite de bruços com tornozelos sob o rolo.","Joelhos alinhados com o eixo da máquina.","Flexione os joelhos trazendo o rolo em direção aos glúteos.","Volte controlado sem hiperextender os joelhos."] },
+  
+  { id: "Seated_Leg_Curl", n: "Cadeira Flexora", nameEn: "Seated Leg Curl", pm: ["hamstrings"], sm: ["calves"], eq: "machine", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Sente com costas firmes, tornozelos sobre o rolo.","Joelhos alinhados com o eixo da máquina.","Flexione os joelhos puxando o rolo para baixo.","Volte controlado focando nos posteriores."] },
+  
+  { id: "Standing_Leg_Curl", n: "Flexora em Pé", nameEn: "Standing Leg Curl", pm: ["hamstrings"], sm: ["calves","glutes"], eq: "machine", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Em pé na máquina, uma perna apoiada e outra com tornozelo no rolo.","Mantenha quadril fixo, sem balançar o tronco.","Flexione o joelho trazendo o calcanhar para o glúteo.","Volte controlado e troque a perna."] },
+  
+  { id: "Romanian_Deadlift", n: "Stiff (Levantamento Romeno)", nameEn: "Romanian Deadlift", pm: ["hamstrings"], sm: ["glutes","lower back"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "pull",
+    ins: ["Em pé com barra à frente, pegada pronada na largura dos ombros.","Joelhos levemente flexionados (não dobre mais durante o movimento).","Empurre o quadril para trás descendo a barra rente às pernas.","Sinta o alongamento dos posteriores e suba apertando os glúteos."] },
+  
+  { id: "Cable_Pull_Through", n: "Pull Through na Polia Baixa", nameEn: "Cable Pull Through", pm: ["glutes"], sm: ["hamstrings","lower back"], eq: "cable", lvl: "beginner", mec: "compound", force: "pull",
+    ins: ["De costas para a polia baixa, segure a corda entre as pernas.","Dê alguns passos à frente para criar tensão.","Empurre o quadril para trás descendo o tronco.","Empurre o quadril à frente apertando os glúteos no topo."] },
+  
+  { id: "Glute_Bridge", n: "Ponte de Glúteo", nameEn: "Glute Bridge", pm: ["glutes"], sm: ["hamstrings"], eq: "body only", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Deite com joelhos flexionados e pés apoiados no chão.","Pés na largura dos ombros, próximos aos glúteos.","Eleve o quadril apertando os glúteos no topo.","Desça controlado sem encostar totalmente o quadril no chão."] },
+  
+  { id: "Barbell_Hip_Thrust", n: "Hip Thrust com Barra", nameEn: "Barbell Hip Thrust", pm: ["glutes"], sm: ["hamstrings","quadriceps"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Sente com costas apoiadas em um banco, barra sobre o quadril (use proteção).","Pés firmes no chão, joelhos a 90°.","Empurre o quadril para cima formando linha reta tronco-coxas.","Aperte glúteos no topo e desça controlado."] },
+  
+  { id: "Smith_Machine_Hip_Thrust", n: "Hip Thrust na Smith", nameEn: "Smith Machine Hip Thrust", pm: ["glutes"], sm: ["hamstrings"], eq: "machine", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Banco perpendicular à Smith, barra na altura do quadril.","Sente com costas no banco, barra sobre o quadril com proteção.","Empurre o quadril para cima até alinhamento total.","Aperte glúteos e desça controlado."] },
+  
+  { id: "Cable_Hip_Adduction", n: "Adução na Polia", nameEn: "Cable Hip Adduction", pm: ["adductors"], sm: ["glutes"], eq: "cable", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Tornozelo preso na polia baixa, fique de lado para a máquina.","Apoie-se em algo para estabilidade.","Traga a perna em direção e através da linha média.","Volte controlado sentindo o estiramento."] },
+  
+  { id: "Hip_Adductor", n: "Cadeira Adutora", nameEn: "Adductor Machine", pm: ["adductors"], sm: ["glutes"], eq: "machine", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Sente na máquina com costas firmes no encosto.","Pernas afastadas com pads internos das coxas.","Aperte as pernas trazendo os pads para o centro.","Volte controlado sentindo o alongamento."] },
+  
+  { id: "Hip_Abductor", n: "Cadeira Abdutora", nameEn: "Abductor Machine", pm: ["glutes"], sm: ["adductors"], eq: "machine", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["Sente na máquina com costas firmes.","Pernas com pads externos das coxas.","Abra as pernas afastando os pads para fora.","Volte controlado focando nos glúteos médios."] },
+  
+  { id: "Bulgarian_Split_Squat", n: "Búlgaro (Afundo Búlgaro)", nameEn: "Bulgarian Split Squat", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "dumbbell", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Pé traseiro apoiado num banco atrás, perna da frente à frente.","Halteres ao lado do corpo (ou só peso corporal).","Desça flexionando o joelho da frente até quase 90°.","Empurre de volta focando no calcanhar da frente."] },
+  
+  { id: "Walking_Lunge", n: "Afundo Caminhando", nameEn: "Walking Lunge", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "dumbbell", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Em pé com halteres ao lado do corpo (ou peso corporal).","Dê um passo grande à frente flexionando ambos joelhos.","Empurre com o calcanhar da perna da frente para subir.","Avance trocando a perna a cada passo."] },
+  
+  { id: "Smith_Lunges", n: "Afundo na Smith", nameEn: "Smith Machine Lunge", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "machine", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Barra na parte alta das costas, uma perna à frente.","Desça o joelho de trás em direção ao chão.","Empurre de volta focando no calcanhar da frente.","Faça todas as repetições antes de trocar de perna."] },
+  
+  // ============ OMBROS — MÁQUINAS, CABOS ============
+  { id: "Side_Lateral_Raise", n: "Elevação Lateral", nameEn: "Dumbbell Lateral Raise", pm: ["shoulders"], sm: [], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["Em pé com halteres ao lado do corpo, palmas voltadas para o tronco.","Eleve os halteres lateralmente até a altura dos ombros.","Cotovelos levemente flexionados durante todo movimento.","Desça controlado sem balançar o tronco."] },
+  
+  { id: "Cable_Lateral_Raise", n: "Elevação Lateral na Polia", nameEn: "Cable Lateral Raise", pm: ["shoulders"], sm: [], eq: "cable", lvl: "intermediate", mec: "isolation", force: "push",
+    ins: ["Polia baixa atrás do corpo, segure a pegada com a mão oposta.","Eleve o braço lateralmente até a altura do ombro.","Mantenha o cotovelo levemente flexionado.","Desça controlado e troque o lado."] },
+  
+  { id: "Machine_Shoulder_Press", n: "Desenvolvimento na Máquina", nameEn: "Machine Shoulder Press", pm: ["shoulders"], sm: ["triceps"], eq: "machine", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Sente com costas firmes no encosto.","Pegadas na altura dos ombros, palmas para frente.","Empurre as alavancas para cima sem travar os cotovelos.","Volte controlado até a altura dos ombros."] },
+  
+  { id: "Smith_Machine_Overhead_Shoulder_Press", n: "Desenvolvimento na Smith", nameEn: "Smith Machine Shoulder Press", pm: ["shoulders"], sm: ["triceps"], eq: "machine", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Sente em banco vertical sob a Smith, barra na altura do peito alto.","Pegada um pouco mais aberta que os ombros.","Empurre a barra para cima sem travar cotovelos.","Desça controlado até a altura do peito."] },
+  
+  { id: "Reverse_Flyes", n: "Crucifixo Inverso", nameEn: "Reverse Flyes", pm: ["shoulders"], sm: ["middle back"], eq: "dumbbell", lvl: "intermediate", mec: "isolation", force: "pull",
+    ins: ["Tronco inclinado à frente (paralelo ao chão), halteres pendendo.","Braços levemente flexionados durante todo movimento.","Eleve os halteres lateralmente apertando as escápulas.","Desça controlado focando nos deltoides posteriores."] },
+  
+  { id: "Reverse_Machine_Flyes", n: "Voador Inverso na Máquina", nameEn: "Reverse Pec Deck", pm: ["shoulders"], sm: ["middle back"], eq: "machine", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Sente de frente para o pad da máquina pec deck (invertido).","Segure as pegadas com braços estendidos à frente.","Abra os braços lateralmente apertando as escápulas.","Volte controlado sentindo o alongamento."] },
+  
+  { id: "Cable_Rear_Delt_Row", n: "Remada Alta na Corda (Face Pull)", nameEn: "Face Pull", pm: ["shoulders"], sm: ["middle back"], eq: "cable", lvl: "beginner", mec: "compound", force: "pull",
+    ins: ["Polia alta com corda, dê um passo para trás.","Puxe a corda em direção ao rosto, separando as pontas.","Cotovelos altos, paralelos ao chão.","Aperte os deltoides posteriores e volte controlado."] },
+  
+  { id: "Front_Dumbbell_Raise", n: "Elevação Frontal", nameEn: "Dumbbell Front Raise", pm: ["shoulders"], sm: [], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["Em pé com halteres na frente das coxas, palmas para o corpo.","Eleve um halter à frente até a altura do ombro.","Desça controlado e alterne os braços.","Não use impulso — controle o movimento."] },
+  
+  { id: "Upright_Cable_Row", n: "Remada Alta no Cabo", nameEn: "Cable Upright Row", pm: ["shoulders"], sm: ["traps","biceps"], eq: "cable", lvl: "intermediate", mec: "compound", force: "pull",
+    ins: ["Polia baixa com barra reta, pegada pronada fechada.","Puxe a barra em direção ao queixo, cotovelos elevados.","Aperte deltoides e trapézios no topo.","Desça controlado."] },
+  
+  // ============ BÍCEPS — VARIAÇÕES E MÁQUINAS ============
+  { id: "Cable_Curl", n: "Rosca Direta no Cabo", nameEn: "Cable Curl", pm: ["biceps"], sm: ["forearms"], eq: "cable", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Polia baixa com barra reta ou EZ.","Cotovelos rente ao corpo, palmas para cima.","Flexione os cotovelos trazendo a barra ao peito.","Desça controlado mantendo tensão constante."] },
+  
+  { id: "Preacher_Curl", n: "Rosca Scott (Preacher)", nameEn: "Preacher Curl", pm: ["biceps"], sm: ["forearms"], eq: "barbell", lvl: "intermediate", mec: "isolation", force: "pull",
+    ins: ["Sente no banco scott com axilas apoiadas no pad.","Pegada supinada na barra EZ, braços estendidos.","Flexione os cotovelos trazendo a barra à testa.","Desça controlado sem estender totalmente os cotovelos."] },
+  
+  { id: "Spider_Curl", n: "Rosca Spider", nameEn: "Spider Curl", pm: ["biceps"], sm: ["forearms"], eq: "barbell", lvl: "intermediate", mec: "isolation", force: "pull",
+    ins: ["Banco inclinado a 45°, deite de bruços com peito apoiado.","Braços pendurados perpendiculares ao chão, halteres ou barra.","Flexione cotovelos trazendo o peso ao peito.","Desça controlado, mantendo cotovelos fixos."] },
+  
+  { id: "Hammer_Curls", n: "Rosca Martelo", nameEn: "Hammer Curl", pm: ["biceps"], sm: ["forearms"], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Em pé com halteres ao lado do corpo, palmas para o tronco.","Mantenha pegada neutra durante todo movimento.","Flexione cotovelos elevando halteres aos ombros.","Desça controlado."] },
+  
+  { id: "Concentration_Curls", n: "Rosca Concentrada", nameEn: "Concentration Curl", pm: ["biceps"], sm: [], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Sente em banco com pernas abertas, halter em uma mão.","Apoie cotovelo na parte interna da coxa.","Flexione o cotovelo trazendo o halter ao ombro.","Desça controlado e troque o braço após as repetições."] },
+  
+  { id: "Cable_Hammer_Curls_-_Rope_Attachment", n: "Rosca Martelo na Corda", nameEn: "Cable Rope Hammer Curl", pm: ["biceps"], sm: ["forearms"], eq: "cable", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Polia baixa com corda, pegada neutra (palmas para dentro).","Cotovelos rente ao corpo.","Flexione os cotovelos trazendo a corda ao peito.","Desça controlado mantendo pegada neutra."] },
+  
+  // ============ TRÍCEPS — VARIAÇÕES ============
+  { id: "Triceps_Pushdown", n: "Tríceps Pulley (Barra)", nameEn: "Triceps Pushdown", pm: ["triceps"], sm: [], eq: "cable", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["Polia alta com barra reta, pegada pronada fechada.","Cotovelos colados ao tronco durante todo movimento.","Empurre a barra para baixo até estender os cotovelos.","Volte controlado até ~90°."] },
+  
+  { id: "Tricep_Dumbbell_Kickback", n: "Tríceps Coice", nameEn: "Tricep Kickback", pm: ["triceps"], sm: [], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["Tronco inclinado, uma mão apoiada em banco.","Halter na outra mão, cotovelo flexionado a 90° rente ao corpo.","Estenda o cotovelo levando o halter para trás.","Volte controlado mantendo cotovelo fixo."] },
+  
+  { id: "Tricep_Dips", n: "Mergulho no Banco (Tríceps)", nameEn: "Bench Dips", pm: ["triceps"], sm: ["chest","shoulders"], eq: "body only", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Mãos no banco atrás, pernas estendidas à frente.","Desça flexionando os cotovelos a 90°.","Empurre de volta estendendo os cotovelos.","Mantenha as costas próximas ao banco."] },
+  
+  { id: "Dips_-_Triceps_Version", n: "Paralelas (Dips)", nameEn: "Triceps Dips on Parallel Bars", pm: ["triceps"], sm: ["chest","shoulders"], eq: "body only", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Suspenso nas barras paralelas, braços estendidos.","Desça flexionando cotovelos a 90°, tronco vertical.","Empurre de volta estendendo cotovelos.","Mantenha cotovelos próximos ao corpo (foco tríceps)."] },
+  
+  { id: "Cable_Rope_Overhead_Triceps_Extension", n: "Tríceps Francês na Polia (Acima da Cabeça)", nameEn: "Overhead Cable Triceps Extension", pm: ["triceps"], sm: [], eq: "cable", lvl: "intermediate", mec: "isolation", force: "push",
+    ins: ["Polia alta com corda, fique de costas para a máquina.","Corda atrás da cabeça, cotovelos apontando para cima.","Estenda os cotovelos levando a corda à frente.","Volte controlado mantendo cotovelos fixos."] },
+  
+  { id: "Decline_EZ_Bar_Triceps_Extension", n: "Tríceps Testa Declinado", nameEn: "Decline EZ-Bar Skull Crusher", pm: ["triceps"], sm: [], eq: "barbell", lvl: "intermediate", mec: "isolation", force: "push",
+    ins: ["Banco em declínio, deite com barra EZ acima da cabeça.","Cotovelos apontando para cima, braços estendidos.","Flexione cotovelos descendo a barra à testa.","Estenda focando no tríceps."] },
+  
+  { id: "Triceps_Pushdown_-_Rope_Attachment", n: "Tríceps Corda", nameEn: "Triceps Rope Pushdown", pm: ["triceps"], sm: [], eq: "cable", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["Polia alta com corda, pegada neutra.","Cotovelos colados ao tronco.","Empurre a corda para baixo separando as pontas no fim.","Aperte tríceps e volte controlado."] },
+  
+  // ============ ABDÔMEN/CORE ============
+  { id: "Cable_Crunch", n: "Abdominal na Polia", nameEn: "Cable Crunch", pm: ["abdominals"], sm: [], eq: "cable", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Ajoelhado em frente à polia alta, segure a corda perto da cabeça.","Flexione o tronco arredondando as costas.","Aperte o abdômen no fim do movimento.","Volte controlado sem perder a tensão."] },
+  
+  { id: "Crunches", n: "Abdominal Crunch", nameEn: "Crunches", pm: ["abdominals"], sm: [], eq: "body only", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Deite com joelhos flexionados, pés apoiados no chão.","Mãos atrás da cabeça (sem puxar o pescoço).","Eleve o tronco apertando o abdômen.","Desça controlado sem encostar totalmente as costas."] },
+  
+  { id: "Plank", n: "Prancha (Plank)", nameEn: "Plank", pm: ["abdominals"], sm: ["lower back","shoulders"], eq: "body only", lvl: "beginner", mec: "isolation", force: "static",
+    ins: ["Apoie antebraços e pontas dos pés no chão.","Corpo formando linha reta da cabeça aos calcanhares.","Aperte abdômen e glúteos durante todo o tempo.","Mantenha por 30-60s."] },
+  
+  { id: "Suspended_Crunch", n: "Abdominal na Barra", nameEn: "Hanging Knee Raise", pm: ["abdominals"], sm: [], eq: "body only", lvl: "intermediate", mec: "isolation", force: "pull",
+    ins: ["Pendurado na barra fixa com pegada pronada.","Eleve os joelhos em direção ao peito.","Aperte o abdômen no topo.","Desça controlado sem balançar."] },
+  
+  { id: "Russian_Twist", n: "Russian Twist", nameEn: "Russian Twist", pm: ["abdominals"], sm: [], eq: "body only", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Sentado com joelhos flexionados, tronco inclinado.","Mãos juntas (com ou sem peso) à frente do peito.","Gire o tronco tocando o chão de cada lado.","Mantenha pés elevados para mais intensidade."] },
+  
+  // ============ PANTURRILHA ============
+  { id: "Standing_Calf_Raises", n: "Panturrilha em Pé na Máquina", nameEn: "Standing Calf Raise Machine", pm: ["calves"], sm: [], eq: "machine", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["Em pé na máquina com pads nos ombros, ponta dos pés na plataforma.","Calcanhares pendendo abaixo da plataforma.","Eleve nos dedos contraindo as panturrilhas no topo.","Desça controlado alongando."] },
+  
+  { id: "Seated_Calf_Raise", n: "Panturrilha Sentado", nameEn: "Seated Calf Raise", pm: ["calves"], sm: [], eq: "machine", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["Sente com joelhos sob os pads, ponta dos pés na plataforma.","Eleve nos dedos contraindo a panturrilha (sóleo).","Aperte no topo.","Desça controlado sentindo o alongamento."] },
+  
+  { id: "Calf_Press", n: "Panturrilha no Leg Press", nameEn: "Leg Press Calf Raise", pm: ["calves"], sm: [], eq: "machine", lvl: "beginner", mec: "isolation", force: "push",
+    ins: ["No leg press, pés na parte baixa da plataforma com calcanhares fora.","Empurre apenas com a ponta dos pés.","Aperte panturrilhas no topo.","Volte controlado alongando."] },
+  
+  // ============ ANTEBRAÇO ============
+  { id: "Wrist_Roller", n: "Rotação de Punho com Halter", nameEn: "Wrist Curl", pm: ["forearms"], sm: [], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "pull",
+    ins: ["Sente com antebraços apoiados nas coxas, palmas para cima.","Halter na mão, deixe o punho flexionar para baixo.","Flexione o punho elevando o halter.","Repita controladamente."] },
+  
+  { id: "Reverse_Barbell_Curl", n: "Rosca Inversa", nameEn: "Reverse Barbell Curl", pm: ["forearms"], sm: ["biceps"], eq: "barbell", lvl: "intermediate", mec: "isolation", force: "pull",
+    ins: ["Em pé com barra, pegada pronada (palmas para baixo).","Cotovelos rente ao corpo.","Flexione os cotovelos elevando a barra.","Desça controlado focando antebraços e braquial."] },
+  
+  // ============ CARDIO/FUNCIONAIS ============
+  { id: "Burpee", n: "Burpee", nameEn: "Burpee", pm: ["chest"], sm: ["shoulders","quadriceps","abdominals"], eq: "body only", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Em pé, agache colocando as mãos no chão.","Salte os pés para trás chegando na prancha.","Faça uma flexão (opcional), volte os pés ao agachamento.","Salte para cima estendendo os braços acima da cabeça."] },
+  
+  { id: "Mountain_Climbers", n: "Escalador (Mountain Climber)", nameEn: "Mountain Climber", pm: ["abdominals"], sm: ["shoulders","quadriceps"], eq: "body only", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Posição de prancha alta com mãos no chão.","Traga um joelho ao peito alternadamente em ritmo rápido.","Mantenha quadril estável, sem levantar.","Continue alternando como se estivesse correndo no lugar."] },
+  
+  { id: "Jumping_Jack", n: "Polichinelo", nameEn: "Jumping Jack", pm: ["calves"], sm: ["shoulders"], eq: "body only", lvl: "beginner", mec: "compound", force: "push",
+    ins: ["Em pé com pés juntos e braços ao lado do corpo.","Salte abrindo as pernas e elevando os braços acima da cabeça.","Salte voltando à posição inicial.","Mantenha ritmo constante."] },
+  
+  { id: "Box_Jump", n: "Box Jump (Salto na Caixa)", nameEn: "Box Jump", pm: ["quadriceps"], sm: ["glutes","calves"], eq: "other", lvl: "intermediate", mec: "compound", force: "push",
+    ins: ["Em pé à frente de uma caixa estável, pés na largura dos ombros.","Agache rapidamente e salte sobre a caixa.","Aterrize suavemente em posição agachada.","Desça (não pule de volta) e repita."] }
+];
+
+// Adiciona os extras ao banco principal
+EXERCICIOS.push(...EXERCICIOS_EXTRA);
+
+console.log(`📚 Banco TRAIN.FUEL v1.1: ${EXERCICIOS.length} exercícios carregados (${EXERCICIOS_EXTRA.length} novos com foco em máquinas)`);
+
+
 // Estatística rápida
 console.log(`📚 Banco TRAIN.FUEL: ${EXERCICIOS.length} exercícios carregados`);
 
@@ -2044,7 +2411,7 @@ function renderResultadosBusca(lista) {
     const lvlLabel = LEVEL[ex.lvl] || ex.lvl;
     return `
       <div class="exercise-card" onclick="abrirModalEx('${ex.id}')" data-ex-id="${ex.id}">
-        <div class="exercise-card-img" data-img-base="${GIF_BASE}${ex.id}/" style="background-image: url('${img0}')"></div>
+        <div class="exercise-card-img" data-img-base="${GIF_BASE}${ex.id}/"></div>
         <div class="exercise-card-body">
           <div class="exercise-card-name">${ex.n}</div>
           <div class="exercise-card-tags">
@@ -2067,19 +2434,61 @@ function renderResultadosBusca(lista) {
 // ============================================================
 // ANIMAÇÃO TIPO GIF (alterna 0.jpg / 1.jpg)
 // ============================================================
+// Cache de status de imagens (evita re-checar)
+const imgStatusCache = {};
+
+function checkImage(url) {
+  return new Promise((resolve) => {
+    if (imgStatusCache[url] !== undefined) {
+      resolve(imgStatusCache[url]);
+      return;
+    }
+    const img = new Image();
+    img.onload = () => { imgStatusCache[url] = true; resolve(true); };
+    img.onerror = () => { imgStatusCache[url] = false; resolve(false); };
+    // Timeout de 5s — se demorar muito, considera falha
+    setTimeout(() => { 
+      if (imgStatusCache[url] === undefined) { 
+        imgStatusCache[url] = false; 
+        resolve(false); 
+      } 
+    }, 5000);
+    img.src = url;
+  });
+}
+
 function iniciarAnimacoes() {
   const cards = document.querySelectorAll('.exercise-card-img[data-img-base]');
   cards.forEach((card, idx) => {
     const base = card.dataset.imgBase;
-    let frame = 0;
-    // Pequeno delay escalonado pra não animar tudo igual
-    setTimeout(() => {
-      const interval = setInterval(() => {
-        frame = frame === 0 ? 1 : 0;
-        card.style.backgroundImage = `url('${base}${frame}.jpg')`;
-      }, 600);
-      gifAnimationIntervals['card_' + idx] = interval;
-    }, idx * 50);
+    const url0 = `${base}0.jpg`;
+    const url1 = `${base}1.jpg`;
+    
+    // Verifica se a imagem 0 existe
+    checkImage(url0).then(ok0 => {
+      if (!ok0) {
+        // Imagem não carregou — marca como quebrada
+        card.classList.add('broken');
+        card.style.backgroundImage = '';
+        return;
+      }
+      // Imagem 0 ok — marca e inicia animação se a 1 também existir
+      card.classList.add('has-image');
+      card.style.backgroundImage = `url('${url0}')`;
+      
+      checkImage(url1).then(ok1 => {
+        let frame = 0;
+        setTimeout(() => {
+          const interval = setInterval(() => {
+            frame = frame === 0 ? 1 : 0;
+            // Se frame 1 não existe, fica só no 0
+            const targetUrl = (frame === 1 && !ok1) ? url0 : `${base}${frame}.jpg`;
+            card.style.backgroundImage = `url('${targetUrl}')`;
+          }, 600);
+          gifAnimationIntervals['card_' + idx] = interval;
+        }, idx * 50);
+      });
+    });
   });
 }
 
@@ -2152,11 +2561,32 @@ let modalIntervals = {};
 function iniciarAnimacaoModal(elId) {
   const el = document.getElementById(elId);
   if (!el || !el.dataset.imgBase) return;
-  let frame = 0;
-  modalIntervals[elId] = setInterval(() => {
-    frame = frame === 0 ? 1 : 0;
-    el.style.backgroundImage = `url('${el.dataset.imgBase}${frame}.jpg')`;
-  }, 600);
+  
+  // Limpa estados anteriores
+  el.classList.remove('broken', 'has-image');
+  el.style.backgroundImage = '';
+  
+  const base = el.dataset.imgBase;
+  const url0 = `${base}0.jpg`;
+  const url1 = `${base}1.jpg`;
+  
+  checkImage(url0).then(ok0 => {
+    if (!ok0) {
+      el.classList.add('broken');
+      return;
+    }
+    el.classList.add('has-image');
+    el.style.backgroundImage = `url('${url0}')`;
+    
+    checkImage(url1).then(ok1 => {
+      let frame = 0;
+      modalIntervals[elId] = setInterval(() => {
+        frame = frame === 0 ? 1 : 0;
+        const targetUrl = (frame === 1 && !ok1) ? url0 : `${base}${frame}.jpg`;
+        el.style.backgroundImage = `url('${targetUrl}')`;
+      }, 600);
+    });
+  });
 }
 function pararAnimacaoModal(elId) {
   if (modalIntervals[elId]) {
@@ -2257,7 +2687,7 @@ function renderDia() {
       <div class="day-exercise-card">
         <div class="day-ex-header">
           <div class="day-ex-thumb" 
-               style="background-image: url('${GIF_BASE}${ex.id}/0.jpg')"
+               data-img-base="${GIF_BASE}${ex.id}/"
                onclick="abrirModalGif('${ex.id}')"
                title="Ver execução"></div>
           <div class="day-ex-info">
@@ -2313,6 +2743,19 @@ function renderDia() {
       </div>
     `;
   }).join('');
+  
+  // Processa thumbs com fallback de imagem quebrada
+  document.querySelectorAll('.day-ex-thumb[data-img-base]').forEach(thumb => {
+    const base = thumb.dataset.imgBase;
+    const url0 = `${base}0.jpg`;
+    checkImage(url0).then(ok => {
+      if (ok) {
+        thumb.style.backgroundImage = `url('${url0}')`;
+      } else {
+        thumb.classList.add('broken');
+      }
+    });
+  });
 }
 
 function escapeHtml(str) {
@@ -2453,34 +2896,47 @@ function buildPDFContent() {
       
       html += `
         <div class="pdf-exercise">
-          <div class="pdf-exercise-header">
-            <span class="pdf-exercise-num">${i + 1}</span>
-            <span class="pdf-exercise-name">${ex.n}</span>
+          <div class="pdf-exercise-thumb-col">
+            <div class="pdf-exercise-thumb">
+              <img src="${GIF_BASE}${ex.id}/0.jpg" 
+                   alt="${ex.n}" 
+                   crossorigin="anonymous"
+                   onerror="this.style.display='none'; this.parentElement.classList.add('broken');" />
+            </div>
+            <a href="${GIF_BASE}${ex.id}/0.jpg" class="pdf-exercise-link" target="_blank">
+              📱 Ver Execução
+            </a>
           </div>
-          <div class="pdf-exercise-tags" style="margin-bottom: 6px;">${muscPm} · ${eqLabel}</div>
-          <div class="pdf-prescription">
-            <div class="pdf-presc-item">
-              <div class="pdf-presc-label">Aquecimento</div>
-              <div class="pdf-presc-value">${ex.aquecimento || '—'}</div>
+          <div class="pdf-exercise-content">
+            <div class="pdf-exercise-header">
+              <span class="pdf-exercise-num">${i + 1}</span>
+              <span class="pdf-exercise-name">${ex.n}</span>
             </div>
-            <div class="pdf-presc-item">
-              <div class="pdf-presc-label">Feeder</div>
-              <div class="pdf-presc-value">${ex.feeder || '—'}</div>
+            <div class="pdf-exercise-tags" style="margin-bottom: 6px;">${muscPm} · ${eqLabel}</div>
+            <div class="pdf-prescription">
+              <div class="pdf-presc-item">
+                <div class="pdf-presc-label">Aquecimento</div>
+                <div class="pdf-presc-value">${ex.aquecimento || '—'}</div>
+              </div>
+              <div class="pdf-presc-item">
+                <div class="pdf-presc-label">Feeder</div>
+                <div class="pdf-presc-value">${ex.feeder || '—'}</div>
+              </div>
+              <div class="pdf-presc-item">
+                <div class="pdf-presc-label">Séries</div>
+                <div class="pdf-presc-value">${ex.series || '—'}</div>
+              </div>
+              <div class="pdf-presc-item">
+                <div class="pdf-presc-label">Reps</div>
+                <div class="pdf-presc-value">${ex.reps || '—'}</div>
+              </div>
+              <div class="pdf-presc-item">
+                <div class="pdf-presc-label">Descanso</div>
+                <div class="pdf-presc-value">${ex.descanso || '—'}</div>
+              </div>
             </div>
-            <div class="pdf-presc-item">
-              <div class="pdf-presc-label">Séries</div>
-              <div class="pdf-presc-value">${ex.series || '—'}</div>
-            </div>
-            <div class="pdf-presc-item">
-              <div class="pdf-presc-label">Reps</div>
-              <div class="pdf-presc-value">${ex.reps || '—'}</div>
-            </div>
-            <div class="pdf-presc-item">
-              <div class="pdf-presc-label">Descanso</div>
-              <div class="pdf-presc-value">${ex.descanso || '—'}</div>
-            </div>
+            ${ex.obs ? `<div class="pdf-exercise-obs"><strong>OBS:</strong> ${escapeHtml(ex.obs)}</div>` : ''}
           </div>
-          ${ex.obs ? `<div class="pdf-exercise-obs"><strong>OBS:</strong> ${escapeHtml(ex.obs)}</div>` : ''}
         </div>
       `;
     });
@@ -2530,41 +2986,91 @@ async function gerarPDF() {
   
   const filename = `Treino-${(c.nome || 'aluno').replace(/[^a-zA-Z0-9]/g, '_')}-${new Date().toISOString().split('T')[0]}.pdf`;
   
-  const pdfWrapper = document.createElement('div');
-  pdfWrapper.id = 'pdfRenderWrapper';
-  pdfWrapper.style.cssText = `
-    position: fixed; top: 0; left: 0;
-    width: 794px;
-    background: #ffffff;
-    padding: 24px;
-    z-index: -1;
-    opacity: 0;
-    pointer-events: none;
-    box-sizing: border-box;
-    font-family: 'Inter', system-ui, sans-serif;
-    color: #1a1a1a;
-  `;
-  pdfWrapper.innerHTML = `<div id="pdfRenderInner" style="width: 100%;">${buildPDFContent()}</div>`;
-  document.body.appendChild(pdfWrapper);
-  
   const btn = event && event.target ? event.target : null;
   let originalText = '';
   if (btn) {
     originalText = btn.textContent;
-    btn.textContent = '⏳ Gerando PDF...';
+    btn.textContent = '⏳ Preparando...';
     btn.disabled = true;
   }
   
+  // ==========================================================
+  // ESTRATÉGIA ROBUSTA (Chrome-friendly):
+  // 1. Wrapper VISÍVEL fora da viewport (left:-10000px) ao invés de opacity:0
+  //    → Chrome moderno trata opacity:0 como invisível pro html2canvas
+  // 2. Esperar fontes Google Fonts (Bebas Neue, Inter, JetBrains) carregarem
+  // 3. Pré-carregar imagens dos exercícios antes da captura
+  // 4. Forçar reflow e dar 800ms de safety
+  // ==========================================================
+  const pdfWrapper = document.createElement('div');
+  pdfWrapper.id = 'pdfRenderWrapper';
+  pdfWrapper.style.cssText = `
+    position: absolute;
+    top: 0;
+    left: -10000px;
+    width: 794px;
+    background: #ffffff;
+    padding: 24px;
+    box-sizing: border-box;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: #1a1a1a;
+    visibility: visible;
+    opacity: 1;
+    z-index: 1;
+  `;
+  pdfWrapper.innerHTML = `<div id="pdfRenderInner" style="width: 100%;">${buildPDFContent()}</div>`;
+  document.body.appendChild(pdfWrapper);
+  
   try {
+    // 1. Esperar fontes carregarem (geral)
+    if (btn) btn.textContent = '⏳ Carregando fontes...';
     if (document.fonts && document.fonts.ready) {
       await document.fonts.ready;
     }
-    await new Promise(r => setTimeout(r, 250));
+    
+    // 2. Forçar carregamento das fontes específicas (Chrome às vezes é preguiçoso)
+    if (document.fonts && document.fonts.load) {
+      try {
+        await Promise.all([
+          document.fonts.load('700 16px "Bebas Neue"'),
+          document.fonts.load('400 14px "Inter"'),
+          document.fonts.load('700 14px "Inter"'),
+          document.fonts.load('800 14px "Inter"'),
+          document.fonts.load('500 12px "JetBrains Mono"'),
+          document.fonts.load('700 12px "JetBrains Mono"')
+        ]);
+      } catch (e) { console.warn('Fontes:', e); }
+    }
+    
+    // 3. Pré-carregar imagens dos exercícios (espera no máximo 8s)
+    if (btn) btn.textContent = '⏳ Carregando imagens...';
+    const imgs = pdfWrapper.querySelectorAll('img');
+    const imgPromises = Array.from(imgs).map(img => {
+      if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+      return new Promise(resolve => {
+        const timeout = setTimeout(() => resolve(), 3500); // max 3.5s por imagem
+        img.onload = () => { clearTimeout(timeout); resolve(); };
+        img.onerror = () => { clearTimeout(timeout); resolve(); };
+      });
+    });
+    // Espera no máximo 8s no total (evita travar se internet ruim)
+    await Promise.race([
+      Promise.all(imgPromises),
+      new Promise(r => setTimeout(r, 8000))
+    ]);
+    
+    // 4. Forçar reflow
+    void pdfWrapper.offsetHeight;
+    
+    // 5. Safety delay (Chrome às vezes precisa)
+    await new Promise(r => setTimeout(r, 500));
+    
+    if (btn) btn.textContent = '⏳ Gerando PDF...';
     
     const opt = {
       margin: [10, 8, 10, 8],
       filename,
-      image: { type: 'jpeg', quality: 0.98 },
+      image: { type: 'jpeg', quality: 0.95 },
       html2canvas: {
         scale: 2,
         useCORS: true,
@@ -2574,11 +3080,18 @@ async function gerarPDF() {
         windowWidth: 794,
         scrollX: 0,
         scrollY: 0,
+        letterRendering: true,
+        foreignObjectRendering: false,
+        imageTimeout: 8000,
         onclone: function(clonedDoc) {
+          // Garante visibilidade total no clone que será renderizado
           const cloned = clonedDoc.getElementById('pdfRenderWrapper');
           if (cloned) {
-            cloned.style.opacity = '1';
             cloned.style.position = 'static';
+            cloned.style.left = '0';
+            cloned.style.top = '0';
+            cloned.style.opacity = '1';
+            cloned.style.visibility = 'visible';
             cloned.style.zIndex = 'auto';
           }
         }
