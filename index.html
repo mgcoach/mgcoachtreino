@@ -340,18 +340,22 @@
     width: 100%;
     aspect-ratio: 4/3;
     background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-    background-size: cover;
-    background-position: center;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
+  }
+  
+  .exercise-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
   
   .exercise-card-img.has-image {
     background: #fff;
-    background-size: cover;
-    background-position: center;
   }
   
   .exercise-card-img.broken {
@@ -363,6 +367,7 @@
     font-size: 2.4rem;
     filter: grayscale(1) brightness(0.3);
     opacity: 0.65;
+    position: absolute;
   }
   
   .exercise-card-img:not(.has-image):not(.broken)::before {
@@ -1243,7 +1248,7 @@
         </div>
         <div class="brand-meta-item">
           <span>Versão</span>
-          <strong>1.0</strong>
+          <strong>1.5</strong>
         </div>
       </div>
     </div>
@@ -1445,7 +1450,7 @@
   </div>
 
   <p class="footer-note">
-    <strong>TRAIN.FUEL · v1.0</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
+    <strong>TRAIN.FUEL · v1.5</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
   </p>
   
   <!-- Área PDF (oculta em tela) -->
@@ -2658,13 +2663,20 @@ function renderResultadosBusca(lista) {
   const slice = lista.slice(0, 60);
   
   grid.innerHTML = slice.map((ex, idx) => {
-    const img0 = `${GIF_BASE}${gifIdFor(ex)}/0.jpg`;
+    const gid = gifIdFor(ex);
+    const img0 = `${GIF_BASE}${gid}/0.jpg`;
     const muscPm = ex.pm.map(m => MUSC[m] || m).join(', ');
     const eqLabel = EQUIP[ex.eq] || ex.eq;
     const lvlLabel = LEVEL[ex.lvl] || ex.lvl;
     return `
       <div class="exercise-card" onclick="abrirModalEx('${ex.id}')" data-ex-id="${ex.id}">
-        <div class="exercise-card-img" data-img-base="${GIF_BASE}${gifIdFor(ex)}/"></div>
+        <div class="exercise-card-img" data-gif-id="${gid}">
+          <img src="${img0}" 
+               alt="${ex.n}"
+               loading="lazy"
+               onload="this.parentElement.classList.add('has-image')"
+               onerror="this.style.display='none'; this.parentElement.classList.add('broken')" />
+        </div>
         <div class="exercise-card-body">
           <div class="exercise-card-name">${ex.n}</div>
           <div class="exercise-card-tags">
@@ -2676,7 +2688,7 @@ function renderResultadosBusca(lista) {
     `;
   }).join('');
   
-  // Inicia animação automática nos cards visíveis (alterna 0.jpg e 1.jpg)
+  // Inicia animação só nos cards que carregaram com sucesso
   iniciarAnimacoes();
   
   if (lista.length > 60) {
@@ -2711,37 +2723,43 @@ function checkImage(url) {
 }
 
 function iniciarAnimacoes() {
-  const cards = document.querySelectorAll('.exercise-card-img[data-img-base]');
+  const cards = document.querySelectorAll('.exercise-card-img[data-gif-id]');
   cards.forEach((card, idx) => {
-    const base = card.dataset.imgBase;
-    const url0 = `${base}0.jpg`;
-    const url1 = `${base}1.jpg`;
+    const gifId = card.dataset.gifId;
+    const url0 = `${GIF_BASE}${gifId}/0.jpg`;
+    const url1 = `${GIF_BASE}${gifId}/1.jpg`;
+    const imgEl = card.querySelector('img');
+    if (!imgEl) return;
     
-    // Verifica se a imagem 0 existe
-    checkImage(url0).then(ok0 => {
-      if (!ok0) {
-        // Imagem não carregou — marca como quebrada
-        card.classList.add('broken');
-        card.style.backgroundImage = '';
-        return;
-      }
-      // Imagem 0 ok — marca e inicia animação se a 1 também existir
-      card.classList.add('has-image');
-      card.style.backgroundImage = `url('${url0}')`;
+    // Espera a imagem 0 carregar pra começar a animação
+    const tryAnimate = () => {
+      // Pré-carrega frame 1 silenciosamente
+      const probe = new Image();
+      let frame1Ok = false;
+      probe.onload = () => { frame1Ok = true; };
+      probe.src = url1;
       
-      checkImage(url1).then(ok1 => {
+      // Inicia alternância depois de 800ms (dá tempo do probe carregar ou falhar)
+      setTimeout(() => {
+        if (card.classList.contains('broken')) return; // não anima se quebrou
         let frame = 0;
-        setTimeout(() => {
-          const interval = setInterval(() => {
-            frame = frame === 0 ? 1 : 0;
-            // Se frame 1 não existe, fica só no 0
-            const targetUrl = (frame === 1 && !ok1) ? url0 : `${base}${frame}.jpg`;
-            card.style.backgroundImage = `url('${targetUrl}')`;
-          }, 600);
-          gifAnimationIntervals['card_' + idx] = interval;
-        }, idx * 50);
-      });
-    });
+        const interval = setInterval(() => {
+          if (card.classList.contains('broken')) {
+            clearInterval(interval);
+            return;
+          }
+          frame = frame === 0 ? 1 : 0;
+          imgEl.src = (frame === 1 && frame1Ok) ? url1 : url0;
+        }, 700);
+        gifAnimationIntervals['card_' + idx] = interval;
+      }, 800 + idx * 30);
+    };
+    
+    if (imgEl.complete && imgEl.naturalWidth > 0) {
+      tryAnimate();
+    } else {
+      imgEl.addEventListener('load', tryAnimate, { once: true });
+    }
   });
 }
 
@@ -2823,23 +2841,32 @@ function iniciarAnimacaoModal(elId) {
   const url0 = `${base}0.jpg`;
   const url1 = `${base}1.jpg`;
   
-  checkImage(url0).then(ok0 => {
-    if (!ok0) {
-      el.classList.add('broken');
-      return;
-    }
+  // Testa frame 0 com Image() puro
+  const probe0 = new Image();
+  probe0.onload = () => {
     el.classList.add('has-image');
     el.style.backgroundImage = `url('${url0}')`;
     
-    checkImage(url1).then(ok1 => {
+    // Testa frame 1
+    const probe1 = new Image();
+    let frame1Ok = false;
+    probe1.onload = () => { frame1Ok = true; };
+    probe1.src = url1;
+    
+    // Anima depois de 500ms
+    setTimeout(() => {
       let frame = 0;
       modalIntervals[elId] = setInterval(() => {
         frame = frame === 0 ? 1 : 0;
-        const targetUrl = (frame === 1 && !ok1) ? url0 : `${base}${frame}.jpg`;
+        const targetUrl = (frame === 1 && frame1Ok) ? url1 : url0;
         el.style.backgroundImage = `url('${targetUrl}')`;
-      }, 600);
-    });
-  });
+      }, 700);
+    }, 500);
+  };
+  probe0.onerror = () => {
+    el.classList.add('broken');
+  };
+  probe0.src = url0;
 }
 function pararAnimacaoModal(elId) {
   if (modalIntervals[elId]) {
@@ -3001,13 +3028,10 @@ function renderDia() {
   document.querySelectorAll('.day-ex-thumb[data-img-base]').forEach(thumb => {
     const base = thumb.dataset.imgBase;
     const url0 = `${base}0.jpg`;
-    checkImage(url0).then(ok => {
-      if (ok) {
-        thumb.style.backgroundImage = `url('${url0}')`;
-      } else {
-        thumb.classList.add('broken');
-      }
-    });
+    const probe = new Image();
+    probe.onload = () => { thumb.style.backgroundImage = `url('${url0}')`; };
+    probe.onerror = () => { thumb.classList.add('broken'); };
+    probe.src = url0;
   });
 }
 
@@ -3390,7 +3414,7 @@ function imprimir() {
 // ============================================================
 function exportarJSON() {
   const data = {
-    versao: '1.0',
+    versao: '1.5',
     treino,
     cliente: coletarCliente(),
     dataCriacao: new Date().toISOString()
@@ -3453,7 +3477,7 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
   console.log('📱 TRAIN.FUEL rodando como PWA');
 }
 
-console.log(`💪 TRAIN.FUEL v1.0 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
+console.log(`💪 TRAIN.FUEL v1.5 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
 
 </script>
 </body>
