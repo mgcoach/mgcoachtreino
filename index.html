@@ -1278,7 +1278,7 @@
         </div>
         <div class="brand-meta-item">
           <span>Versão</span>
-          <strong>2.0</strong>
+          <strong>2.1</strong>
         </div>
       </div>
     </div>
@@ -1489,7 +1489,7 @@
   </div>
 
   <p class="footer-note">
-    <strong>TRAIN.FUEL · v2.0</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
+    <strong>TRAIN.FUEL · v2.1</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
   </p>
   
   <!-- Área PDF (oculta em tela) -->
@@ -3724,7 +3724,7 @@ async function imprimir() {
 // ============================================================
 // EXPORTAR COMO HTML (RECOMENDADO!)
 // Gera arquivo HTML standalone com imagens em base64
-// Aluno abre no celular/PC e os links são clicáveis nativamente
+// Aluno abre no celular/PC e clica em "Ver Execução" → modal animado
 // ============================================================
 async function exportarHTML() {
   let totalEx = 0;
@@ -3748,14 +3748,17 @@ async function exportarHTML() {
   }
   
   try {
-    // ETAPA 1: Coletar URLs únicas das imagens dos exercícios
+    // ETAPA 1: Coletar URLs únicas DOS DOIS FRAMES (0 e 1)
     const urlsParaConverter = new Set();
     const urlToEx = {};
     Object.keys(DIAS).forEach(d => {
       treino[d].exercicios.forEach(ex => {
-        const url = `${GIF_BASE}${gifIdFor(ex)}/0.jpg`;
-        urlsParaConverter.add(url);
-        urlToEx[url] = ex;
+        const url0 = `${GIF_BASE}${gifIdFor(ex)}/0.jpg`;
+        const url1 = `${GIF_BASE}${gifIdFor(ex)}/1.jpg`;
+        urlsParaConverter.add(url0);
+        urlsParaConverter.add(url1);
+        urlToEx[url0] = ex;
+        urlToEx[url1] = ex;
       });
     });
     
@@ -3776,32 +3779,142 @@ async function exportarHTML() {
       if (btn) btn.textContent = `⏳ Baixando imagens (${progress}/${urlsParaConverter.size})...`;
     }));
     
-    // ETAPA 3: Construir HTML com base64 (imagens embutidas)
+    // ETAPA 3: Construir HTML embutindo os 2 frames em cada exercício
     if (btn) btn.textContent = '⏳ Montando arquivo...';
-    let conteudo = buildPDFContent();
     
-    // Substituir URLs por base64
-    for (const [url, value] of Object.entries(urlToBase64Map)) {
-      const escapedUrl = url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`src="${escapedUrl}"`, 'g');
-      if (value) {
-        conteudo = conteudo.replace(regex, `src="${value}"`);
-      }
-    }
-    
-    // ETAPA 4: Construir HTML completo standalone
     const dataF = c.planData
       ? new Date(c.planData + 'T12:00:00').toLocaleDateString('pt-BR')
       : new Date().toLocaleDateString('pt-BR');
-    
     const tituloAluno = (c.nome && c.nome !== '—') ? c.nome : 'Aluno';
     
+    // Construir conteúdo manualmente pra incluir os 2 frames
+    let conteudo = `
+      <div class="pdf-header">
+        <div class="pdf-brand-row">
+          <div class="pdf-brand">
+            <div class="pdf-logo">🏋️</div>
+            <div class="pdf-title-block">
+              <h1>TRAIN<span>.FUEL</span></h1>
+              <div class="pdf-tagline">PRESCRIÇÃO · TREINO · CIÊNCIA</div>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div class="pdf-date-label">DATA DO PLANO</div>
+            <div class="pdf-date">${escapeHtml(dataF)}</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="pdf-client">
+        <div class="pdf-client-label">FICHA DO ALUNO</div>
+        <div class="pdf-client-name">${escapeHtml(tituloAluno)}</div>
+        <div class="pdf-client-meta">
+          ${c.idade !== '—' ? `<span><strong>${escapeHtml(c.idade)}</strong> anos</span>` : ''}
+          ${c.peso !== '—' ? `<span><strong>${escapeHtml(c.peso)}</strong> kg</span>` : ''}
+          ${c.altura !== '—' ? `<span><strong>${escapeHtml(c.altura)}</strong> cm</span>` : ''}
+          ${c.objetivo !== '—' ? `<span>Obj: <strong>${escapeHtml(c.objetivo)}</strong></span>` : ''}
+          ${c.nivel !== '—' ? `<span>Nível: <strong>${escapeHtml(c.nivel)}</strong></span>` : ''}
+          ${c.profissional !== '—' ? `<span>Prof: <strong>${escapeHtml(c.profissional)}</strong></span>` : ''}
+        </div>
+        ${c.restricoes && c.restricoes !== '—' ? `<div style="margin-top: 10px; padding: 8px 12px; background: #fff8f0; border-left: 3px solid #ff6b1a; border-radius: 4px; font-size: 0.85rem;"><strong style="color: #ff6b1a;">⚠️ Restrições/Lesões:</strong> ${escapeHtml(c.restricoes)}</div>` : ''}
+      </div>
+    `;
+    
+    let exGlobal = 0;
+    Object.entries(DIAS).forEach(([key, label]) => {
+      const dia = treino[key];
+      if (!dia || !dia.exercicios.length) return;
+      
+      conteudo += `
+        <div class="pdf-day">
+          <div class="pdf-day-header">
+            <span class="pdf-day-name">${escapeHtml(label.toUpperCase())}</span>
+            ${dia.focus ? `<span class="pdf-day-focus">${escapeHtml(dia.focus)}</span>` : ''}
+            <span class="pdf-day-count">${dia.exercicios.length} exercícios</span>
+          </div>
+          <div class="pdf-exercises">
+      `;
+      
+      dia.exercicios.forEach((ex, i) => {
+        exGlobal++;
+        const muscPm = ex.pm.map(m => MUSC[m] || m).join(', ');
+        const eqLabel = EQUIP[ex.eq] || ex.eq;
+        const url0 = `${GIF_BASE}${gifIdFor(ex)}/0.jpg`;
+        const url1 = `${GIF_BASE}${gifIdFor(ex)}/1.jpg`;
+        const frame0 = urlToBase64Map[url0] || '';
+        const frame1 = urlToBase64Map[url1] || frame0; // se não tem frame 1, usa o 0
+        
+        conteudo += `
+          <div class="pdf-exercise" data-ex-num="${exGlobal}">
+            <div class="pdf-exercise-thumb-col">
+              <div class="pdf-exercise-thumb">
+                <img src="${frame0}" alt="${escapeHtml(ex.n)}" />
+              </div>
+              <button class="pdf-exercise-link" onclick="abrirModalGif('ex-${exGlobal}')">
+                ▶ VER EXECUÇÃO
+              </button>
+              <!-- Frames embutidos como dados (recuperados pelo modal) -->
+              <div id="ex-${exGlobal}-data" style="display:none" 
+                   data-name="${escapeHtml(ex.n)}"
+                   data-frame0="${frame0}"
+                   data-frame1="${frame1}"></div>
+            </div>
+            <div class="pdf-exercise-content">
+              <div class="pdf-exercise-header">
+                <span class="pdf-exercise-num">${i + 1}</span>
+                <span class="pdf-exercise-name">${escapeHtml(ex.n)}</span>
+              </div>
+              <div class="pdf-exercise-tags">${escapeHtml(muscPm)} · ${escapeHtml(eqLabel)}</div>
+              <div class="pdf-prescription">
+                <div class="pdf-presc-item">
+                  <div class="pdf-presc-label">Aquec.</div>
+                  <div class="pdf-presc-value">${escapeHtml(ex.aquecimento || '—')}</div>
+                </div>
+                <div class="pdf-presc-item">
+                  <div class="pdf-presc-label">Feeder</div>
+                  <div class="pdf-presc-value">${escapeHtml(ex.feeder || '—')}</div>
+                </div>
+                <div class="pdf-presc-item">
+                  <div class="pdf-presc-label">Séries</div>
+                  <div class="pdf-presc-value">${escapeHtml(ex.series || '—')}</div>
+                </div>
+                <div class="pdf-presc-item">
+                  <div class="pdf-presc-label">Reps</div>
+                  <div class="pdf-presc-value">${escapeHtml(ex.reps || '—')}</div>
+                </div>
+                <div class="pdf-presc-item">
+                  <div class="pdf-presc-label">Descanso</div>
+                  <div class="pdf-presc-value">${escapeHtml(ex.descanso || '—')}</div>
+                </div>
+              </div>
+              ${ex.obs ? `<div class="pdf-exercise-obs"><strong>OBS:</strong> ${escapeHtml(ex.obs)}</div>` : ''}
+            </div>
+          </div>
+        `;
+      });
+      
+      conteudo += `</div></div>`;
+    });
+    
+    conteudo += `
+      <div class="pdf-disclaimer">
+        <strong>⚠️ Importante:</strong> Este plano de treino é uma sugestão baseada nas informações fornecidas. 
+        Em caso de dor, desconforto ou lesão, interrompa imediatamente o exercício e consulte seu profissional responsável. 
+        As cargas e progressões devem ser ajustadas de acordo com sua evolução.
+      </div>
+      <div class="pdf-footer">
+        <strong>TRAIN.FUEL</strong> · Sistema Profissional de Treinos · Plano gerado em ${escapeHtml(dataF)}
+        ${c.profissional !== '—' ? `<br>Profissional Responsável: ${escapeHtml(c.profissional)}` : ''}
+      </div>
+    `;
+    
+    // ETAPA 4: HTML completo standalone com modal de execução animado
     const htmlCompleto = `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Treino — ${escapeHtml(tituloAluno)} — ${dataF}</title>
+<title>Treino — ${escapeHtml(tituloAluno)} — ${escapeHtml(dataF)}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -3822,13 +3935,10 @@ async function exportarHTML() {
     border-radius: 12px;
     overflow: hidden;
   }
-  
   .pdf-header {
     background: #0a0a0a;
     color: #fff;
     padding: 20px 24px;
-    border-radius: 12px 12px 0 0;
-    margin-bottom: 0;
   }
   .pdf-brand-row { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; }
   .pdf-brand { display: flex; align-items: center; gap: 12px; }
@@ -3868,7 +3978,6 @@ async function exportarHTML() {
     font-weight: 700;
     margin-top: 2px;
   }
-  
   .pdf-client {
     padding: 18px 24px;
     background: #fafafa;
@@ -3895,7 +4004,6 @@ async function exportarHTML() {
     color: #555;
   }
   .pdf-client-meta strong { color: #1a1a1a; font-weight: 700; }
-  
   .pdf-day {
     margin: 0 24px 18px 24px;
     border: 1px solid #eaeaea;
@@ -3924,7 +4032,6 @@ async function exportarHTML() {
     font-weight: 700;
     color: #1a1a1a;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
   }
   .pdf-day-count {
     background: #1a1a1a;
@@ -3935,9 +4042,6 @@ async function exportarHTML() {
     font-weight: 700;
     font-family: 'JetBrains Mono', monospace;
   }
-  
-  .pdf-exercises { background: #fff; }
-  
   .pdf-exercise {
     padding: 16px;
     border-bottom: 1px solid #f0f0f0;
@@ -3946,65 +4050,53 @@ async function exportarHTML() {
     align-items: flex-start;
   }
   .pdf-exercise:last-child { border-bottom: none; }
-  
   .pdf-exercise-thumb-col {
     flex-shrink: 0;
-    width: 120px;
+    width: 130px;
     display: flex;
     flex-direction: column;
     gap: 6px;
     align-items: center;
   }
   .pdf-exercise-thumb {
-    width: 120px;
-    height: 120px;
+    width: 130px;
+    height: 130px;
     border-radius: 10px;
     background: #fafafa;
     border: 1px solid #e5e5e5;
     overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
   .pdf-exercise-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
   }
-  
   .pdf-exercise-link {
     display: block;
     width: 100%;
     text-align: center;
     background: #ff6b1a;
-    color: #fff !important;
-    padding: 8px 6px;
+    color: #fff;
+    padding: 10px 6px;
     border-radius: 6px;
-    text-decoration: none;
-    font-size: 0.72rem;
+    border: 2px solid #cc4f10;
+    font-size: 0.78rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    border: 2px solid #cc4f10;
-    transition: all 0.15s ease;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
   }
-  .pdf-exercise-link:active,
-  .pdf-exercise-link:hover {
+  .pdf-exercise-link:active {
     background: #cc4f10;
     transform: scale(0.97);
   }
-  
   .pdf-exercise-content { flex: 1; min-width: 0; }
-  
   .pdf-exercise-header {
     display: flex; align-items: center; gap: 10px;
-    margin-bottom: 4px;
-    flex-wrap: wrap;
+    margin-bottom: 4px; flex-wrap: wrap;
   }
   .pdf-exercise-num {
-    background: #1a1a1a;
-    color: #fff;
+    background: #1a1a1a; color: #fff;
     width: 28px; height: 28px;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
@@ -4025,7 +4117,6 @@ async function exportarHTML() {
     letter-spacing: 0.05em;
     margin-bottom: 8px;
   }
-  
   .pdf-prescription {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -4046,7 +4137,6 @@ async function exportarHTML() {
     font-size: 0.55rem;
     color: #888;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
     margin-bottom: 2px;
   }
   .pdf-presc-value {
@@ -4065,7 +4155,6 @@ async function exportarHTML() {
     color: #444;
   }
   .pdf-exercise-obs strong { color: #ff6b1a; }
-  
   .pdf-disclaimer {
     margin: 18px 24px;
     padding: 14px;
@@ -4077,18 +4166,81 @@ async function exportarHTML() {
     line-height: 1.5;
   }
   .pdf-disclaimer strong { color: #cc4f10; }
-  
   .pdf-footer {
     background: #0a0a0a;
     color: #a0a0a0;
     padding: 16px 24px;
     text-align: center;
     font-size: 0.72rem;
-    border-radius: 0 0 12px 12px;
   }
   .pdf-footer strong { color: #ff6b1a; }
   
-  /* MOBILE: tudo em coluna */
+  /* MODAL DE GIF ANIMADO */
+  .gif-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .gif-modal.active { display: flex; }
+  .gif-modal-content {
+    max-width: 600px;
+    width: 100%;
+    background: #1a1a1a;
+    border-radius: 16px;
+    padding: 24px;
+    border: 2px solid #ff6b1a;
+    box-shadow: 0 0 40px rgba(255,107,26,0.3);
+    text-align: center;
+  }
+  .gif-modal-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    color: #ff6b1a;
+    letter-spacing: 0.05em;
+    margin-bottom: 16px;
+    line-height: 1.1;
+  }
+  .gif-modal-img-wrapper {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    aspect-ratio: 4/3;
+  }
+  .gif-modal-img-wrapper img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .gif-modal-info {
+    color: #a0a0a0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+  }
+  .gif-modal-close {
+    background: #ff6b1a;
+    color: #fff;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: 'Inter', sans-serif;
+  }
+  .gif-modal-close:active { background: #cc4f10; }
+  
+  /* MOBILE */
   @media (max-width: 600px) {
     body { padding: 8px; }
     .pdf-exercise {
@@ -4110,14 +4262,20 @@ async function exportarHTML() {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 12px 8px;
-      font-size: 0.85rem;
+      padding: 14px 8px;
+      font-size: 0.95rem;
     }
     .pdf-prescription {
       grid-template-columns: repeat(2, 1fr);
     }
     .pdf-day { margin: 12px 8px; }
     .pdf-disclaimer { margin: 12px 8px; }
+    .gif-modal-content {
+      padding: 16px;
+    }
+    .gif-modal-name {
+      font-size: 1.4rem;
+    }
   }
 </style>
 </head>
@@ -4125,21 +4283,79 @@ async function exportarHTML() {
   <div class="container">
     ${conteudo}
   </div>
+  
+  <!-- Modal animado pra ver execução -->
+  <div class="gif-modal" id="gifModal" onclick="if(event.target===this)fecharModalGif()">
+    <div class="gif-modal-content">
+      <div class="gif-modal-name" id="gifModalName">Exercício</div>
+      <div class="gif-modal-img-wrapper">
+        <img id="gifModalImg" src="" alt="" />
+      </div>
+      <div class="gif-modal-info">🎬 Animação · Toque fora para fechar</div>
+      <button class="gif-modal-close" onclick="fecharModalGif()">FECHAR</button>
+    </div>
+  </div>
+  
+  <script>
+    let gifInterval = null;
+    let gifFrame0 = '';
+    let gifFrame1 = '';
+    let currentFrame = 0;
+    
+    function abrirModalGif(exId) {
+      const data = document.getElementById(exId + '-data');
+      if (!data) return;
+      const name = data.dataset.name;
+      gifFrame0 = data.dataset.frame0;
+      gifFrame1 = data.dataset.frame1;
+      
+      document.getElementById('gifModalName').textContent = name;
+      const img = document.getElementById('gifModalImg');
+      img.src = gifFrame0;
+      img.alt = name;
+      
+      document.getElementById('gifModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+      
+      // Inicia animação alternando frames
+      currentFrame = 0;
+      if (gifFrame1 && gifFrame1 !== gifFrame0) {
+        gifInterval = setInterval(() => {
+          currentFrame = currentFrame === 0 ? 1 : 0;
+          img.src = currentFrame === 0 ? gifFrame0 : gifFrame1;
+        }, 600);
+      }
+    }
+    
+    function fecharModalGif() {
+      document.getElementById('gifModal').classList.remove('active');
+      document.body.style.overflow = '';
+      if (gifInterval) {
+        clearInterval(gifInterval);
+        gifInterval = null;
+      }
+    }
+    
+    // Tecla ESC fecha
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') fecharModalGif();
+    });
+  </script>
 </body>
 </html>`;
     
     // ETAPA 5: Download do arquivo
     if (btn) btn.textContent = '⏳ Salvando...';
     const blob = new Blob([htmlCompleto], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
+    const blobUrl = URL.createObjectURL(blob);
     const a = document.createElement('a');
     const filename = `Treino-${(c.nome || 'aluno').replace(/[^a-zA-Z0-9]/g, '_')}-${new Date().toISOString().split('T')[0]}.html`;
-    a.href = url;
+    a.href = blobUrl;
     a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    URL.revokeObjectURL(blobUrl);
     
     if (btn) {
       btn.textContent = '✅ Salvo!';
@@ -4164,7 +4380,7 @@ async function exportarHTML() {
 // ============================================================
 function exportarJSON() {
   const data = {
-    versao: '2.0',
+    versao: '2.1',
     treino,
     cliente: coletarCliente(),
     dataCriacao: new Date().toISOString()
@@ -4227,7 +4443,7 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
   console.log('📱 TRAIN.FUEL rodando como PWA');
 }
 
-console.log(`💪 TRAIN.FUEL v2.0 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
+console.log(`💪 TRAIN.FUEL v2.1 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
 
 </script>
 </body>
