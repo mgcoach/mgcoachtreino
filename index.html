@@ -1248,7 +1248,7 @@
         </div>
         <div class="brand-meta-item">
           <span>Versão</span>
-          <strong>1.7</strong>
+          <strong>1.8</strong>
         </div>
       </div>
     </div>
@@ -1435,8 +1435,7 @@
       <div class="section-title">Exportar Treino</div>
       
       <div class="actions" style="margin-top: 0;">
-        <button class="action-btn primary" onclick="gerarPDF()">📄 Baixar PDF</button>
-        <button class="action-btn primary" onclick="imprimir()">🖨️ Imprimir</button>
+        <button class="action-btn primary" onclick="imprimir()" style="font-size: 1.1rem; padding: 14px 18px;">📄 Salvar como PDF</button>
         <button class="action-btn" onclick="exportarJSON()">💾 Salvar JSON</button>
         <button class="action-btn" onclick="document.getElementById('importFile').click()">📂 Importar JSON</button>
         <button class="action-btn danger" onclick="limparTudo()">🗑️ Limpar Tudo</button>
@@ -1445,12 +1444,17 @@
     </div>
     
     <div class="info-card">
-      <strong>Dica:</strong> Antes de gerar o PDF, preencha os dados do aluno na aba <strong>Aluno</strong>. O PDF inclui todos os dias da semana com exercícios e prescrições, formatado profissionalmente.
+      <strong>📄 Como salvar como PDF:</strong><br>
+      1. Clique em <strong>"Salvar como PDF"</strong> acima<br>
+      2. Vai abrir a janela de impressão do navegador<br>
+      3. Em <strong>"Destino"</strong>, escolha <strong>"Salvar como PDF"</strong><br>
+      4. Clique em <strong>"Salvar"</strong><br>
+      <em>Use este método em vez de qualquer outro — é o mais confiável.</em>
     </div>
   </div>
 
   <p class="footer-note">
-    <strong>TRAIN.FUEL · v1.7</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
+    <strong>TRAIN.FUEL · v1.8</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
   </p>
   
   <!-- Área PDF (oculta em tela) -->
@@ -3307,13 +3311,15 @@ function buildPDFContent() {
       const muscPm = ex.pm.map(m => MUSC[m] || m).join(', ');
       const eqLabel = EQUIP[ex.eq] || ex.eq;
       
+      const gifUrl = `${GIF_BASE}${gifIdFor(ex)}/0.jpg`;
+      
       html += `
         <div class="pdf-exercise">
           <div class="pdf-exercise-thumb-col">
             <div class="pdf-exercise-thumb">
-              <img src="${GIF_BASE}${gifIdFor(ex)}/0.jpg" alt="${ex.n}" />
+              <img src="${gifUrl}" alt="${ex.n}" />
             </div>
-            <a href="${GIF_BASE}${gifIdFor(ex)}/0.jpg" class="pdf-exercise-link" target="_blank">
+            <a href="${gifUrl}" class="pdf-exercise-link" target="_blank">
               📱 Ver Execução
             </a>
           </div>
@@ -3589,44 +3595,90 @@ async function imprimir() {
   }
   
   const btn = event && event.target ? event.target : null;
+  let originalText = '';
   if (btn) {
+    originalText = btn.textContent;
     btn.disabled = true;
     btn.textContent = '⏳ Preparando...';
   }
   
-  const pdfArea = document.getElementById('pdfArea');
-  pdfArea.innerHTML = buildPDFContent();
-  
-  // Esperar todas as imagens carregarem (max 6s)
-  const imgs = pdfArea.querySelectorAll('img');
-  const imgPromises = Array.from(imgs).map(img => {
-    if (img.complete && img.naturalWidth > 0) return Promise.resolve();
-    return new Promise(resolve => {
-      const t = setTimeout(() => resolve(), 4000);
-      img.onload = () => { clearTimeout(t); resolve(); };
-      img.onerror = () => { clearTimeout(t); resolve(); };
+  try {
+    // ETAPA 1: Coletar URLs únicas das imagens dos exercícios
+    const urlsParaConverter = new Set();
+    const urlToEx = {};
+    Object.keys(DIAS).forEach(d => {
+      treino[d].exercicios.forEach(ex => {
+        const url = `${GIF_BASE}${gifIdFor(ex)}/0.jpg`;
+        urlsParaConverter.add(url);
+        urlToEx[url] = ex;
+      });
     });
-  });
-  
-  await Promise.race([
-    Promise.all(imgPromises),
-    new Promise(r => setTimeout(r, 6000))
-  ]);
-  
-  // Esperar fontes
-  if (document.fonts && document.fonts.ready) {
-    await document.fonts.ready;
-  }
-  
-  if (btn) {
-    btn.disabled = false;
-    btn.textContent = '🖨️ Imprimir / Salvar PDF';
-  }
-  
-  setTimeout(() => {
+    
+    // ETAPA 2: Converter cada URL em base64 (com fallback pra SVG placeholder)
+    if (btn) btn.textContent = `⏳ Baixando imagens (0/${urlsParaConverter.size})...`;
+    const urlToBase64Map = {};
+    let progress = 0;
+    
+    await Promise.all([...urlsParaConverter].map(async url => {
+      const base64 = await urlToBase64(url, 5000);
+      if (base64) {
+        urlToBase64Map[url] = base64;
+      } else {
+        // Sem GIF — gera SVG placeholder personalizado
+        const ex = urlToEx[url];
+        urlToBase64Map[url] = ex ? generatePlaceholderSVG(ex) : null;
+      }
+      progress++;
+      if (btn) btn.textContent = `⏳ Baixando imagens (${progress}/${urlsParaConverter.size})...`;
+    }));
+    
+    // ETAPA 3: Construir HTML do PDF substituindo URLs por base64
+    if (btn) btn.textContent = '⏳ Montando documento...';
+    let pdfHtml = buildPDFContent();
+    
+    for (const [url, value] of Object.entries(urlToBase64Map)) {
+      const escapedUrl = url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`src="${escapedUrl}"`, 'g');
+      if (value) {
+        pdfHtml = pdfHtml.replace(regex, `src="${value}"`);
+      } else {
+        pdfHtml = pdfHtml.replace(regex, `src="" style="display:none"`);
+      }
+    }
+    
+    // ETAPA 4: Injetar no pdfArea
+    const pdfArea = document.getElementById('pdfArea');
+    pdfArea.innerHTML = pdfHtml;
+    
+    // ETAPA 5: Esperar fontes
+    if (btn) btn.textContent = '⏳ Carregando fontes...';
+    if (document.fonts && document.fonts.ready) {
+      await document.fonts.ready;
+    }
+    
+    // ETAPA 6: Forçar reflow + delay
+    void pdfArea.offsetHeight;
+    await new Promise(r => setTimeout(r, 300));
+    
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+    
+    // ETAPA 7: Chamar print
     window.print();
-    setTimeout(() => { pdfArea.innerHTML = ''; }, 1500);
-  }, 200);
+    
+    // Limpa o pdfArea após algum tempo
+    setTimeout(() => { pdfArea.innerHTML = ''; }, 2000);
+    
+  } catch (err) {
+    console.error('Erro ao preparar impressão:', err);
+    alert('Erro ao preparar impressão: ' + (err.message || 'desconhecido'));
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  }
 }
 
 // ============================================================
@@ -3634,7 +3686,7 @@ async function imprimir() {
 // ============================================================
 function exportarJSON() {
   const data = {
-    versao: '1.7',
+    versao: '1.8',
     treino,
     cliente: coletarCliente(),
     dataCriacao: new Date().toISOString()
@@ -3697,7 +3749,7 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
   console.log('📱 TRAIN.FUEL rodando como PWA');
 }
 
-console.log(`💪 TRAIN.FUEL v1.7 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
+console.log(`💪 TRAIN.FUEL v1.8 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
 
 </script>
 </body>
