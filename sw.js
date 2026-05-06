@@ -1,5 +1,5 @@
-// TRAIN.FUEL - Service Worker v2.3.0
-const CACHE_NAME = 'trainfuel-v2-3-0';
+// TRAIN.FUEL - Service Worker v2.4.0
+const CACHE_NAME = 'trainfuel-v2-4-0';
 const ASSETS = [
   './',
   './index.html',

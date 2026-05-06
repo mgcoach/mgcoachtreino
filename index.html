@@ -1278,7 +1278,7 @@
         </div>
         <div class="brand-meta-item">
           <span>Versão</span>
-          <strong>2.3</strong>
+          <strong>2.4</strong>
         </div>
       </div>
     </div>
@@ -1489,7 +1489,7 @@
   </div>
 
   <p class="footer-note">
-    <strong>TRAIN.FUEL · v2.3</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
+    <strong>TRAIN.FUEL · v2.4</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
   </p>
   
   <!-- Área PDF (oculta em tela) -->
@@ -3803,6 +3803,8 @@ async function exportarHTML() {
     `;
     
     let exGlobal = 0;
+    let modaisHtml = ''; // Acumula modais individuais (CSS :target)
+    
     Object.entries(DIAS).forEach(([key, label]) => {
       const dia = treino[key];
       if (!dia || !dia.exercicios.length) return;
@@ -3826,20 +3828,31 @@ async function exportarHTML() {
         const frame0 = urlToBase64Map[url0] || '';
         const frame1 = urlToBase64Map[url1] || frame0; // se não tem frame 1, usa o 0
         
+        // Modal individual para esse exercício (CSS :target — sem JS)
+        modaisHtml += `
+          <div class="gif-modal" id="modal-${exGlobal}">
+            <a href="#ex-${exGlobal}" class="gif-modal-bg"></a>
+            <div class="gif-modal-content">
+              <div class="gif-modal-name">${escapeHtml(ex.n)}</div>
+              <div class="gif-modal-img-wrapper">
+                <img class="gif-frame gif-frame-0" src="${frame0}" alt="${escapeHtml(ex.n)} - Frame 1" />
+                <img class="gif-frame gif-frame-1" src="${frame1}" alt="${escapeHtml(ex.n)} - Frame 2" />
+              </div>
+              <div class="gif-modal-info">🎬 Animação contínua · Toque em FECHAR para voltar</div>
+              <a href="#ex-${exGlobal}" class="gif-modal-close">FECHAR</a>
+            </div>
+          </div>
+        `;
+        
         conteudo += `
-          <div class="pdf-exercise" data-ex-num="${exGlobal}">
+          <div class="pdf-exercise" id="ex-${exGlobal}" data-ex-num="${exGlobal}">
             <div class="pdf-exercise-thumb-col">
               <div class="pdf-exercise-thumb">
                 <img src="${frame0}" alt="${escapeHtml(ex.n)}" />
               </div>
-              <button class="pdf-exercise-link" onclick="abrirModalGif('ex-${exGlobal}')">
+              <a href="#modal-${exGlobal}" class="pdf-exercise-link">
                 ▶ VER EXECUÇÃO
-              </button>
-              <!-- Frames embutidos como dados (recuperados pelo modal) -->
-              <div id="ex-${exGlobal}-data" style="display:none" 
-                   data-name="${escapeHtml(ex.n)}"
-                   data-frame0="${frame0}"
-                   data-frame1="${frame1}"></div>
+              </a>
             </div>
             <div class="pdf-exercise-content">
               <div class="pdf-exercise-header">
@@ -4157,7 +4170,7 @@ async function exportarHTML() {
   }
   .pdf-footer strong { color: #ff6b1a; }
   
-  /* MODAL DE GIF ANIMADO */
+  /* MODAL DE GIF — ABRE VIA CSS :target (FUNCIONA NO WHATSAPP/IOS/ANDROID) */
   .gif-modal {
     display: none;
     position: fixed;
@@ -4168,7 +4181,16 @@ async function exportarHTML() {
     justify-content: center;
     padding: 16px;
   }
-  .gif-modal.active { display: flex; }
+  /* Quando o anchor é o target, mostra o modal */
+  .gif-modal:target {
+    display: flex;
+  }
+  .gif-modal-bg {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 0;
+    cursor: pointer;
+  }
   .gif-modal-content {
     max-width: 600px;
     width: 100%;
@@ -4178,6 +4200,8 @@ async function exportarHTML() {
     border: 2px solid #ff6b1a;
     box-shadow: 0 0 40px rgba(255,107,26,0.3);
     text-align: center;
+    position: relative;
+    z-index: 1;
   }
   .gif-modal-name {
     font-family: 'Bebas Neue', sans-serif;
@@ -4193,11 +4217,29 @@ async function exportarHTML() {
     overflow: hidden;
     margin-bottom: 16px;
     aspect-ratio: 4/3;
+    position: relative;
   }
-  .gif-modal-img-wrapper img {
+  /* Animação CSS — alterna os 2 frames a cada 600ms (sem JavaScript!) */
+  .gif-frame {
+    position: absolute;
+    top: 0; left: 0;
     width: 100%; height: 100%;
     object-fit: cover;
     display: block;
+  }
+  .gif-frame-0 {
+    animation: gifFlip0 1.2s steps(1, end) infinite;
+  }
+  .gif-frame-1 {
+    animation: gifFlip1 1.2s steps(1, end) infinite;
+  }
+  @keyframes gifFlip0 {
+    0%, 50% { opacity: 1; }
+    50.01%, 100% { opacity: 0; }
+  }
+  @keyframes gifFlip1 {
+    0%, 50% { opacity: 0; }
+    50.01%, 100% { opacity: 1; }
   }
   .gif-modal-info {
     color: #a0a0a0;
@@ -4208,14 +4250,15 @@ async function exportarHTML() {
     margin-bottom: 16px;
   }
   .gif-modal-close {
+    display: inline-block;
     background: #ff6b1a;
-    color: #fff;
+    color: #fff !important;
     border: none;
     padding: 12px 32px;
     border-radius: 8px;
     font-weight: 800;
     font-size: 1rem;
-    cursor: pointer;
+    text-decoration: none;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-family: 'Inter', sans-serif;
@@ -4266,63 +4309,8 @@ async function exportarHTML() {
     ${conteudo}
   </div>
   
-  <!-- Modal animado pra ver execução -->
-  <div class="gif-modal" id="gifModal" onclick="if(event.target===this)fecharModalGif()">
-    <div class="gif-modal-content">
-      <div class="gif-modal-name" id="gifModalName">Exercício</div>
-      <div class="gif-modal-img-wrapper">
-        <img id="gifModalImg" src="" alt="" />
-      </div>
-      <div class="gif-modal-info">🎬 Animação · Toque fora para fechar</div>
-      <button class="gif-modal-close" onclick="fecharModalGif()">FECHAR</button>
-    </div>
-  </div>
-  
-  <script>
-    let gifInterval = null;
-    let gifFrame0 = '';
-    let gifFrame1 = '';
-    let currentFrame = 0;
-    
-    function abrirModalGif(exId) {
-      const data = document.getElementById(exId + '-data');
-      if (!data) return;
-      const name = data.dataset.name;
-      gifFrame0 = data.dataset.frame0;
-      gifFrame1 = data.dataset.frame1;
-      
-      document.getElementById('gifModalName').textContent = name;
-      const img = document.getElementById('gifModalImg');
-      img.src = gifFrame0;
-      img.alt = name;
-      
-      document.getElementById('gifModal').classList.add('active');
-      document.body.style.overflow = 'hidden';
-      
-      // Inicia animação alternando frames
-      currentFrame = 0;
-      if (gifFrame1 && gifFrame1 !== gifFrame0) {
-        gifInterval = setInterval(() => {
-          currentFrame = currentFrame === 0 ? 1 : 0;
-          img.src = currentFrame === 0 ? gifFrame0 : gifFrame1;
-        }, 600);
-      }
-    }
-    
-    function fecharModalGif() {
-      document.getElementById('gifModal').classList.remove('active');
-      document.body.style.overflow = '';
-      if (gifInterval) {
-        clearInterval(gifInterval);
-        gifInterval = null;
-      }
-    }
-    
-    // Tecla ESC fecha
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') fecharModalGif();
-    });
-  <\/script>
+  <!-- Modais animados (CSS :target — funciona em qualquer navegador, incluindo WhatsApp) -->
+  ${modaisHtml}
 </body>
 </html>`;
     
@@ -4362,7 +4350,7 @@ async function exportarHTML() {
 // ============================================================
 function exportarJSON() {
   const data = {
-    versao: '2.3',
+    versao: '2.4',
     treino,
     cliente: coletarCliente(),
     dataCriacao: new Date().toISOString()
@@ -4425,7 +4413,7 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
   console.log('📱 TRAIN.FUEL rodando como PWA');
 }
 
-console.log(`💪 TRAIN.FUEL v2.3 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
+console.log(`💪 TRAIN.FUEL v2.4 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
 
 </script>
 </body>
