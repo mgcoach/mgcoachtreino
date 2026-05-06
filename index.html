@@ -1278,7 +1278,7 @@
         </div>
         <div class="brand-meta-item">
           <span>Versão</span>
-          <strong>2.1</strong>
+          <strong>2.3</strong>
         </div>
       </div>
     </div>
@@ -1489,7 +1489,7 @@
   </div>
 
   <p class="footer-note">
-    <strong>TRAIN.FUEL · v2.1</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
+    <strong>TRAIN.FUEL · v2.3</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
   </p>
   
   <!-- Área PDF (oculta em tela) -->
@@ -1750,8 +1750,6 @@ const EXERCICIOS = [
   { id: "Cable_Crossover", n: "Crossover na Polia", nameEn: "Cable Crossover", pm: ["chest"], sm: ["shoulders"], eq: "cable", lvl: "intermediate", mec: "isolation", force: "push",
     ins: ["Polias na altura mais alta. Pegue uma alça em cada mão.","Dê um passo à frente, ligeiro avanço do tronco.","Cruze as mãos à frente do corpo na linha do umbigo.","Retorne controladamente sentindo o alongamento."] },
   
-  { id: "Pec_Deck", n: "Voador (Pec Deck)", nameEn: "Pec Deck", pm: ["chest"], sm: [], eq: "machine", lvl: "beginner", mec: "isolation", force: "push",
-    ins: ["Sente-se com as costas firmes no encosto.","Cotovelos apoiados nas almofadas, braços na altura do ombro.","Aproxime as almofadas até quase se tocarem.","Retorne controladamente."] },
   
   { id: "Bench_Dips", n: "Mergulho no Banco", nameEn: "Bench Dips", pm: ["triceps"], sm: ["chest","shoulders"], eq: "body only", lvl: "beginner", mec: "compound", force: "push",
     ins: ["Mãos apoiadas no banco, pés no chão.","Desça flexionando os cotovelos a 90°.","Empurre de volta para cima."] },
@@ -1878,8 +1876,6 @@ const EXERCICIOS = [
   { id: "Barbell_Squat", n: "Agachamento Livre com Barra", nameEn: "Barbell Squat", pm: ["quadriceps"], sm: ["glutes","hamstrings","lower back"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "push",
     ins: ["Barra apoiada nos trapézios, pés na largura dos ombros.","Empurre o quadril para trás e flexione os joelhos.","Desça até as coxas ficarem paralelas ao chão.","Suba empurrando o chão com os calcanhares.","Joelhos alinhados com os pés."] },
   
-  { id: "Front_Barbell_Squat", n: "Agachamento Frontal", nameEn: "Front Squat", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "barbell", lvl: "expert", mec: "compound", force: "push",
-    ins: ["Barra apoiada no clavícula, cotovelos altos.","Tronco mais ereto que no agachamento tradicional.","Desça mantendo cotovelos altos.","Foco maior em quadríceps."] },
   
   { id: "Dumbbell_Squat", n: "Agachamento com Halteres", nameEn: "Dumbbell Squat", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "dumbbell", lvl: "beginner", mec: "compound", force: "push",
     ins: ["Halteres ao lado do corpo.","Pés na largura dos ombros.","Agache mantendo o tronco ereto.","Suba empurrando o chão."] },
@@ -1956,15 +1952,11 @@ const EXERCICIOS = [
   { id: "Russian_Twist", n: "Russian Twist", nameEn: "Russian Twist", pm: ["abdominals"], sm: ["obliques"], eq: "body only", lvl: "beginner", mec: "isolation", force: "pull",
     ins: ["Sentado, joelhos flexionados, tronco inclinado para trás.","Gire o tronco de um lado ao outro.","Pés podem ficar elevados para mais dificuldade."] },
   
-  { id: "Side_Bridge", n: "Prancha Lateral", nameEn: "Side Plank", pm: ["obliques"], sm: ["abdominals"], eq: "body only", lvl: "beginner", mec: "isolation", force: "static",
-    ins: ["Deitado de lado, apoiado no antebraço.","Corpo reto, eleve o quadril.","Mantenha o tempo determinado.","Faça nos dois lados."] },
   
   { id: "Mountain_Climbers", n: "Mountain Climbers (Escalador)", nameEn: "Mountain Climbers", pm: ["abdominals"], sm: ["quadriceps","shoulders"], eq: "body only", lvl: "beginner", mec: "compound", force: "push",
     ins: ["Posição de prancha alta.","Traga um joelho ao peito alternadamente.","Mantenha o quadril estável.","Velocidade controlada ou rápida (cardio)."] },
   
   // ============ CARDIO ============
-  { id: "Jumping_Jacks", n: "Polichinelo", nameEn: "Jumping Jacks", pm: ["cardio"], sm: ["quadriceps","shoulders"], eq: "body only", lvl: "beginner", mec: "compound", force: "push",
-    ins: ["Em pé, pés juntos, braços ao lado do corpo.","Salte abrindo pernas e levantando braços acima da cabeça.","Volte ao início e repita ritmadamente."] },
   
   { id: "Burpee", n: "Burpee", nameEn: "Burpee", pm: ["cardio"], sm: ["chest","quadriceps"], eq: "body only", lvl: "intermediate", mec: "compound", force: "push",
     ins: ["Em pé, agache, apoie as mãos no chão.","Estenda as pernas para trás (prancha).","Volte e dê um salto vertical com as mãos acima da cabeça."] },
@@ -1988,8 +1980,6 @@ const EXERCICIOS = [
   { id: "Decline_Dumbbell_Flyes", n: "Crucifixo Declinado", nameEn: "Decline Flyes", pm: ["chest"], sm: ["shoulders"], eq: "dumbbell", lvl: "intermediate", mec: "isolation", force: "push",
     ins: ["Banco em declínio com pés presos.","Halteres acima do peito.","Abra lateralmente, sinta a parte baixa do peito."] },
   
-  { id: "Low_Cable_Crossover", n: "Crossover Polia Baixa", nameEn: "Low Cable Crossover", pm: ["chest"], sm: [], eq: "cable", lvl: "intermediate", mec: "isolation", force: "push",
-    ins: ["Polias na altura mais baixa.","Trabalhe peito superior cruzando os cabos para cima."] },
   
   { id: "Wide-Grip_Decline_Barbell_Bench_Press", n: "Supino Declinado com Barra", nameEn: "Decline Barbell Press", pm: ["chest"], sm: ["triceps"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "push",
     ins: ["Banco declinado, pés presos.","Pegada um pouco mais aberta que ombros.","Foco no peitoral inferior."] },
@@ -1998,8 +1988,6 @@ const EXERCICIOS = [
     ins: ["Sente-se ajustando o banco para que as alças fiquem na altura do peito.","Empurre as alças à frente.","Volte controladamente."] },
   
   // ============ MAIS COSTAS ============
-  { id: "Reverse_Grip_Bent-Over_Rows", n: "Remada Curvada Pegada Supinada", nameEn: "Reverse Grip Row", pm: ["middle back"], sm: ["biceps","lats"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "pull",
-    ins: ["Tronco inclinado, barra com pegada supinada.","Puxe em direção ao abdômen baixo.","Foco maior em dorsais e bíceps."] },
   
   { id: "Yates_Row", n: "Remada Yates", nameEn: "Yates Row", pm: ["middle back"], sm: ["biceps","lats"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "pull",
     ins: ["Tronco inclinado a 45° (mais ereto que a curvada tradicional).","Pegada supinada.","Puxe em direção ao umbigo."] },
@@ -2032,8 +2020,6 @@ const EXERCICIOS = [
   { id: "Cable_Lateral_Raise", n: "Elevação Lateral na Polia", nameEn: "Cable Lateral Raise", pm: ["shoulders"], sm: [], eq: "cable", lvl: "intermediate", mec: "isolation", force: "push",
     ins: ["Polia baixa, em pé de lado.","Eleve lateralmente até a altura do ombro.","Tensão constante — diferencial vs halteres."] },
   
-  { id: "Machine_Shoulder_(Military)_Press", n: "Desenvolvimento na Máquina", nameEn: "Machine Shoulder Press", pm: ["shoulders"], sm: ["triceps"], eq: "machine", lvl: "beginner", mec: "compound", force: "push",
-    ins: ["Sente-se ajustando alças na altura dos ombros.","Empurre verticalmente.","Ideal pra iniciantes."] },
   
   { id: "Push_Press", n: "Push Press", nameEn: "Push Press", pm: ["shoulders"], sm: ["triceps","quadriceps"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "push",
     ins: ["Barra na altura dos ombros.","Use leve impulso das pernas para iniciar o movimento.","Empurre verticalmente.","Permite cargas maiores que o militar puro."] },
@@ -2061,8 +2047,6 @@ const EXERCICIOS = [
   { id: "Tricep_Dumbbell_Kickback", n: "Tríceps Coice na Polia", nameEn: "Cable Tricep Kickback", pm: ["triceps"], sm: [], eq: "cable", lvl: "intermediate", mec: "isolation", force: "push",
     ins: ["Polia baixa, tronco inclinado.","Cotovelo na altura do tronco, fixo.","Estenda o braço para trás."] },
   
-  { id: "Bench_Press_-_Powerlifting", n: "Supino Pegada Fechada", nameEn: "Close Grip Press Variation", pm: ["triceps"], sm: ["chest","shoulders"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "push",
-    ins: ["Cotovelos próximos ao tronco.","Foco no tríceps com massa."] },
   
   // ============ MAIS PERNAS ============
   { id: "Box_Squat", n: "Agachamento no Box", nameEn: "Box Squat", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "push",
@@ -2158,8 +2142,6 @@ const EXERCICIOS_EXTRA = [
   { id: "Wide-Grip_Lat_Pulldown", n: "Puxada Pegada Aberta", nameEn: "Wide-Grip Lat Pulldown", pm: ["lats"], sm: ["biceps","middle back"], eq: "cable", lvl: "beginner", mec: "compound", force: "pull",
     ins: ["Sente na máquina com coxas presas pelos rolos.","Pegada bem mais aberta que os ombros, palmas para frente.","Puxe a barra até a parte alta do peito, peito estufado.","Volte controlado sentindo o alongamento das dorsais."] },
   
-  { id: "Reverse_Grip_Bent-Over_Rows", n: "Puxada Pegada Supinada", nameEn: "Reverse Grip Lat Pulldown", pm: ["lats"], sm: ["biceps"], eq: "cable", lvl: "beginner", mec: "compound", force: "pull",
-    ins: ["Pegada supinada (palmas para você), largura dos ombros.","Sente firme, peito estufado.","Puxe a barra até a parte alta do peito.","Foco maior nas dorsais inferiores e bíceps."] },
   
   { id: "Close-Grip_Front_Lat_Pulldown", n: "Puxada Pegada Fechada (Triângulo)", nameEn: "Close-Grip Lat Pulldown", pm: ["lats"], sm: ["biceps","middle back"], eq: "cable", lvl: "beginner", mec: "compound", force: "pull",
     ins: ["Use o triângulo (barra V) ou pegada fechada neutra.","Sente firme, peito estufado.","Puxe até a barra encostar no peito médio/alto.","Aperte as escápulas no fim do movimento."] },
@@ -4340,7 +4322,7 @@ async function exportarHTML() {
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') fecharModalGif();
     });
-  </script>
+  <\/script>
 </body>
 </html>`;
     
@@ -4380,7 +4362,7 @@ async function exportarHTML() {
 // ============================================================
 function exportarJSON() {
   const data = {
-    versao: '2.1',
+    versao: '2.3',
     treino,
     cliente: coletarCliente(),
     dataCriacao: new Date().toISOString()
@@ -4443,7 +4425,7 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
   console.log('📱 TRAIN.FUEL rodando como PWA');
 }
 
-console.log(`💪 TRAIN.FUEL v2.1 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
+console.log(`💪 TRAIN.FUEL v2.3 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
 
 </script>
 </body>
