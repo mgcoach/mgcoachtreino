@@ -1278,7 +1278,7 @@
         </div>
         <div class="brand-meta-item">
           <span>Versão</span>
-          <strong>1.9</strong>
+          <strong>2.0</strong>
         </div>
       </div>
     </div>
@@ -1465,7 +1465,8 @@
       <div class="section-title">Exportar Treino</div>
       
       <div class="actions" style="margin-top: 0;">
-        <button class="action-btn primary" onclick="imprimir()" style="font-size: 1.1rem; padding: 14px 18px;">📄 Salvar como PDF</button>
+        <button class="action-btn primary" onclick="exportarHTML()" style="font-size: 1.15rem; padding: 16px 18px; background: linear-gradient(135deg, #ff8c42, #cc4f10);">📲 Salvar para WhatsApp (HTML)</button>
+        <button class="action-btn" onclick="imprimir()">📄 Salvar como PDF (sem links)</button>
         <button class="action-btn" onclick="exportarJSON()">💾 Salvar JSON</button>
         <button class="action-btn" onclick="document.getElementById('importFile').click()">📂 Importar JSON</button>
         <button class="action-btn danger" onclick="limparTudo()">🗑️ Limpar Tudo</button>
@@ -1474,17 +1475,21 @@
     </div>
     
     <div class="info-card">
-      <strong>📄 Como salvar como PDF:</strong><br>
-      1. Clique em <strong>"Salvar como PDF"</strong> acima<br>
-      2. Vai abrir a janela de impressão do navegador<br>
-      3. Em <strong>"Destino"</strong>, escolha <strong>"Salvar como PDF"</strong><br>
-      4. Clique em <strong>"Salvar"</strong><br>
-      <em>Use este método em vez de qualquer outro — é o mais confiável.</em>
+      <strong>📲 RECOMENDADO: Salvar para WhatsApp (HTML)</strong><br>
+      O arquivo HTML preserva os links clicáveis para o aluno ver os GIFs!<br>
+      <strong>Como usar:</strong><br>
+      1. Clique em <strong>"📲 Salvar para WhatsApp (HTML)"</strong><br>
+      2. O arquivo .html é baixado<br>
+      3. Anexe no WhatsApp do aluno (igual qualquer arquivo)<br>
+      4. Aluno toca no arquivo → abre no celular dele<br>
+      5. Os botões <strong>"VER EXECUÇÃO"</strong> são <em>clicáveis</em> no celular!<br>
+      <br>
+      <em>O PDF também funciona, mas os links não ficam clicáveis nele (limitação dos navegadores).</em>
     </div>
   </div>
 
   <p class="footer-note">
-    <strong>TRAIN.FUEL · v1.9</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
+    <strong>TRAIN.FUEL · v2.0</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
   </p>
   
   <!-- Área PDF (oculta em tela) -->
@@ -3717,11 +3722,449 @@ async function imprimir() {
 }
 
 // ============================================================
-// EXPORT/IMPORT JSON
+// EXPORTAR COMO HTML (RECOMENDADO!)
+// Gera arquivo HTML standalone com imagens em base64
+// Aluno abre no celular/PC e os links são clicáveis nativamente
+// ============================================================
+async function exportarHTML() {
+  let totalEx = 0;
+  Object.keys(DIAS).forEach(d => totalEx += treino[d].exercicios.length);
+  if (totalEx === 0) {
+    alert('Adicione pelo menos um exercício antes de exportar.');
+    return;
+  }
+  
+  const c = coletarCliente();
+  if (c.nome === '—' || !c.nome.trim()) {
+    if (!confirm('O nome do aluno não foi preenchido. Deseja continuar mesmo assim?')) return;
+  }
+  
+  const btn = event && event.target ? event.target : null;
+  let originalText = '';
+  if (btn) {
+    originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '⏳ Preparando...';
+  }
+  
+  try {
+    // ETAPA 1: Coletar URLs únicas das imagens dos exercícios
+    const urlsParaConverter = new Set();
+    const urlToEx = {};
+    Object.keys(DIAS).forEach(d => {
+      treino[d].exercicios.forEach(ex => {
+        const url = `${GIF_BASE}${gifIdFor(ex)}/0.jpg`;
+        urlsParaConverter.add(url);
+        urlToEx[url] = ex;
+      });
+    });
+    
+    // ETAPA 2: Converter cada URL em base64 (com fallback para SVG placeholder)
+    if (btn) btn.textContent = `⏳ Baixando imagens (0/${urlsParaConverter.size})...`;
+    const urlToBase64Map = {};
+    let progress = 0;
+    
+    await Promise.all([...urlsParaConverter].map(async url => {
+      const base64 = await urlToBase64(url, 5000);
+      if (base64) {
+        urlToBase64Map[url] = base64;
+      } else {
+        const ex = urlToEx[url];
+        urlToBase64Map[url] = ex ? generatePlaceholderSVG(ex) : null;
+      }
+      progress++;
+      if (btn) btn.textContent = `⏳ Baixando imagens (${progress}/${urlsParaConverter.size})...`;
+    }));
+    
+    // ETAPA 3: Construir HTML com base64 (imagens embutidas)
+    if (btn) btn.textContent = '⏳ Montando arquivo...';
+    let conteudo = buildPDFContent();
+    
+    // Substituir URLs por base64
+    for (const [url, value] of Object.entries(urlToBase64Map)) {
+      const escapedUrl = url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`src="${escapedUrl}"`, 'g');
+      if (value) {
+        conteudo = conteudo.replace(regex, `src="${value}"`);
+      }
+    }
+    
+    // ETAPA 4: Construir HTML completo standalone
+    const dataF = c.planData
+      ? new Date(c.planData + 'T12:00:00').toLocaleDateString('pt-BR')
+      : new Date().toLocaleDateString('pt-BR');
+    
+    const tituloAluno = (c.nome && c.nome !== '—') ? c.nome : 'Aluno';
+    
+    const htmlCompleto = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Treino — ${escapeHtml(tituloAluno)} — ${dataF}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #f5f5f5;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #1a1a1a;
+    padding: 16px;
+    line-height: 1.5;
+  }
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #fff;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  .pdf-header {
+    background: #0a0a0a;
+    color: #fff;
+    padding: 20px 24px;
+    border-radius: 12px 12px 0 0;
+    margin-bottom: 0;
+  }
+  .pdf-brand-row { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; }
+  .pdf-brand { display: flex; align-items: center; gap: 12px; }
+  .pdf-logo {
+    width: 50px; height: 50px;
+    background: linear-gradient(135deg, #ff8c42, #cc4f10);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+  }
+  .pdf-title-block h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 0.05em;
+    line-height: 1;
+  }
+  .pdf-title-block h1 span { color: #ff6b1a; }
+  .pdf-tagline {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: #a0a0a0;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 2px;
+  }
+  .pdf-date-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    color: #a0a0a0;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+  .pdf-date {
+    font-family: 'JetBrains Mono', monospace;
+    color: #ff6b1a;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  
+  .pdf-client {
+    padding: 18px 24px;
+    background: #fafafa;
+    border-bottom: 3px solid #ff6b1a;
+  }
+  .pdf-client-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+  .pdf-client-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    color: #1a1a1a;
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+  }
+  .pdf-client-meta {
+    display: flex; flex-wrap: wrap; gap: 14px;
+    font-size: 0.78rem;
+    color: #555;
+  }
+  .pdf-client-meta strong { color: #1a1a1a; font-weight: 700; }
+  
+  .pdf-day {
+    margin: 0 24px 18px 24px;
+    border: 1px solid #eaeaea;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .pdf-day:first-of-type { margin-top: 18px; }
+  .pdf-day-header {
+    background: #ff6b1a;
+    color: #1a1a1a;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .pdf-day-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.06em;
+  }
+  .pdf-day-focus {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .pdf-day-count {
+    background: #1a1a1a;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  
+  .pdf-exercises { background: #fff; }
+  
+  .pdf-exercise {
+    padding: 16px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .pdf-exercise:last-child { border-bottom: none; }
+  
+  .pdf-exercise-thumb-col {
+    flex-shrink: 0;
+    width: 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+  }
+  .pdf-exercise-thumb {
+    width: 120px;
+    height: 120px;
+    border-radius: 10px;
+    background: #fafafa;
+    border: 1px solid #e5e5e5;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pdf-exercise-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  
+  .pdf-exercise-link {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: #ff6b1a;
+    color: #fff !important;
+    padding: 8px 6px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border: 2px solid #cc4f10;
+    transition: all 0.15s ease;
+  }
+  .pdf-exercise-link:active,
+  .pdf-exercise-link:hover {
+    background: #cc4f10;
+    transform: scale(0.97);
+  }
+  
+  .pdf-exercise-content { flex: 1; min-width: 0; }
+  
+  .pdf-exercise-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+  }
+  .pdf-exercise-num {
+    background: #1a1a1a;
+    color: #fff;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+  .pdf-exercise-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1a1a1a;
+  }
+  .pdf-exercise-tags {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  
+  .pdf-prescription {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    background: #fafafa;
+    padding: 10px;
+    border-radius: 8px;
+    border-left: 3px solid #ff6b1a;
+  }
+  .pdf-presc-item {
+    background: #fff;
+    padding: 6px 4px;
+    border-radius: 5px;
+    text-align: center;
+  }
+  .pdf-presc-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+  }
+  .pdf-presc-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #1a1a1a;
+  }
+  .pdf-exercise-obs {
+    margin-top: 8px;
+    padding: 8px 10px;
+    background: #fff8f0;
+    border-left: 3px solid #ff6b1a;
+    border-radius: 4px;
+    font-size: 0.78rem;
+    color: #444;
+  }
+  .pdf-exercise-obs strong { color: #ff6b1a; }
+  
+  .pdf-disclaimer {
+    margin: 18px 24px;
+    padding: 14px;
+    background: #fff8f0;
+    border-left: 4px solid #ff6b1a;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    color: #555;
+    line-height: 1.5;
+  }
+  .pdf-disclaimer strong { color: #cc4f10; }
+  
+  .pdf-footer {
+    background: #0a0a0a;
+    color: #a0a0a0;
+    padding: 16px 24px;
+    text-align: center;
+    font-size: 0.72rem;
+    border-radius: 0 0 12px 12px;
+  }
+  .pdf-footer strong { color: #ff6b1a; }
+  
+  /* MOBILE: tudo em coluna */
+  @media (max-width: 600px) {
+    body { padding: 8px; }
+    .pdf-exercise {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .pdf-exercise-thumb-col {
+      width: 100%;
+      flex-direction: row;
+      gap: 10px;
+    }
+    .pdf-exercise-thumb {
+      width: 110px;
+      height: 110px;
+      flex-shrink: 0;
+    }
+    .pdf-exercise-link {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 8px;
+      font-size: 0.85rem;
+    }
+    .pdf-prescription {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .pdf-day { margin: 12px 8px; }
+    .pdf-disclaimer { margin: 12px 8px; }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    ${conteudo}
+  </div>
+</body>
+</html>`;
+    
+    // ETAPA 5: Download do arquivo
+    if (btn) btn.textContent = '⏳ Salvando...';
+    const blob = new Blob([htmlCompleto], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const filename = `Treino-${(c.nome || 'aluno').replace(/[^a-zA-Z0-9]/g, '_')}-${new Date().toISOString().split('T')[0]}.html`;
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    if (btn) {
+      btn.textContent = '✅ Salvo!';
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }, 2000);
+    }
+    
+  } catch (err) {
+    console.error('Erro ao exportar HTML:', err);
+    alert('Erro ao exportar: ' + (err.message || 'desconhecido'));
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  }
+}
+
+// ============================================================
+// EXPORTAR JSON
 // ============================================================
 function exportarJSON() {
   const data = {
-    versao: '1.9',
+    versao: '2.0',
     treino,
     cliente: coletarCliente(),
     dataCriacao: new Date().toISOString()
@@ -3784,7 +4227,7 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
   console.log('📱 TRAIN.FUEL rodando como PWA');
 }
 
-console.log(`💪 TRAIN.FUEL v1.9 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
+console.log(`💪 TRAIN.FUEL v2.0 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
 
 </script>
 </body>
