@@ -1278,7 +1278,7 @@
         </div>
         <div class="brand-meta-item">
           <span>Versão</span>
-          <strong>2.4</strong>
+          <strong>2.5</strong>
         </div>
       </div>
     </div>
@@ -1489,7 +1489,7 @@
   </div>
 
   <p class="footer-note">
-    <strong>TRAIN.FUEL · v2.4</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
+    <strong>TRAIN.FUEL · v2.5</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
   </p>
   
   <!-- Área PDF (oculta em tela) -->
@@ -1567,11 +1567,33 @@
 
 const GIF_BASE = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/";
 
+// ============================================================
+// GIFS CUSTOMIZADOS (v2.5+) — adicionados manualmente em base64
+// Exemplo: GIF_CUSTOM["Glute_Drive_Machine"] = { frame0: "data:image/jpeg;base64,...", frame1: "..." };
+// Os exercícios verificam GIF_CUSTOM[id] PRIMEIRO antes de tentar free-exercise-db
+// ============================================================
+const GIF_CUSTOM = {
+  // Adicione aqui exercícios com GIFs customizados
+  // Estrutura: { frame0: "base64", frame1: "base64" }  (frame1 opcional)
+  // Ou: { gif: "base64 do GIF animado completo" } — mas será tratado como frame estático
+};
+
 // Retorna o ID correto a usar para buscar imagens.
 // Se o exercício tem gifId definido, usa ele (mapeamento manual).
 // Senão usa o próprio id.
 function gifIdFor(ex) {
   return ex.gifId || ex.id;
+}
+
+// Verifica se exercício tem GIF customizado
+function temGifCustom(ex) {
+  const id = gifIdFor(ex);
+  return GIF_CUSTOM[id] != null;
+}
+
+function getGifCustomFrames(ex) {
+  const id = gifIdFor(ex);
+  return GIF_CUSTOM[id] || null;
 }
 
 // Lista simples de IDs candidatos:
@@ -2044,8 +2066,6 @@ const EXERCICIOS = [
   { id: "One_Arm_Dumbbell_Triceps_Extension", n: "Tríceps Francês Unilateral", nameEn: "One Arm Tricep Extension", pm: ["triceps"], sm: [], eq: "dumbbell", lvl: "intermediate", mec: "isolation", force: "push",
     ins: ["Em pé ou sentado, halter acima da cabeça.","Flexione o cotovelo descendo o halter atrás da cabeça.","Estenda completamente."] },
   
-  { id: "Tricep_Dumbbell_Kickback", n: "Tríceps Coice na Polia", nameEn: "Cable Tricep Kickback", pm: ["triceps"], sm: [], eq: "cable", lvl: "intermediate", mec: "isolation", force: "push",
-    ins: ["Polia baixa, tronco inclinado.","Cotovelo na altura do tronco, fixo.","Estenda o braço para trás."] },
   
   
   // ============ MAIS PERNAS ============
@@ -2070,8 +2090,6 @@ const EXERCICIOS = [
   { id: "Sumo_Deadlift", n: "Levantamento Terra Sumô", nameEn: "Sumo Deadlift", pm: ["quadriceps"], sm: ["glutes","hamstrings","lower back"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "pull",
     ins: ["Pés bem afastados, pontas para fora.","Mãos pegam a barra entre as pernas.","Tronco mais ereto que no terra convencional.","Foco maior em quadríceps e adutores."] },
   
-  { id: "Seated_Calf_Raise", n: "Panturrilha Sentado (Sóleo)", nameEn: "Seated Calf Raise", pm: ["calves"], sm: [], eq: "machine", lvl: "beginner", mec: "isolation", force: "push",
-    ins: ["Sentado com joelhos a 90°.","Foco no músculo sóleo.","Movimento completo para máximo recrutamento."] },
   
   { id: "Calf_Press", n: "Panturrilha no Leg Press", nameEn: "Calf Press on Leg Press", pm: ["calves"], sm: [], eq: "machine", lvl: "beginner", mec: "isolation", force: "push",
     ins: ["No leg press, pés na borda inferior da plataforma.","Empurre apenas com a panturrilha.","Sem dobrar os joelhos."] },
@@ -2120,8 +2138,6 @@ const EXERCICIOS_EXTRA = [
   { id: "Butterfly", n: "Voador (Pec Deck)", nameEn: "Pec Deck / Butterfly", pm: ["chest"], sm: ["shoulders"], eq: "machine", lvl: "beginner", mec: "isolation", force: "push",
     ins: ["Sente na máquina com costas firmes no encosto, pés apoiados.","Posicione antebraços nos pads (cotovelos a 90°) ou segure as pegadas.","Empurre os braços para frente apertando o peito até quase encostar.","Volte controladamente sem deixar os pads baterem nas placas."] },
   
-  { id: "Cable_Crossover", n: "Crossover (Cabo Cruzado)", nameEn: "Cable Crossover", pm: ["chest"], sm: ["shoulders"], eq: "cable", lvl: "intermediate", mec: "isolation", force: "push",
-    ins: ["Posicione as polias altas, segure as pegadas com pegada neutra.","Dê um passo à frente em afundo curto, tronco levemente inclinado.","Traga as mãos para frente do corpo em arco descendente, cruzando levemente.","Aperte o peito no fim do movimento e volte controlado."] },
   
   { id: "Cable_Crossover_Variations", n: "Crossover Polia Baixa", nameEn: "Low Cable Crossover", pm: ["chest"], sm: ["shoulders","biceps"], eq: "cable", lvl: "intermediate", mec: "isolation", force: "push",
     ins: ["Polias na posição mais baixa, segure as pegadas.","Tronco levemente inclinado à frente, braços abertos lateralmente.","Traga as mãos para cima e para o centro, em frente ao peito alto.","Foco no peito superior — não suba demais (não vira elevação frontal)."] },
@@ -2129,28 +2145,14 @@ const EXERCICIOS_EXTRA = [
   { id: "Cable_Chest_Press", n: "Supino na Polia (em pé)", nameEn: "Cable Chest Press", pm: ["chest"], sm: ["shoulders","triceps"], eq: "cable", lvl: "intermediate", mec: "compound", force: "push",
     ins: ["Posicione polias na altura do peito, fique de costas para a máquina.","Segure as pegadas com pegada pronada na altura do peito.","Empurre as mãos à frente até quase estender os braços.","Volte controlado sem perder a tensão dos cabos."] },
   
-  { id: "Smith_Machine_Bench_Press", n: "Supino na Smith", nameEn: "Smith Machine Bench Press", pm: ["chest"], sm: ["shoulders","triceps"], eq: "machine", lvl: "intermediate", mec: "compound", force: "push",
-    ins: ["Banco no centro da Smith, barra alinhada com o meio do peito.","Pegada pouco mais aberta que ombros, destrave a barra.","Desça controlado até a parte média do peito.","Empurre verticalmente focando no peito."] },
   
-  { id: "Machine_Bench_Press", n: "Supino na Máquina (Hammer)", nameEn: "Machine Chest Press / Hammer Strength", pm: ["chest"], sm: ["shoulders","triceps"], eq: "machine", lvl: "beginner", mec: "compound", force: "push",
-    ins: ["Ajuste o assento para que as pegadas fiquem na altura do peito.","Sente com costas firmes no encosto, pés no chão.","Empurre as alavancas à frente até quase estender os braços.","Volte controlado, sem deixar as placas baterem."] },
   
-  { id: "Incline_Hammer_Curls", n: "Supino Inclinado na Máquina", nameEn: "Incline Machine Press", pm: ["chest"], sm: ["shoulders","triceps"], eq: "machine", lvl: "beginner", mec: "compound", force: "push",
-    ins: ["Ajuste a máquina inclinada, sente com encosto firme.","Pegada na altura do peito alto.","Empurre as alavancas à frente em ângulo ascendente.","Foco no peito superior — não jogue os ombros à frente."] },
   
   // ============ COSTAS — MÁQUINAS, CABOS E PUXADAS ============
-  { id: "Wide-Grip_Lat_Pulldown", n: "Puxada Pegada Aberta", nameEn: "Wide-Grip Lat Pulldown", pm: ["lats"], sm: ["biceps","middle back"], eq: "cable", lvl: "beginner", mec: "compound", force: "pull",
-    ins: ["Sente na máquina com coxas presas pelos rolos.","Pegada bem mais aberta que os ombros, palmas para frente.","Puxe a barra até a parte alta do peito, peito estufado.","Volte controlado sentindo o alongamento das dorsais."] },
   
   
-  { id: "Close-Grip_Front_Lat_Pulldown", n: "Puxada Pegada Fechada (Triângulo)", nameEn: "Close-Grip Lat Pulldown", pm: ["lats"], sm: ["biceps","middle back"], eq: "cable", lvl: "beginner", mec: "compound", force: "pull",
-    ins: ["Use o triângulo (barra V) ou pegada fechada neutra.","Sente firme, peito estufado.","Puxe até a barra encostar no peito médio/alto.","Aperte as escápulas no fim do movimento."] },
   
-  { id: "Seated_Cable_Rows", n: "Remada Sentada no Cabo", nameEn: "Seated Cable Row", pm: ["middle back"], sm: ["biceps","lats"], eq: "cable", lvl: "beginner", mec: "compound", force: "pull",
-    ins: ["Sente com pés apoiados, joelhos levemente flexionados.","Segure o triângulo, costas eretas e peito estufado.","Puxe o cabo até o abdômen, cotovelos rente ao corpo.","Aperte as escápulas e volte controlado sem arredondar a coluna."] },
   
-  { id: "T-Bar_Row_with_Handle", n: "Remada Cavalinho (T-Bar)", nameEn: "T-Bar Row", pm: ["middle back"], sm: ["lats","biceps"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "pull",
-    ins: ["Posicione-se sobre a barra com pegada fechada (triângulo ou alça).","Tronco inclinado a ~45°, joelhos semi-flexionados.","Puxe a barra em direção ao peito médio.","Aperte as escápulas no topo e desça controlado."] },
   
   { id: "Lying_T-Bar_Row", n: "Remada T-Bar Apoiada", nameEn: "Chest-Supported T-Bar Row", pm: ["middle back"], sm: ["lats","biceps"], eq: "machine", lvl: "intermediate", mec: "compound", force: "pull",
     ins: ["Deite no banco inclinado da máquina, peito apoiado.","Pegada larga ou neutra na barra.","Puxe a barra em direção ao peito, cotovelos abertos.","Aperte escápulas e volte controlado."] },
@@ -2161,8 +2163,6 @@ const EXERCICIOS_EXTRA = [
   { id: "Machine_Lat_Pulldown", n: "Pulldown na Máquina (placa)", nameEn: "Plate-Loaded Lat Pulldown Machine", pm: ["lats"], sm: ["biceps"], eq: "machine", lvl: "beginner", mec: "compound", force: "pull",
     ins: ["Sente com coxas presas, segure as pegadas (geralmente neutras).","Peito estufado, levemente inclinado para trás.","Puxe as pegadas para baixo até a altura dos ombros.","Foco em puxar com os cotovelos, não com os bíceps."] },
   
-  { id: "Pullups", n: "Barra Fixa (Pull-up)", nameEn: "Pull-ups", pm: ["lats"], sm: ["biceps","middle back"], eq: "body only", lvl: "intermediate", mec: "compound", force: "pull",
-    ins: ["Pegada pronada, mais aberta que os ombros.","Pendure-se com braços estendidos, ombros ativos.","Puxe o corpo até o queixo passar a barra.","Desça controlado até a extensão completa."] },
   
   { id: "Chin-Up", n: "Barra Fixa Supinada (Chin-up)", nameEn: "Chin-up", pm: ["lats"], sm: ["biceps","middle back"], eq: "body only", lvl: "intermediate", mec: "compound", force: "pull",
     ins: ["Pegada supinada (palmas para você), largura dos ombros.","Pendure-se com braços estendidos.","Puxe até o queixo passar a barra, foco em apertar dorsais e bíceps.","Desça controlado."] },
@@ -2177,50 +2177,30 @@ const EXERCICIOS_EXTRA = [
     ins: ["De pé na polia alta com barra ou corda.","Braços levemente flexionados, mantendo essa angulação fixa.","Puxe os braços para baixo até as coxas em arco.","Aperte as dorsais no fim do movimento."] },
   
   // ============ PERNAS — MÁQUINAS ESSENCIAIS ============
-  { id: "Leg_Press", n: "Leg Press 45°", nameEn: "Leg Press", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "machine", lvl: "beginner", mec: "compound", force: "push",
-    ins: ["Sente na máquina com pés na largura dos ombros, no centro da plataforma.","Destrave os suportes e desça controlado até ~90° nos joelhos.","Empurre a plataforma sem travar os joelhos no topo.","Mantenha lombar apoiada o tempo todo."] },
   
-  { id: "Hack_Squat", n: "Hack Squat (Agachamento Hack)", nameEn: "Hack Squat Machine", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "machine", lvl: "intermediate", mec: "compound", force: "push",
-    ins: ["Posicione-se na máquina com costas firmes, pés na plataforma.","Destrave e desça controlado até ~90° nos joelhos.","Empurre de volta sem travar joelhos.","Mantenha core ativo durante todo movimento."] },
   
   { id: "Pendulum_Squat", n: "Agachamento Pendular", nameEn: "Pendulum Squat", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "machine", lvl: "intermediate", mec: "compound", force: "push",
     ins: ["Posicione-se na máquina com ombros nos pads e pés na plataforma.","Destrave os suportes laterais.","Desça controlado em arco pendular até ~90°.","Empurre de volta sentindo os quadríceps trabalhando intensamente."] },
   
-  { id: "Smith_Machine_Squat", n: "Agachamento na Smith", nameEn: "Smith Machine Squat", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "machine", lvl: "intermediate", mec: "compound", force: "push",
-    ins: ["Barra apoiada na parte alta das costas (trapézio).","Pés ligeiramente à frente da barra (postura levemente inclinada).","Desça até as coxas paralelas ao chão.","Empurre de volta focando nos calcanhares."] },
   
   { id: "Front_Squats", n: "Agachamento Frontal", nameEn: "Front Squat", pm: ["quadriceps"], sm: ["glutes","hamstrings","abdominals"], eq: "barbell", lvl: "expert", mec: "compound", force: "push",
     ins: ["Barra apoiada nos deltoides anteriores, cotovelos altos.","Pés na largura dos ombros, ligeiramente abertos.","Desça mantendo o tronco bem ereto.","Empurre de volta sem deixar os cotovelos caírem."] },
   
-  { id: "Leg_Extensions", n: "Cadeira Extensora", nameEn: "Leg Extension", pm: ["quadriceps"], sm: [], eq: "machine", lvl: "beginner", mec: "isolation", force: "push",
-    ins: ["Sente na máquina com costas firmes no encosto.","Posicione os tornozelos atrás do rolo, joelhos alinhados com o eixo.","Estenda as pernas até quase travar (não trave).","Volte controlado sem deixar as placas baterem."] },
   
-  { id: "Lying_Leg_Curls", n: "Mesa Flexora", nameEn: "Lying Leg Curl", pm: ["hamstrings"], sm: ["calves"], eq: "machine", lvl: "beginner", mec: "isolation", force: "pull",
-    ins: ["Deite de bruços com tornozelos sob o rolo.","Joelhos alinhados com o eixo da máquina.","Flexione os joelhos trazendo o rolo em direção aos glúteos.","Volte controlado sem hiperextender os joelhos."] },
   
-  { id: "Seated_Leg_Curl", n: "Cadeira Flexora", nameEn: "Seated Leg Curl", pm: ["hamstrings"], sm: ["calves"], eq: "machine", lvl: "beginner", mec: "isolation", force: "pull",
-    ins: ["Sente com costas firmes, tornozelos sobre o rolo.","Joelhos alinhados com o eixo da máquina.","Flexione os joelhos puxando o rolo para baixo.","Volte controlado focando nos posteriores."] },
   
   { id: "Standing_Leg_Curl", n: "Flexora em Pé", nameEn: "Standing Leg Curl", pm: ["hamstrings"], sm: ["calves","glutes"], eq: "machine", lvl: "beginner", mec: "isolation", force: "pull",
     ins: ["Em pé na máquina, uma perna apoiada e outra com tornozelo no rolo.","Mantenha quadril fixo, sem balançar o tronco.","Flexione o joelho trazendo o calcanhar para o glúteo.","Volte controlado e troque a perna."] },
   
-  { id: "Romanian_Deadlift", n: "Stiff (Levantamento Romeno)", nameEn: "Romanian Deadlift", pm: ["hamstrings"], sm: ["glutes","lower back"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "pull",
-    ins: ["Em pé com barra à frente, pegada pronada na largura dos ombros.","Joelhos levemente flexionados (não dobre mais durante o movimento).","Empurre o quadril para trás descendo a barra rente às pernas.","Sinta o alongamento dos posteriores e suba apertando os glúteos."] },
   
   { id: "Cable_Pull_Through", n: "Pull Through na Polia Baixa", nameEn: "Cable Pull Through", pm: ["glutes"], sm: ["hamstrings","lower back"], eq: "cable", lvl: "beginner", mec: "compound", force: "pull",
     ins: ["De costas para a polia baixa, segure a corda entre as pernas.","Dê alguns passos à frente para criar tensão.","Empurre o quadril para trás descendo o tronco.","Empurre o quadril à frente apertando os glúteos no topo."] },
   
-  { id: "Glute_Bridge", n: "Ponte de Glúteo", nameEn: "Glute Bridge", pm: ["glutes"], sm: ["hamstrings"], eq: "body only", lvl: "beginner", mec: "compound", force: "push",
-    ins: ["Deite com joelhos flexionados e pés apoiados no chão.","Pés na largura dos ombros, próximos aos glúteos.","Eleve o quadril apertando os glúteos no topo.","Desça controlado sem encostar totalmente o quadril no chão."] },
   
-  { id: "Barbell_Hip_Thrust", n: "Hip Thrust com Barra", nameEn: "Barbell Hip Thrust", pm: ["glutes"], sm: ["hamstrings","quadriceps"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "push",
-    ins: ["Sente com costas apoiadas em um banco, barra sobre o quadril (use proteção).","Pés firmes no chão, joelhos a 90°.","Empurre o quadril para cima formando linha reta tronco-coxas.","Aperte glúteos no topo e desça controlado."] },
   
   { id: "Smith_Machine_Hip_Thrust", n: "Hip Thrust na Smith", nameEn: "Smith Machine Hip Thrust", pm: ["glutes"], sm: ["hamstrings"], eq: "machine", lvl: "intermediate", mec: "compound", force: "push",
     ins: ["Banco perpendicular à Smith, barra na altura do quadril.","Sente com costas no banco, barra sobre o quadril com proteção.","Empurre o quadril para cima até alinhamento total.","Aperte glúteos e desça controlado."] },
   
-  { id: "Cable_Hip_Adduction", n: "Adução na Polia", nameEn: "Cable Hip Adduction", pm: ["adductors"], sm: ["glutes"], eq: "cable", lvl: "beginner", mec: "isolation", force: "pull",
-    ins: ["Tornozelo preso na polia baixa, fique de lado para a máquina.","Apoie-se em algo para estabilidade.","Traga a perna em direção e através da linha média.","Volte controlado sentindo o estiramento."] },
   
   { id: "Hip_Adductor", n: "Cadeira Adutora", nameEn: "Adductor Machine", pm: ["adductors"], sm: ["glutes"], eq: "machine", lvl: "beginner", mec: "isolation", force: "pull",
     ins: ["Sente na máquina com costas firmes no encosto.","Pernas afastadas com pads internos das coxas.","Aperte as pernas trazendo os pads para o centro.","Volte controlado sentindo o alongamento."] },
@@ -2228,8 +2208,6 @@ const EXERCICIOS_EXTRA = [
   { id: "Hip_Abductor", n: "Cadeira Abdutora", nameEn: "Abductor Machine", pm: ["glutes"], sm: ["adductors"], eq: "machine", lvl: "beginner", mec: "isolation", force: "push",
     ins: ["Sente na máquina com costas firmes.","Pernas com pads externos das coxas.","Abra as pernas afastando os pads para fora.","Volte controlado focando nos glúteos médios."] },
   
-  { id: "Bulgarian_Split_Squat", n: "Búlgaro (Afundo Búlgaro)", nameEn: "Bulgarian Split Squat", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "dumbbell", lvl: "intermediate", mec: "compound", force: "push",
-    ins: ["Pé traseiro apoiado num banco atrás, perna da frente à frente.","Halteres ao lado do corpo (ou só peso corporal).","Desça flexionando o joelho da frente até quase 90°.","Empurre de volta focando no calcanhar da frente."] },
   
   { id: "Walking_Lunge", n: "Afundo Caminhando", nameEn: "Walking Lunge", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "dumbbell", lvl: "beginner", mec: "compound", force: "push",
     ins: ["Em pé com halteres ao lado do corpo (ou peso corporal).","Dê um passo grande à frente flexionando ambos joelhos.","Empurre com o calcanhar da perna da frente para subir.","Avance trocando a perna a cada passo."] },
@@ -2238,20 +2216,12 @@ const EXERCICIOS_EXTRA = [
     ins: ["Barra na parte alta das costas, uma perna à frente.","Desça o joelho de trás em direção ao chão.","Empurre de volta focando no calcanhar da frente.","Faça todas as repetições antes de trocar de perna."] },
   
   // ============ OMBROS — MÁQUINAS, CABOS ============
-  { id: "Side_Lateral_Raise", n: "Elevação Lateral", nameEn: "Dumbbell Lateral Raise", pm: ["shoulders"], sm: [], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "push",
-    ins: ["Em pé com halteres ao lado do corpo, palmas voltadas para o tronco.","Eleve os halteres lateralmente até a altura dos ombros.","Cotovelos levemente flexionados durante todo movimento.","Desça controlado sem balançar o tronco."] },
   
-  { id: "Cable_Lateral_Raise", n: "Elevação Lateral na Polia", nameEn: "Cable Lateral Raise", pm: ["shoulders"], sm: [], eq: "cable", lvl: "intermediate", mec: "isolation", force: "push",
-    ins: ["Polia baixa atrás do corpo, segure a pegada com a mão oposta.","Eleve o braço lateralmente até a altura do ombro.","Mantenha o cotovelo levemente flexionado.","Desça controlado e troque o lado."] },
   
   { id: "Machine_Shoulder_Press", n: "Desenvolvimento na Máquina", nameEn: "Machine Shoulder Press", pm: ["shoulders"], sm: ["triceps"], eq: "machine", lvl: "beginner", mec: "compound", force: "push",
     ins: ["Sente com costas firmes no encosto.","Pegadas na altura dos ombros, palmas para frente.","Empurre as alavancas para cima sem travar os cotovelos.","Volte controlado até a altura dos ombros."] },
   
-  { id: "Smith_Machine_Overhead_Shoulder_Press", n: "Desenvolvimento na Smith", nameEn: "Smith Machine Shoulder Press", pm: ["shoulders"], sm: ["triceps"], eq: "machine", lvl: "intermediate", mec: "compound", force: "push",
-    ins: ["Sente em banco vertical sob a Smith, barra na altura do peito alto.","Pegada um pouco mais aberta que os ombros.","Empurre a barra para cima sem travar cotovelos.","Desça controlado até a altura do peito."] },
   
-  { id: "Reverse_Flyes", n: "Crucifixo Inverso", nameEn: "Reverse Flyes", pm: ["shoulders"], sm: ["middle back"], eq: "dumbbell", lvl: "intermediate", mec: "isolation", force: "pull",
-    ins: ["Tronco inclinado à frente (paralelo ao chão), halteres pendendo.","Braços levemente flexionados durante todo movimento.","Eleve os halteres lateralmente apertando as escápulas.","Desça controlado focando nos deltoides posteriores."] },
   
   { id: "Reverse_Machine_Flyes", n: "Voador Inverso na Máquina", nameEn: "Reverse Pec Deck", pm: ["shoulders"], sm: ["middle back"], eq: "machine", lvl: "beginner", mec: "isolation", force: "pull",
     ins: ["Sente de frente para o pad da máquina pec deck (invertido).","Segure as pegadas com braços estendidos à frente.","Abra os braços lateralmente apertando as escápulas.","Volte controlado sentindo o alongamento."] },
@@ -2259,43 +2229,23 @@ const EXERCICIOS_EXTRA = [
   { id: "Cable_Rear_Delt_Row", n: "Remada Alta na Corda (Face Pull)", nameEn: "Face Pull", pm: ["shoulders"], sm: ["middle back"], eq: "cable", lvl: "beginner", mec: "compound", force: "pull",
     ins: ["Polia alta com corda, dê um passo para trás.","Puxe a corda em direção ao rosto, separando as pontas.","Cotovelos altos, paralelos ao chão.","Aperte os deltoides posteriores e volte controlado."] },
   
-  { id: "Front_Dumbbell_Raise", n: "Elevação Frontal", nameEn: "Dumbbell Front Raise", pm: ["shoulders"], sm: [], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "push",
-    ins: ["Em pé com halteres na frente das coxas, palmas para o corpo.","Eleve um halter à frente até a altura do ombro.","Desça controlado e alterne os braços.","Não use impulso — controle o movimento."] },
   
   { id: "Upright_Cable_Row", n: "Remada Alta no Cabo", nameEn: "Cable Upright Row", pm: ["shoulders"], sm: ["traps","biceps"], eq: "cable", lvl: "intermediate", mec: "compound", force: "pull",
     ins: ["Polia baixa com barra reta, pegada pronada fechada.","Puxe a barra em direção ao queixo, cotovelos elevados.","Aperte deltoides e trapézios no topo.","Desça controlado."] },
   
   // ============ BÍCEPS — VARIAÇÕES E MÁQUINAS ============
-  { id: "Cable_Curl", n: "Rosca Direta no Cabo", nameEn: "Cable Curl", pm: ["biceps"], sm: ["forearms"], eq: "cable", lvl: "beginner", mec: "isolation", force: "pull",
-    ins: ["Polia baixa com barra reta ou EZ.","Cotovelos rente ao corpo, palmas para cima.","Flexione os cotovelos trazendo a barra ao peito.","Desça controlado mantendo tensão constante."] },
   
-  { id: "Preacher_Curl", n: "Rosca Scott (Preacher)", nameEn: "Preacher Curl", pm: ["biceps"], sm: ["forearms"], eq: "barbell", lvl: "intermediate", mec: "isolation", force: "pull",
-    ins: ["Sente no banco scott com axilas apoiadas no pad.","Pegada supinada na barra EZ, braços estendidos.","Flexione os cotovelos trazendo a barra à testa.","Desça controlado sem estender totalmente os cotovelos."] },
   
-  { id: "Spider_Curl", n: "Rosca Spider", nameEn: "Spider Curl", pm: ["biceps"], sm: ["forearms"], eq: "barbell", lvl: "intermediate", mec: "isolation", force: "pull",
-    ins: ["Banco inclinado a 45°, deite de bruços com peito apoiado.","Braços pendurados perpendiculares ao chão, halteres ou barra.","Flexione cotovelos trazendo o peso ao peito.","Desça controlado, mantendo cotovelos fixos."] },
   
-  { id: "Hammer_Curls", n: "Rosca Martelo", nameEn: "Hammer Curl", pm: ["biceps"], sm: ["forearms"], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "pull",
-    ins: ["Em pé com halteres ao lado do corpo, palmas para o tronco.","Mantenha pegada neutra durante todo movimento.","Flexione cotovelos elevando halteres aos ombros.","Desça controlado."] },
   
-  { id: "Concentration_Curls", n: "Rosca Concentrada", nameEn: "Concentration Curl", pm: ["biceps"], sm: [], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "pull",
-    ins: ["Sente em banco com pernas abertas, halter em uma mão.","Apoie cotovelo na parte interna da coxa.","Flexione o cotovelo trazendo o halter ao ombro.","Desça controlado e troque o braço após as repetições."] },
   
-  { id: "Cable_Hammer_Curls_-_Rope_Attachment", n: "Rosca Martelo na Corda", nameEn: "Cable Rope Hammer Curl", pm: ["biceps"], sm: ["forearms"], eq: "cable", lvl: "beginner", mec: "isolation", force: "pull",
-    ins: ["Polia baixa com corda, pegada neutra (palmas para dentro).","Cotovelos rente ao corpo.","Flexione os cotovelos trazendo a corda ao peito.","Desça controlado mantendo pegada neutra."] },
   
   // ============ TRÍCEPS — VARIAÇÕES ============
-  { id: "Triceps_Pushdown", n: "Tríceps Pulley (Barra)", nameEn: "Triceps Pushdown", pm: ["triceps"], sm: [], eq: "cable", lvl: "beginner", mec: "isolation", force: "push",
-    ins: ["Polia alta com barra reta, pegada pronada fechada.","Cotovelos colados ao tronco durante todo movimento.","Empurre a barra para baixo até estender os cotovelos.","Volte controlado até ~90°."] },
   
-  { id: "Tricep_Dumbbell_Kickback", n: "Tríceps Coice", nameEn: "Tricep Kickback", pm: ["triceps"], sm: [], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "push",
-    ins: ["Tronco inclinado, uma mão apoiada em banco.","Halter na outra mão, cotovelo flexionado a 90° rente ao corpo.","Estenda o cotovelo levando o halter para trás.","Volte controlado mantendo cotovelo fixo."] },
   
   { id: "Tricep_Dips", n: "Mergulho no Banco (Tríceps)", nameEn: "Bench Dips", pm: ["triceps"], sm: ["chest","shoulders"], eq: "body only", lvl: "beginner", mec: "compound", force: "push",
     ins: ["Mãos no banco atrás, pernas estendidas à frente.","Desça flexionando os cotovelos a 90°.","Empurre de volta estendendo os cotovelos.","Mantenha as costas próximas ao banco."] },
   
-  { id: "Dips_-_Triceps_Version", n: "Paralelas (Dips)", nameEn: "Triceps Dips on Parallel Bars", pm: ["triceps"], sm: ["chest","shoulders"], eq: "body only", lvl: "intermediate", mec: "compound", force: "push",
-    ins: ["Suspenso nas barras paralelas, braços estendidos.","Desça flexionando cotovelos a 90°, tronco vertical.","Empurre de volta estendendo cotovelos.","Mantenha cotovelos próximos ao corpo (foco tríceps)."] },
   
   { id: "Cable_Rope_Overhead_Triceps_Extension", n: "Tríceps Francês na Polia (Acima da Cabeça)", nameEn: "Overhead Cable Triceps Extension", pm: ["triceps"], sm: [], eq: "cable", lvl: "intermediate", mec: "isolation", force: "push",
     ins: ["Polia alta com corda, fique de costas para a máquina.","Corda atrás da cabeça, cotovelos apontando para cima.","Estenda os cotovelos levando a corda à frente.","Volte controlado mantendo cotovelos fixos."] },
@@ -2307,44 +2257,22 @@ const EXERCICIOS_EXTRA = [
     ins: ["Polia alta com corda, pegada neutra.","Cotovelos colados ao tronco.","Empurre a corda para baixo separando as pontas no fim.","Aperte tríceps e volte controlado."] },
   
   // ============ ABDÔMEN/CORE ============
-  { id: "Cable_Crunch", n: "Abdominal na Polia", nameEn: "Cable Crunch", pm: ["abdominals"], sm: [], eq: "cable", lvl: "beginner", mec: "isolation", force: "pull",
-    ins: ["Ajoelhado em frente à polia alta, segure a corda perto da cabeça.","Flexione o tronco arredondando as costas.","Aperte o abdômen no fim do movimento.","Volte controlado sem perder a tensão."] },
   
-  { id: "Crunches", n: "Abdominal Crunch", nameEn: "Crunches", pm: ["abdominals"], sm: [], eq: "body only", lvl: "beginner", mec: "isolation", force: "pull",
-    ins: ["Deite com joelhos flexionados, pés apoiados no chão.","Mãos atrás da cabeça (sem puxar o pescoço).","Eleve o tronco apertando o abdômen.","Desça controlado sem encostar totalmente as costas."] },
   
-  { id: "Plank", n: "Prancha (Plank)", nameEn: "Plank", pm: ["abdominals"], sm: ["lower back","shoulders"], eq: "body only", lvl: "beginner", mec: "isolation", force: "static",
-    ins: ["Apoie antebraços e pontas dos pés no chão.","Corpo formando linha reta da cabeça aos calcanhares.","Aperte abdômen e glúteos durante todo o tempo.","Mantenha por 30-60s."] },
   
   { id: "Suspended_Crunch", n: "Abdominal na Barra", nameEn: "Hanging Knee Raise", pm: ["abdominals"], sm: [], eq: "body only", lvl: "intermediate", mec: "isolation", force: "pull",
     ins: ["Pendurado na barra fixa com pegada pronada.","Eleve os joelhos em direção ao peito.","Aperte o abdômen no topo.","Desça controlado sem balançar."] },
   
-  { id: "Russian_Twist", n: "Russian Twist", nameEn: "Russian Twist", pm: ["abdominals"], sm: [], eq: "body only", lvl: "beginner", mec: "isolation", force: "pull",
-    ins: ["Sentado com joelhos flexionados, tronco inclinado.","Mãos juntas (com ou sem peso) à frente do peito.","Gire o tronco tocando o chão de cada lado.","Mantenha pés elevados para mais intensidade."] },
   
   // ============ PANTURRILHA ============
-  { id: "Standing_Calf_Raises", n: "Panturrilha em Pé na Máquina", nameEn: "Standing Calf Raise Machine", pm: ["calves"], sm: [], eq: "machine", lvl: "beginner", mec: "isolation", force: "push",
-    ins: ["Em pé na máquina com pads nos ombros, ponta dos pés na plataforma.","Calcanhares pendendo abaixo da plataforma.","Eleve nos dedos contraindo as panturrilhas no topo.","Desça controlado alongando."] },
   
-  { id: "Seated_Calf_Raise", n: "Panturrilha Sentado", nameEn: "Seated Calf Raise", pm: ["calves"], sm: [], eq: "machine", lvl: "beginner", mec: "isolation", force: "push",
-    ins: ["Sente com joelhos sob os pads, ponta dos pés na plataforma.","Eleve nos dedos contraindo a panturrilha (sóleo).","Aperte no topo.","Desça controlado sentindo o alongamento."] },
   
-  { id: "Calf_Press", n: "Panturrilha no Leg Press", nameEn: "Leg Press Calf Raise", pm: ["calves"], sm: [], eq: "machine", lvl: "beginner", mec: "isolation", force: "push",
-    ins: ["No leg press, pés na parte baixa da plataforma com calcanhares fora.","Empurre apenas com a ponta dos pés.","Aperte panturrilhas no topo.","Volte controlado alongando."] },
   
   // ============ ANTEBRAÇO ============
-  { id: "Wrist_Roller", n: "Rotação de Punho com Halter", nameEn: "Wrist Curl", pm: ["forearms"], sm: [], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "pull",
-    ins: ["Sente com antebraços apoiados nas coxas, palmas para cima.","Halter na mão, deixe o punho flexionar para baixo.","Flexione o punho elevando o halter.","Repita controladamente."] },
   
-  { id: "Reverse_Barbell_Curl", n: "Rosca Inversa", nameEn: "Reverse Barbell Curl", pm: ["forearms"], sm: ["biceps"], eq: "barbell", lvl: "intermediate", mec: "isolation", force: "pull",
-    ins: ["Em pé com barra, pegada pronada (palmas para baixo).","Cotovelos rente ao corpo.","Flexione os cotovelos elevando a barra.","Desça controlado focando antebraços e braquial."] },
   
   // ============ CARDIO/FUNCIONAIS ============
-  { id: "Burpee", n: "Burpee", nameEn: "Burpee", pm: ["chest"], sm: ["shoulders","quadriceps","abdominals"], eq: "body only", lvl: "intermediate", mec: "compound", force: "push",
-    ins: ["Em pé, agache colocando as mãos no chão.","Salte os pés para trás chegando na prancha.","Faça uma flexão (opcional), volte os pés ao agachamento.","Salte para cima estendendo os braços acima da cabeça."] },
   
-  { id: "Mountain_Climbers", n: "Escalador (Mountain Climber)", nameEn: "Mountain Climber", pm: ["abdominals"], sm: ["shoulders","quadriceps"], eq: "body only", lvl: "beginner", mec: "compound", force: "push",
-    ins: ["Posição de prancha alta com mãos no chão.","Traga um joelho ao peito alternadamente em ritmo rápido.","Mantenha quadril estável, sem levantar.","Continue alternando como se estivesse correndo no lugar."] },
   
   { id: "Jumping_Jack", n: "Polichinelo", nameEn: "Jumping Jack", pm: ["calves"], sm: ["shoulders"], eq: "body only", lvl: "beginner", mec: "compound", force: "push",
     ins: ["Em pé com pés juntos e braços ao lado do corpo.","Salte abrindo as pernas e elevando os braços acima da cabeça.","Salte voltando à posição inicial.","Mantenha ritmo constante."] },
@@ -2393,14 +2321,8 @@ const EXERCICIOS_EXTRA_V13 = [
   { id: "Single-Arm_Lat_Pulldown", n: "Puxada Unilateral", nameEn: "Single-Arm Lat Pulldown", pm: ["lats"], sm: ["biceps"], eq: "cable", lvl: "intermediate", mec: "compound", force: "pull",
     ins: ["Polia alta com pegada única, sente ou ajoelhe.","Puxe com um braço de cada vez focando na contração lateral.","Aperte a dorsal no fim do movimento.","Faça todas as repetições e troque o braço."] },
   
-  { id: "One-Arm_Dumbbell_Row", n: "Remada Unilateral com Halter (Serrote)", nameEn: "One-Arm Dumbbell Row", pm: ["middle back"], sm: ["lats","biceps"], eq: "dumbbell", lvl: "beginner", mec: "compound", force: "pull",
-    ins: ["Apoie um joelho e mão no banco, outra perna no chão.","Halter na mão livre, braço estendido para baixo.","Puxe o halter até a lateral do tronco, cotovelo rente.","Desça controlado e troque o lado."] },
   
-  { id: "Bent_Over_Barbell_Row", n: "Remada Curvada com Barra", nameEn: "Bent-Over Barbell Row", pm: ["middle back"], sm: ["lats","biceps"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "pull",
-    ins: ["Em pé com barra à frente, pegada pronada na largura dos ombros.","Tronco inclinado a ~45°, joelhos semi-flexionados, lombar neutra.","Puxe a barra em direção ao abdômen.","Desça controlado mantendo posição do tronco."] },
   
-  { id: "Pendlay_Row", n: "Remada Pendlay", nameEn: "Pendlay Row", pm: ["middle back"], sm: ["lats","biceps"], eq: "barbell", lvl: "expert", mec: "compound", force: "pull",
-    ins: ["Tronco paralelo ao chão, barra no chão.","Cada repetição começa com a barra parada no chão.","Puxe explosivamente até a parte baixa do peito.","Volte ao chão entre cada repetição."] },
   
   { id: "Assisted_Pullup", n: "Gravitron (Barra Assistida)", nameEn: "Assisted Pull-up Machine / Gravitron", pm: ["lats"], sm: ["biceps","middle back"], eq: "machine", lvl: "beginner", mec: "compound", force: "pull",
     ins: ["Selecione a carga assistida (quanto mais peso, mais ajuda).","Suba na plataforma e segure as pegadas pronadas.","Puxe o corpo para cima até o queixo passar a barra.","Desça controlado até extensão total dos braços."] },
@@ -2411,8 +2333,6 @@ const EXERCICIOS_EXTRA_V13 = [
   { id: "Deadlift", n: "Levantamento Terra Convencional", nameEn: "Deadlift", pm: ["lower back"], sm: ["glutes","hamstrings","quadriceps","traps"], eq: "barbell", lvl: "expert", mec: "compound", force: "pull",
     ins: ["Barra no chão, pés na largura dos quadris embaixo dela.","Agache pegando a barra (pegada pronada ou mista).","Suba mantendo barra rente ao corpo, lombar neutra.","Desça controlado até a barra encostar o chão."] },
   
-  { id: "Sumo_Deadlift", n: "Levantamento Terra Sumô", nameEn: "Sumo Deadlift", pm: ["glutes"], sm: ["hamstrings","quadriceps","lower back"], eq: "barbell", lvl: "expert", mec: "compound", force: "pull",
-    ins: ["Pés bem afastados, pontas levemente para fora, barra à frente.","Pegada pronada com braços entre as pernas.","Suba mantendo tronco mais ereto que no terra convencional.","Desça controlado focando nos glúteos e adutores."] },
   
   { id: "Stiff_Legged_Barbell_Deadlift", gifId: "Romanian_Deadlift", n: "Stiff (Pernas Retas)", nameEn: "Stiff-Legged Deadlift", pm: ["hamstrings"], sm: ["glutes","lower back"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "pull",
     ins: ["Em pé com barra, pegada pronada na largura dos ombros.","Pernas levemente flexionadas (mas mais retas que no Romeno).","Empurre quadril para trás descendo a barra.","Sinta o alongamento intenso dos posteriores."] },
@@ -2421,8 +2341,6 @@ const EXERCICIOS_EXTRA_V13 = [
   { id: "Glute_Kickback", n: "Glúteo Coice no Solo (4 apoios)", nameEn: "Glute Kickback (Floor)", pm: ["glutes"], sm: ["hamstrings"], eq: "body only", lvl: "beginner", mec: "isolation", force: "push",
     ins: ["Apoie-se em 4 apoios (joelhos e mãos no chão).","Mantenha o joelho dobrado em 90° e empurre a perna para trás e para cima.","Aperte o glúteo no topo do movimento.","Volte controlado e troque a perna após as repetições."] },
   
-  { id: "Cable_Hip_Adduction", n: "Glúteo Coice na Polia", nameEn: "Cable Glute Kickback", pm: ["glutes"], sm: ["hamstrings"], eq: "cable", lvl: "beginner", mec: "isolation", force: "push",
-    ins: ["Tornozelo preso na polia baixa, fique de frente para a máquina.","Apoie-se na máquina para estabilidade.","Empurre a perna para trás mantendo joelho levemente flexionado.","Aperte o glúteo no topo e volte controlado."] },
   
   { id: "Glute_Drive_Machine", gifId: "Barbell_Hip_Thrust", n: "Elevação Pélvica (Glúteo) na Máquina", nameEn: "Glute Drive Machine", pm: ["glutes"], sm: ["hamstrings","quadriceps"], eq: "machine", lvl: "beginner", mec: "compound", force: "push",
     ins: ["Sente na máquina com costas no encosto, pad sobre o quadril.","Pés firmes na plataforma, joelhos a ~90°.","Empurre o quadril para cima apertando os glúteos no topo.","Desça controlado focando no glúteo durante toda a fase."] },
@@ -2440,8 +2358,6 @@ const EXERCICIOS_EXTRA_V13 = [
   { id: "Wide_Stance_Barbell_Squat", n: "Agachamento Sumô com Barra", nameEn: "Sumo Barbell Squat", pm: ["quadriceps"], sm: ["glutes","adductors"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "push",
     ins: ["Pés bem afastados, pontas para fora, barra na parte alta das costas.","Desça mantendo joelhos alinhados com pontas dos pés.","Foco extra em glúteos e adutores.","Empurre de volta sem deixar joelhos colapsarem para dentro."] },
   
-  { id: "Goblet_Squat", n: "Agachamento Goblet", nameEn: "Goblet Squat", pm: ["quadriceps"], sm: ["glutes","abdominals"], eq: "dumbbell", lvl: "beginner", mec: "compound", force: "push",
-    ins: ["Segure um halter na vertical na altura do peito, pés na largura dos ombros.","Desça em agachamento profundo, cotovelos entre os joelhos.","Empurre de volta mantendo tronco ereto.","Excelente para iniciantes — ensina padrão de agachamento."] },
   
   { id: "Goblet_Squat_Off_Box", n: "Agachamento na Caixa", nameEn: "Box Squat", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "push",
     ins: ["Caixa atrás (altura ~paralelo ao chão), barra na parte alta das costas.","Desça empurrando o quadril para trás até sentar na caixa.","Pause 1s na caixa.","Empurre de volta sem balançar."] },
@@ -2449,11 +2365,7 @@ const EXERCICIOS_EXTRA_V13 = [
   { id: "Leg_Press_-_45_Degrees", n: "Leg Press Horizontal", nameEn: "Horizontal Leg Press", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "machine", lvl: "beginner", mec: "compound", force: "push",
     ins: ["Sente com costas no encosto, pés na plataforma na largura dos ombros.","Destrave os suportes laterais.","Desça até ~90° nos joelhos sem perder contato lombar.","Empurre de volta sem travar joelhos no fim."] },
   
-  { id: "Stiff-Legged_Dumbbell_Deadlift", gifId: "Romanian_Deadlift", n: "Stiff com Halteres", nameEn: "Dumbbell Stiff-Legged Deadlift", pm: ["hamstrings"], sm: ["glutes","lower back"], eq: "dumbbell", lvl: "beginner", mec: "compound", force: "pull",
-    ins: ["Em pé com halteres à frente das coxas, palmas para o corpo.","Pernas levemente flexionadas (joelhos semi-flexionados).","Empurre quadril para trás descendo halteres rente às pernas.","Sinta o alongamento dos posteriores e suba apertando glúteos."] },
   
-  { id: "Dumbbell_Lunges", n: "Afundo Estático com Halteres", nameEn: "Stationary Dumbbell Lunge", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "dumbbell", lvl: "beginner", mec: "compound", force: "push",
-    ins: ["Halteres ao lado do corpo, uma perna à frente, outra atrás.","Desça flexionando ambos joelhos a 90°.","Empurre de volta com calcanhar da frente.","Faça todas as repetições e troque a perna."] },
   
   { id: "Reverse_Lunge", n: "Afundo Reverso", nameEn: "Reverse Lunge", pm: ["quadriceps"], sm: ["glutes","hamstrings"], eq: "dumbbell", lvl: "beginner", mec: "compound", force: "push",
     ins: ["Em pé com halteres ao lado do corpo.","Dê um passo grande para TRÁS flexionando ambos joelhos.","Empurre de volta com calcanhar da frente.","Variação mais segura para joelhos sensíveis."] },
@@ -2462,14 +2374,8 @@ const EXERCICIOS_EXTRA_V13 = [
     ins: ["Halteres ao lado do corpo, banco/caixa à frente (altura do joelho).","Suba na caixa pisando firme com uma perna.","Empurre o calcanhar para subir totalmente.","Desça controlado e troque a perna ou alterne."] },
   
   // ============ OMBROS — VARIAÇÕES PRO ============
-  { id: "Arnold_Dumbbell_Press", n: "Desenvolvimento Arnold", nameEn: "Arnold Press", pm: ["shoulders"], sm: ["triceps"], eq: "dumbbell", lvl: "intermediate", mec: "compound", force: "push",
-    ins: ["Sente com halteres à frente do peito, palmas voltadas para você.","Empurre os halteres para cima girando os punhos durante o movimento.","No topo, palmas para frente.","Volte revertendo a rotação."] },
   
-  { id: "Standing_Military_Press", n: "Desenvolvimento Militar em Pé", nameEn: "Standing Military Press", pm: ["shoulders"], sm: ["triceps","abdominals"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "push",
-    ins: ["Em pé com barra na altura dos ombros, pegada pouco mais aberta que ombros.","Core ativo, glúteos contraídos.","Empurre a barra verticalmente acima da cabeça.","Desça controlado até clavículas."] },
   
-  { id: "Seated_Dumbbell_Press", n: "Desenvolvimento Sentado com Halteres", nameEn: "Seated Dumbbell Shoulder Press", pm: ["shoulders"], sm: ["triceps"], eq: "dumbbell", lvl: "beginner", mec: "compound", force: "push",
-    ins: ["Sente em banco com encosto vertical, halteres na altura dos ombros.","Palmas voltadas para frente, cotovelos a 90°.","Empurre os halteres para cima sem travar cotovelos.","Desça controlado até a altura inicial."] },
   
   { id: "Seated_Bent-Over_Rear_Delt_Raise", n: "Crucifixo Inverso Sentado", nameEn: "Seated Bent-Over Rear Delt Raise", pm: ["shoulders"], sm: ["middle back"], eq: "dumbbell", lvl: "intermediate", mec: "isolation", force: "pull",
     ins: ["Sente na ponta do banco, tronco bem inclinado à frente.","Halteres ao lado dos pés, palmas voltadas para o corpo.","Eleve os halteres lateralmente até altura dos ombros.","Aperte deltoides posteriores e volte controlado."] },
@@ -2477,40 +2383,24 @@ const EXERCICIOS_EXTRA_V13 = [
   { id: "Cable_Reverse_Flyes", n: "Crucifixo Inverso na Polia", nameEn: "Cable Reverse Fly", pm: ["shoulders"], sm: ["middle back"], eq: "cable", lvl: "intermediate", mec: "isolation", force: "pull",
     ins: ["Polias altas cruzadas, segure cada lado com a mão oposta.","Braços estendidos à frente.","Abra os braços lateralmente apertando deltoides posteriores.","Volte controlado mantendo tensão."] },
   
-  { id: "Barbell_Shrug", n: "Encolhimento com Barra (Shrug)", nameEn: "Barbell Shrug", pm: ["traps"], sm: [], eq: "barbell", lvl: "beginner", mec: "isolation", force: "pull",
-    ins: ["Em pé com barra à frente, pegada pronada na largura dos ombros.","Eleve os ombros em direção às orelhas.","Aperte o trapézio no topo (sem rotacionar).","Desça controlado."] },
   
-  { id: "Dumbbell_Shrug", n: "Encolhimento com Halteres", nameEn: "Dumbbell Shrug", pm: ["traps"], sm: [], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "pull",
-    ins: ["Em pé com halteres ao lado do corpo, palmas voltadas para o corpo.","Eleve os ombros em direção às orelhas.","Aperte o trapézio sem rotacionar os ombros.","Desça controlado."] },
   
-  { id: "Upright_Barbell_Row", n: "Remada Alta com Barra", nameEn: "Upright Barbell Row", pm: ["shoulders"], sm: ["traps","biceps"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "pull",
-    ins: ["Em pé com barra, pegada pronada fechada (~ largura dos ombros).","Puxe a barra em direção ao queixo, cotovelos altos.","Mantenha barra próxima ao corpo durante a subida.","Desça controlado."] },
   
   { id: "Lateral_Raise_-_With_Bands", n: "Elevação Lateral com Faixa", nameEn: "Banded Lateral Raise", pm: ["shoulders"], sm: [], eq: "bands", lvl: "beginner", mec: "isolation", force: "push",
     ins: ["Pise na faixa, segure as pontas com cada mão.","Eleve os braços lateralmente até a altura dos ombros.","Cotovelos levemente flexionados.","Desça controlado mantendo tensão."] },
   
   // ============ BÍCEPS — VARIAÇÕES POPULARES ============
-  { id: "Barbell_Curl", n: "Rosca Direta com Barra", nameEn: "Standing Barbell Curl", pm: ["biceps"], sm: ["forearms"], eq: "barbell", lvl: "beginner", mec: "isolation", force: "pull",
-    ins: ["Em pé com barra reta, pegada supinada na largura dos ombros.","Cotovelos rente ao corpo, sem balançar o tronco.","Flexione cotovelos elevando a barra ao peito.","Desça controlado sem estender totalmente."] },
   
-  { id: "EZ-Bar_Curl", n: "Rosca Direta com Barra W (EZ)", nameEn: "EZ-Bar Curl", pm: ["biceps"], sm: ["forearms"], eq: "barbell", lvl: "beginner", mec: "isolation", force: "pull",
-    ins: ["Em pé com barra W, pegada nas curvas internas (mais confortável para punhos).","Cotovelos rente ao corpo.","Flexione cotovelos elevando ao peito.","Desça controlado."] },
   
-  { id: "Dumbbell_Bicep_Curl", n: "Rosca Alternada com Halteres", nameEn: "Alternate Dumbbell Curl", pm: ["biceps"], sm: ["forearms"], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "pull",
-    ins: ["Em pé com halteres ao lado do corpo, palmas para o tronco.","Flexione um cotovelo girando o punho (supina) durante a subida.","Aperte o bíceps no topo.","Desça controlado e alterne os braços."] },
   
   { id: "Drag_Curl", n: "Rosca Drag Curl", nameEn: "Drag Curl", pm: ["biceps"], sm: ["forearms"], eq: "barbell", lvl: "intermediate", mec: "isolation", force: "pull",
     ins: ["Em pé com barra, cotovelos puxando para trás durante a subida.","A barra 'arrasta' próxima ao corpo (não vai à frente).","Foco maior na cabeça longa do bíceps.","Desça controlado."] },
   
-  { id: "Cable_Curl", n: "Rosca Direta na Polia (Barra)", nameEn: "Cable Bar Curl", pm: ["biceps"], sm: ["forearms"], eq: "cable", lvl: "beginner", mec: "isolation", force: "pull",
-    ins: ["Polia baixa com barra reta ou EZ.","Cotovelos rente ao corpo.","Flexione cotovelos trazendo a barra ao peito.","Tensão constante — diferente da barra livre."] },
   
   { id: "Concentration_Curl", gifId: "Concentration_Curls", n: "Rosca Concentrada na Polia", nameEn: "Cable Concentration Curl", pm: ["biceps"], sm: [], eq: "cable", lvl: "intermediate", mec: "isolation", force: "pull",
     ins: ["Sente em banco baixo ao lado da polia, cotovelo apoiado na coxa.","Pegada supinada na pegada simples da polia.","Flexione cotovelo trazendo ao ombro.","Aperte o bíceps no topo."] },
   
   // ============ TRÍCEPS — VARIAÇÕES PRO ============
-  { id: "Lying_Triceps_Press", n: "Tríceps Testa com Barra", nameEn: "Lying Triceps Press / Skull Crusher", pm: ["triceps"], sm: [], eq: "barbell", lvl: "intermediate", mec: "isolation", force: "push",
-    ins: ["Deite no banco reto com barra EZ acima do peito, braços estendidos.","Cotovelos apontando para o teto, fixos.","Flexione cotovelos descendo a barra à testa.","Estenda os cotovelos focando no tríceps."] },
   
   { id: "Close-Grip_EZ_Bar_Curl", n: "Supino Fechado para Tríceps", nameEn: "Close-Grip Bench Press", pm: ["triceps"], sm: ["chest","shoulders"], eq: "barbell", lvl: "intermediate", mec: "compound", force: "push",
     ins: ["Deite no banco com pegada fechada na barra (largura dos ombros).","Desça a barra ao peito médio mantendo cotovelos rente ao tronco.","Empurre verticalmente focando no tríceps.","Não abra os cotovelos durante o movimento."] },
@@ -2518,8 +2408,6 @@ const EXERCICIOS_EXTRA_V13 = [
   { id: "Two-Arm_Dumbbell_Tricep_Extension", n: "Tríceps Francês com Halter (em pé)", nameEn: "Standing Overhead Triceps Extension", pm: ["triceps"], sm: [], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "push",
     ins: ["Em pé segurando um halter com as duas mãos, atrás da cabeça.","Cotovelos apontando para o teto, fixos.","Estenda os cotovelos elevando o halter.","Desça controlado mantendo cotovelos fixos."] },
   
-  { id: "Seated_Triceps_Press", n: "Tríceps Sentado com Halter", nameEn: "Seated Overhead Dumbbell Triceps Extension", pm: ["triceps"], sm: [], eq: "dumbbell", lvl: "beginner", mec: "isolation", force: "push",
-    ins: ["Sente em banco com encosto vertical, halter atrás da cabeça com duas mãos.","Cotovelos apontando para o teto.","Estenda os cotovelos elevando o halter.","Desça controlado."] },
   
   { id: "Triceps_Pushdown_-_V-Bar_Attachment", n: "Tríceps na Polia com Pegada V", nameEn: "V-Bar Triceps Pushdown", pm: ["triceps"], sm: [], eq: "cable", lvl: "beginner", mec: "isolation", force: "push",
     ins: ["Polia alta com barra V (triângulo).","Cotovelos rente ao corpo, pegada neutra.","Empurre a barra para baixo até estender.","Volte controlado."] },
@@ -2528,8 +2416,6 @@ const EXERCICIOS_EXTRA_V13 = [
     ins: ["Polia alta com barra reta, pegada supinada (palmas para cima).","Cotovelos rente ao corpo.","Empurre a barra para baixo até estender.","Foco maior na cabeça lateral do tríceps."] },
   
   // ============ ABDÔMEN/CORE — APARELHOS DAS REDES ============
-  { id: "Decline_Crunch", n: "Abdominal no Banco Declinado", nameEn: "Decline Sit-Up", pm: ["abdominals"], sm: [], eq: "body only", lvl: "intermediate", mec: "isolation", force: "pull",
-    ins: ["Banco em declínio, prenda os pés nos apoios.","Mãos atrás da cabeça (sem puxar pescoço).","Eleve o tronco em direção aos joelhos.","Desça controlado."] },
   
   { id: "Roman_Chair_Situp", n: "Abdominal Romano (Cadeira)", nameEn: "Roman Chair Sit-Up", pm: ["abdominals"], sm: ["lower back"], eq: "machine", lvl: "intermediate", mec: "isolation", force: "pull",
     ins: ["Sente na cadeira romana com pés presos.","Tronco inicialmente reto, mãos cruzadas no peito.","Desça o tronco para trás controlado e suba.","CUIDADO com lombar — não force amplitude."] },
@@ -2553,11 +2439,7 @@ const EXERCICIOS_EXTRA_V13 = [
     ins: ["4 apoios (joelhos e mãos no chão).","Estenda braço direito à frente e perna esquerda atrás simultaneamente.","Mantenha corpo alinhado, 2-3s.","Volte e alterne (braço esquerdo + perna direita)."] },
   
   // ============ PEITO — VARIAÇÕES IMPORTANTES ============
-  { id: "Dumbbell_Flyes", n: "Crucifixo no Banco com Halteres", nameEn: "Dumbbell Flyes", pm: ["chest"], sm: ["shoulders"], eq: "dumbbell", lvl: "intermediate", mec: "isolation", force: "push",
-    ins: ["Deite no banco reto com halteres acima do peito, palmas voltadas.","Braços levemente flexionados (mantenha angulação).","Abra os braços lateralmente até sentir alongamento.","Volte unindo as mãos acima do peito em arco."] },
   
-  { id: "Incline_Dumbbell_Flyes", n: "Crucifixo Inclinado com Halteres", nameEn: "Incline Dumbbell Flyes", pm: ["chest"], sm: ["shoulders"], eq: "dumbbell", lvl: "intermediate", mec: "isolation", force: "push",
-    ins: ["Banco inclinado a 30-45°, halteres acima do peito.","Braços levemente flexionados.","Abra lateralmente sentindo alongamento.","Volte focando peito superior."] },
   
   // ============ PUXADAS/REMADAS — VARIAÇÕES MOVEMENT ============
   { id: "Iso-Lateral_Row", n: "Remada Hammer Iso-Lateral", nameEn: "Iso-Lateral Row Machine", pm: ["middle back"], sm: ["lats","biceps"], eq: "machine", lvl: "intermediate", mec: "compound", force: "pull",
@@ -2771,19 +2653,25 @@ function renderResultadosBusca(lista) {
   grid.innerHTML = slice.map((ex, idx) => {
     const altIds = alternativeGifIds(ex);
     const firstId = altIds[0] || ex.id;
-    const img0 = `${GIF_BASE}${firstId}/0.jpg`;
     const fallbackStr = altIds.join('|');
     const muscPm = ex.pm.map(m => MUSC[m] || m).join(', ');
     const eqLabel = EQUIP[ex.eq] || ex.eq;
     const lvlLabel = LEVEL[ex.lvl] || ex.lvl;
+    
+    // Verifica se tem GIF customizado (prioridade máxima)
+    const customFrames = getGifCustomFrames(ex);
+    const img0 = customFrames 
+      ? (customFrames.frame0 || customFrames.gif)
+      : `${GIF_BASE}${firstId}/0.jpg`;
+    
     return `
       <div class="exercise-card" onclick="abrirModalEx('${ex.id}')" data-ex-id="${ex.id}">
-        <div class="exercise-card-img" data-gif-id="${firstId}" data-fallback-ids="${fallbackStr}">
+        <div class="exercise-card-img" data-gif-id="${firstId}" data-fallback-ids="${fallbackStr}" ${customFrames ? 'data-custom="1"' : ''}>
           <img src="${img0}" 
                alt="${ex.n}"
                loading="lazy"
                onload="this.parentElement.classList.add('has-image')"
-               onerror="tryNextGif(this)" />
+               ${customFrames ? '' : 'onerror="tryNextGif(this)"'} />
         </div>
         <div class="exercise-card-body">
           <div class="exercise-card-name">${ex.n}</div>
@@ -2930,8 +2818,19 @@ function abrirModalEx(exId) {
   
   // Imagem com animação
   const imgEl = document.getElementById('modalImg');
-  imgEl.style.backgroundImage = `url('${GIF_BASE}${gifIdFor(ex)}/0.jpg')`;
-  imgEl.dataset.imgBase = `${GIF_BASE}${gifIdFor(ex)}/`;
+  const customFrames = getGifCustomFrames(ex);
+  if (customFrames) {
+    // Usar frames customizados em base64
+    imgEl.style.backgroundImage = `url('${customFrames.frame0 || customFrames.gif}')`;
+    imgEl.dataset.imgBase = '';
+    imgEl.dataset.customFrame0 = customFrames.frame0 || customFrames.gif || '';
+    imgEl.dataset.customFrame1 = customFrames.frame1 || customFrames.frame0 || customFrames.gif || '';
+  } else {
+    imgEl.style.backgroundImage = `url('${GIF_BASE}${gifIdFor(ex)}/0.jpg')`;
+    imgEl.dataset.imgBase = `${GIF_BASE}${gifIdFor(ex)}/`;
+    delete imgEl.dataset.customFrame0;
+    delete imgEl.dataset.customFrame1;
+  }
   iniciarAnimacaoModal('modalImg');
   
   // Nome e tags
@@ -2972,11 +2871,32 @@ function fecharModalEx() {
 let modalIntervals = {};
 function iniciarAnimacaoModal(elId) {
   const el = document.getElementById(elId);
-  if (!el || !el.dataset.imgBase) return;
+  if (!el) return;
   
   // Limpa estados anteriores
   el.classList.remove('broken', 'has-image', 'is-placeholder');
   el.style.backgroundImage = '';
+  
+  // CASO 1: GIF customizado em base64 (data-custom-frame0/1)
+  if (el.dataset.customFrame0) {
+    const f0 = el.dataset.customFrame0;
+    const f1 = el.dataset.customFrame1 || f0;
+    el.classList.add('has-image');
+    el.style.backgroundImage = `url('${f0}')`;
+    
+    if (f1 && f1 !== f0) {
+      // Anima alternando os 2 frames
+      let frame = 0;
+      modalIntervals[elId] = setInterval(() => {
+        frame = frame === 0 ? 1 : 0;
+        el.style.backgroundImage = `url('${frame === 0 ? f0 : f1}')`;
+      }, 700);
+    }
+    return;
+  }
+  
+  // CASO 2: URL externa (free-exercise-db)
+  if (!el.dataset.imgBase) return;
   
   const base = el.dataset.imgBase;
   const url0 = `${base}0.jpg`;
@@ -3460,12 +3380,15 @@ async function gerarPDF() {
   }
   
   try {
-    // ETAPA 1: Coletar todas as URLs de imagens dos exercícios
+    // ETAPA 1: Coletar todas as URLs de imagens dos exercícios (apenas os SEM GIF custom)
     if (btn) btn.textContent = '⏳ Listando imagens...';
     const urlsParaConverter = new Set();
     Object.keys(DIAS).forEach(d => {
       treino[d].exercicios.forEach(ex => {
-        urlsParaConverter.add(`${GIF_BASE}${gifIdFor(ex)}/0.jpg`);
+        if (!temGifCustom(ex)) {
+          // Sem GIF customizado, vamos baixar de free-exercise-db
+          urlsParaConverter.add(`${GIF_BASE}${gifIdFor(ex)}/0.jpg`);
+        }
       });
     });
     
@@ -3478,7 +3401,9 @@ async function gerarPDF() {
     const urlToEx = {};
     Object.keys(DIAS).forEach(d => {
       treino[d].exercicios.forEach(ex => {
-        urlToEx[`${GIF_BASE}${gifIdFor(ex)}/0.jpg`] = ex;
+        if (!temGifCustom(ex)) {
+          urlToEx[`${GIF_BASE}${gifIdFor(ex)}/0.jpg`] = ex;
+        }
       });
     });
     
@@ -3823,10 +3748,19 @@ async function exportarHTML() {
         exGlobal++;
         const muscPm = ex.pm.map(m => MUSC[m] || m).join(', ');
         const eqLabel = EQUIP[ex.eq] || ex.eq;
-        const url0 = `${GIF_BASE}${gifIdFor(ex)}/0.jpg`;
-        const url1 = `${GIF_BASE}${gifIdFor(ex)}/1.jpg`;
-        const frame0 = urlToBase64Map[url0] || '';
-        const frame1 = urlToBase64Map[url1] || frame0; // se não tem frame 1, usa o 0
+        
+        // GIF customizado tem prioridade
+        const customFrames = getGifCustomFrames(ex);
+        let frame0, frame1;
+        if (customFrames) {
+          frame0 = customFrames.frame0 || customFrames.gif || '';
+          frame1 = customFrames.frame1 || frame0;
+        } else {
+          const url0 = `${GIF_BASE}${gifIdFor(ex)}/0.jpg`;
+          const url1 = `${GIF_BASE}${gifIdFor(ex)}/1.jpg`;
+          frame0 = urlToBase64Map[url0] || '';
+          frame1 = urlToBase64Map[url1] || frame0; // se não tem frame 1, usa o 0
+        }
         
         // Modal individual para esse exercício (CSS :target — sem JS)
         modaisHtml += `
@@ -4350,7 +4284,7 @@ async function exportarHTML() {
 // ============================================================
 function exportarJSON() {
   const data = {
-    versao: '2.4',
+    versao: '2.5',
     treino,
     cliente: coletarCliente(),
     dataCriacao: new Date().toISOString()
@@ -4413,7 +4347,7 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
   console.log('📱 TRAIN.FUEL rodando como PWA');
 }
 
-console.log(`💪 TRAIN.FUEL v2.4 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
+console.log(`💪 TRAIN.FUEL v2.5 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
 
 </script>
 </body>
