@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Preview Placeholders</title>
+<style>
+  body { background: #0a0a0a; padding: 30px; font-family: Arial; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+  .card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; overflow: hidden; }
+  .card-img { aspect-ratio: 4/3; }
+  .card-img img { width: 100%; height: 100%; display: block; }
+  .card-body { padding: 12px; color: #fff; }
+  .card-name { font-weight: 700; font-size: 0.9rem; margin-bottom: 6px; }
+  .tag { display: inline-block; background: rgba(255,107,26,0.2); color: #ff6b1a; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; margin-right: 4px; }
+  h1 { color: #ff6b1a; font-family: Bebas Neue, Arial; }
+</style>
+</head>
+<body>
+<h1>PREVIEW — Placeholders SVG por grupo muscular</h1>
+<div class="grid" id="grid"></div>
+<script>
+// Mesmas funções do app
+const MUSC = { chest: "Peito", back: "Costas", lats: "Dorsais", lower_back: "Lombar", shoulders: "Ombros", biceps: "Bíceps", triceps: "Tríceps", forearms: "Antebraço", abdominals: "Abdômen", obliques: "Oblíquos", glutes: "Glúteos", quadriceps: "Quadríceps", hamstrings: "Posteriores", calves: "Panturrilhas", adductors: "Adutores", abductors: "Abdutores", traps: "Trapézio" };
+
+const MUSC_ICONS = {
+  chest: '<path d="M30 35c0-5 4-9 9-9h22c5 0 9 4 9 9v15c0 8-6 14-14 14H44c-8 0-14-6-14-14V35z" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="40" cy="42" r="3" fill="currentColor"/><circle cx="60" cy="42" r="3" fill="currentColor"/>',
+  back: '<path d="M50 20v60M30 35c5-3 10-3 20 0c10 3 15 3 20 0M30 55c5-3 10-3 20 0c10 3 15 3 20 0" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>',
+  lats: '<path d="M50 20v55M28 30c8 8 14 22 22 35M72 30c-8 8-14 22-22 35" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>',
+  lower_back: '<path d="M30 30h40M35 45h30M40 60h20M50 75v5" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>',
+  traps: '<path d="M50 18l-20 18M50 18l20 18M30 36l5 20M70 36l-5 20" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>',
+  shoulders: '<circle cx="35" cy="40" r="12" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="65" cy="40" r="12" stroke="currentColor" stroke-width="3" fill="none"/>',
+  biceps: '<path d="M30 30c0 0 5 15 20 20c15 5 20 20 20 20" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="50" cy="50" r="8" fill="currentColor"/>',
+  triceps: '<path d="M30 70c0 0 5-15 20-20c15-5 20-20 20-20" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="50" cy="50" r="8" fill="currentColor"/>',
+  forearms: '<rect x="30" y="35" width="40" height="30" rx="6" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="40" cy="50" r="2" fill="currentColor"/><circle cx="50" cy="50" r="2" fill="currentColor"/><circle cx="60" cy="50" r="2" fill="currentColor"/>',
+  abdominals: '<rect x="38" y="20" width="24" height="14" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><rect x="38" y="38" width="24" height="14" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><rect x="38" y="56" width="24" height="14" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><line x1="50" y1="20" x2="50" y2="70" stroke="currentColor" stroke-width="2.5"/>',
+  obliques: '<path d="M28 30l44 40M28 50l44 20M28 70l30 10" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>',
+  glutes: '<circle cx="38" cy="50" r="14" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="62" cy="50" r="14" stroke="currentColor" stroke-width="3" fill="none"/>',
+  quadriceps: '<path d="M40 20v60M60 20v60M30 35h40M30 50h40M30 65h40" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>',
+  hamstrings: '<path d="M40 20v60M60 20v60M35 45c5-2 10-2 15 0c5 2 10 2 15 0" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>',
+  calves: '<path d="M35 20v45c0 5 5 10 15 10c10 0 15-5 15-10V20" stroke="currentColor" stroke-width="3" fill="none"/><path d="M40 50c5 2 15 2 20 0" stroke="currentColor" stroke-width="2" fill="none"/>',
+  adductors: '<path d="M40 25l-10 50M60 25l10 50M40 50h20" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>',
+  abductors: '<path d="M40 25l-15 50M60 25l15 50" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>',
+  default: '<rect x="22" y="42" width="56" height="6" rx="2" fill="currentColor"/><rect x="14" y="33" width="10" height="24" rx="3" fill="currentColor"/><rect x="76" y="33" width="10" height="24" rx="3" fill="currentColor"/>'
+};
+
+function escapeXml(str) {
+  if (!str) return '';
+  return String(str).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&apos;'}[c]));
+}
+
+function generatePlaceholderSVG(ex) {
+  const muscleKey = (ex.pm && ex.pm[0]) ? ex.pm[0].replace(/\s+/g, '_') : 'default';
+  const icon = MUSC_ICONS[muscleKey] || MUSC_ICONS.default;
+  const muscleLabel = (ex.pm && ex.pm[0]) ? (MUSC[ex.pm[0]] || ex.pm[0]).toUpperCase() : '';
+  
+  const name = (ex.n || ex.nameEn || 'EXERCÍCIO').toUpperCase();
+  const words = name.split(/\s+/);
+  let line1 = '', line2 = '';
+  for (const w of words) {
+    if ((line1 + ' ' + w).trim().length <= 16) {
+      line1 = (line1 + ' ' + w).trim();
+    } else if ((line2 + ' ' + w).trim().length <= 16) {
+      line2 = (line2 + ' ' + w).trim();
+    }
+  }
+  
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 150" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+    <defs><linearGradient id="grad-${ex.id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff8c42"/><stop offset="100%" stop-color="#cc4f10"/></linearGradient></defs>
+    <rect width="200" height="150" fill="url(#grad-${ex.id})"/>
+    <g transform="translate(50,5) scale(1.0,0.9)" fill="none" color="#1a1a1a" opacity="0.85">${icon}</g>
+    <text x="100" y="118" text-anchor="middle" fill="#1a1a1a" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" letter-spacing="0.5">${escapeXml(line1)}</text>
+    ${line2 ? `<text x="100" y="135" text-anchor="middle" fill="#1a1a1a" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" letter-spacing="0.5">${escapeXml(line2)}</text>` : ''}
+    ${muscleLabel && !line2 ? `<text x="100" y="135" text-anchor="middle" fill="#1a1a1a" font-family="Arial, sans-serif" font-size="9" font-weight="700" opacity="0.7" letter-spacing="1">${escapeXml(muscleLabel)}</text>` : ''}
+  </svg>`;
+  
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+
+// Exercícios de demonstração com diferentes grupos musculares
+const examples = [
+  { id: 'a1', n: 'Pec Deck (Voador)', pm: ['chest'], eq: 'Máquina' },
+  { id: 'a2', n: 'Supino Hammer Iso-Lateral', pm: ['chest'], eq: 'Máquina' },
+  { id: 'a3', n: 'Glute Drive', pm: ['glutes'], eq: 'Máquina' },
+  { id: 'a4', n: 'Hip Thrust com Barra', pm: ['glutes'], eq: 'Barra' },
+  { id: 'a5', n: 'Cadeira Adutora', pm: ['adductors'], eq: 'Máquina' },
+  { id: 'a6', n: 'Cadeira Abdutora', pm: ['abductors'], eq: 'Máquina' },
+  { id: 'a7', n: 'Agachamento Pendular', pm: ['quadriceps'], eq: 'Máquina' },
+  { id: 'a8', n: 'Cadeira Extensora', pm: ['quadriceps'], eq: 'Máquina' },
+  { id: 'a9', n: 'Mesa Flexora', pm: ['hamstrings'], eq: 'Máquina' },
+  { id: 'a10', n: 'Panturrilha em Pé', pm: ['calves'], eq: 'Máquina' },
+  { id: 'a11', n: 'Rosca Scott', pm: ['biceps'], eq: 'Barra' },
+  { id: 'a12', n: 'Tríceps Pulley Corda', pm: ['triceps'], eq: 'Cabo' },
+  { id: 'a13', n: 'Pulldown Triângulo', pm: ['lats'], eq: 'Cabo' },
+  { id: 'a14', n: 'Encolhimento (Shrug)', pm: ['traps'], eq: 'Halteres' },
+  { id: 'a15', n: 'Cable Crunch', pm: ['abdominals'], eq: 'Cabo' },
+  { id: 'a16', n: 'Russian Twist', pm: ['obliques'], eq: 'Halteres' },
+  { id: 'a17', n: 'Hyperextension Lombar', pm: ['lower_back'], eq: 'Máquina' },
+  { id: 'a18', n: 'Desenvolvimento Arnold', pm: ['shoulders'], eq: 'Halteres' },
+];
+
+const grid = document.getElementById('grid');
+examples.forEach(ex => {
+  const div = document.createElement('div');
+  div.className = 'card';
+  const muscle = MUSC[ex.pm[0]] || ex.pm[0];
+  div.innerHTML = `
+    <div class="card-img"><img src="${generatePlaceholderSVG(ex)}"/></div>
+    <div class="card-body">
+      <div class="card-name">${ex.n}</div>
+      <span class="tag">${muscle}</span>
+      <span class="tag">${ex.eq}</span>
+    </div>
+  `;
+  grid.appendChild(div);
+});
+</script>
+</body></html>
