@@ -1277,8 +1277,12 @@
           <strong id="metaTotalEx">—</strong>
         </div>
         <div class="brand-meta-item">
+          <span>Alunos</span>
+          <strong id="metaTotalAlunos">0</strong>
+        </div>
+        <div class="brand-meta-item">
           <span>Versão</span>
-          <strong>2.7</strong>
+          <strong>2.9</strong>
         </div>
       </div>
     </div>
@@ -1286,19 +1290,155 @@
 
   <!-- ============== NAVEGAÇÃO ============== -->
   <div class="nav-tabs">
-    <button class="nav-tab active" data-panel="aluno">👤 Aluno</button>
+    <button class="nav-tab active" data-panel="alunos">👥 Alunos</button>
+    <button class="nav-tab" data-panel="aluno">👤 Ficha</button>
     <button class="nav-tab" data-panel="treino">🏋️ Treino</button>
     <button class="nav-tab" data-panel="export">📄 Exportar</button>
   </div>
 
-  <!-- ============== PAINEL ALUNO ============== -->
-  <div class="panel active" id="panel-aluno">
+  <!-- ============== PAINEL ALUNOS (lista) ============== -->
+  <div class="panel active" id="panel-alunos">
+    <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap;">
+      <input type="text" id="alunoSearch" placeholder="🔍 Buscar aluno por nome..." 
+        style="flex: 1; min-width: 200px; padding: 12px 14px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 0.95rem;"
+        oninput="filtrarAlunos()">
+      <select id="alunoFilterObjetivo" onchange="filtrarAlunos()" 
+        style="padding: 12px 14px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 0.9rem;">
+        <option value="">Todos objetivos</option>
+        <option>Hipertrofia</option>
+        <option>Emagrecimento</option>
+        <option>Definição</option>
+        <option>Força</option>
+        <option>Resistência</option>
+        <option>Performance esportiva</option>
+        <option>Saúde geral</option>
+        <option>Reabilitação</option>
+      </select>
+      <button onclick="novoAluno()" 
+        style="padding: 12px 18px; background: linear-gradient(135deg, var(--orange), var(--orange-2)); border: none; color: #fff; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(255,107,26,.3);">
+        ➕ Novo Aluno
+      </button>
+    </div>
+
+    <!-- Estatísticas -->
+    <div id="alunosStats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px;">
+      <div style="background: var(--bg-2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center;">
+        <div style="font-size: 0.7rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 1px;">Total</div>
+        <div id="statTotalAlunos" style="font-size: 1.6rem; font-weight: 800; color: var(--orange); margin-top: 4px;">0</div>
+      </div>
+      <div style="background: var(--bg-2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center;">
+        <div style="font-size: 0.7rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 1px;">Ativos (30d)</div>
+        <div id="statAtivosAlunos" style="font-size: 1.6rem; font-weight: 800; color: var(--text); margin-top: 4px;">0</div>
+      </div>
+      <div style="background: var(--bg-2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center;">
+        <div style="font-size: 0.7rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 1px;">Treinos Salvos</div>
+        <div id="statTreinosVersoes" style="font-size: 1.6rem; font-weight: 800; color: var(--text); margin-top: 4px;">0</div>
+      </div>
+    </div>
+
+    <!-- Lista de alunos (cards) -->
+    <div id="alunosList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;">
+      <!-- preenchido via JS -->
+    </div>
+
+    <!-- Estado vazio -->
+    <div id="alunosEmpty" style="display: none; text-align: center; padding: 60px 20px; background: var(--bg-2); border: 2px dashed var(--border); border-radius: 14px; color: var(--text-3);">
+      <div style="font-size: 4rem; margin-bottom: 14px;">👥</div>
+      <h3 style="color: var(--text); margin: 0 0 8px;">Nenhum aluno cadastrado ainda</h3>
+      <p style="margin: 0 0 18px; font-size: 0.9rem;">Comece cadastrando seu primeiro aluno para organizar treinos com histórico completo.</p>
+      <button onclick="novoAluno()" 
+        style="padding: 12px 22px; background: linear-gradient(135deg, var(--orange), var(--orange-2)); border: none; color: #fff; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 0.95rem;">
+        ➕ Cadastrar Primeiro Aluno
+      </button>
+    </div>
+
+    <!-- Backup geral -->
+    <div style="margin-top: 24px; padding: 16px; background: var(--bg-2); border-radius: 12px; border: 1px solid var(--border);">
+      <h4 style="margin: 0 0 10px; color: var(--text); font-size: 0.95rem;">💾 Backup & Sincronização</h4>
+      <p style="margin: 0 0 12px; font-size: 0.82rem; color: var(--text-2); line-height: 1.5;">
+        Use o backup para mover alunos entre dispositivos (celular ↔ computador) ou para guardar segurança no Google Drive/WhatsApp.
+      </p>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button onclick="exportarTodosAlunos()" 
+          style="padding: 10px 14px; background: var(--bg-3); border: 1px solid var(--border); color: var(--text); border-radius: 8px; cursor: pointer; font-size: 0.85rem;">
+          📥 Exportar Todos (JSON)
+        </button>
+        <button onclick="document.getElementById('importAlunosFile').click()" 
+          style="padding: 10px 14px; background: var(--bg-3); border: 1px solid var(--border); color: var(--text); border-radius: 8px; cursor: pointer; font-size: 0.85rem;">
+          📤 Importar Backup
+        </button>
+        <input type="file" id="importAlunosFile" accept=".json" style="display:none" onchange="importarAlunos(event)">
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== MODAL HISTÓRICO DE VERSÕES ============== -->
+  <div class="modal-overlay" id="historicoModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,.85); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 14px; max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="margin: 0; color: var(--orange);">📜 Histórico de Versões</h3>
+        <button onclick="fecharHistorico()" style="background: none; border: none; color: var(--text-3); font-size: 1.5rem; cursor: pointer;">✕</button>
+      </div>
+      <div id="historicoLista">
+        <!-- preenchido via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== TOAST ============== -->
+  <div id="toast" style="display: none; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--orange), var(--orange-2)); color: #fff; padding: 14px 22px; border-radius: 10px; font-weight: 600; z-index: 99999; box-shadow: 0 8px 24px rgba(255,107,26,.4); font-size: 0.9rem;">
+    Mensagem
+  </div>
+
+  <!-- ============== PAINEL ALUNO (Ficha) ============== -->
+  <div class="panel" id="panel-aluno">
+    
+    <!-- Indicador de aluno ativo -->
+    <div id="alunoAtivoBar" style="display:none; background: linear-gradient(135deg, rgba(255,107,26,.15), rgba(255,140,66,.05)); border: 1px solid rgba(255,107,26,.4); border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+      <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;">
+        <div id="alunoAtivoFoto" style="width: 48px; height: 48px; border-radius: 50%; background: var(--bg-2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 1.5rem;">👤</div>
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-size: 0.7rem; color: var(--orange); text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Editando aluno</div>
+          <div id="alunoAtivoNome" style="font-size: 1.1rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">—</div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px; flex-shrink: 0;">
+        <button onclick="salvarAlunoAtivo()" class="btn-export" style="background: var(--orange); color: #fff; border: none; padding: 8px 14px; font-size: 0.85rem;">💾 Salvar</button>
+        <button onclick="fecharAlunoAtivo()" style="background: var(--bg-2); color: var(--text-2); border: 1px solid var(--border); padding: 8px 14px; font-size: 0.85rem; border-radius: 8px; cursor: pointer;">✕ Fechar</button>
+      </div>
+    </div>
     
     <div class="client-form">
       <div style="margin-top: 8px;">
-        <div class="field-grid" style="grid-template-columns: 2fr 1fr 1fr;">
+        
+        <!-- Foto do aluno -->
+        <div style="display: grid; grid-template-columns: auto 1fr 1fr; gap: 12px; align-items: end; margin-bottom: 12px;">
+          <div class="field" style="text-align: center;">
+            <label>Foto Atual</label>
+            <div onclick="document.getElementById('cliFotoInput').click()" id="cliFotoPreview" style="width: 90px; height: 90px; border-radius: 12px; background: var(--bg-2); border: 2px dashed var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; font-size: 1.8rem; color: var(--text-3);">📷</div>
+            <input type="file" id="cliFotoInput" accept="image/*" style="display:none" onchange="lerFoto(event, 'cliFoto')">
+            <input type="hidden" id="cliFoto">
+            <button type="button" onclick="limparFoto('cliFoto')" id="cliFotoLimpar" style="display:none; margin-top: 6px; background: none; border: 1px solid var(--border); color: var(--text-3); padding: 3px 8px; font-size: 0.7rem; border-radius: 6px; cursor: pointer;">remover</button>
+          </div>
+          <div class="field" style="text-align: center;">
+            <label>Foto "Antes"</label>
+            <div onclick="document.getElementById('cliFotoAntesInput').click()" id="cliFotoAntesPreview" style="width: 90px; height: 90px; border-radius: 12px; background: var(--bg-2); border: 2px dashed var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; font-size: 1.8rem; color: var(--text-3); margin: 0 auto;">📸</div>
+            <input type="file" id="cliFotoAntesInput" accept="image/*" style="display:none" onchange="lerFoto(event, 'cliFotoAntes')">
+            <input type="hidden" id="cliFotoAntes">
+            <button type="button" onclick="limparFoto('cliFotoAntes')" id="cliFotoAntesLimpar" style="display:none; margin-top: 6px; background: none; border: 1px solid var(--border); color: var(--text-3); padding: 3px 8px; font-size: 0.7rem; border-radius: 6px; cursor: pointer;">remover</button>
+          </div>
+          <div class="field" style="text-align: center;">
+            <label>Foto "Depois"</label>
+            <div onclick="document.getElementById('cliFotoDepoisInput').click()" id="cliFotoDepoisPreview" style="width: 90px; height: 90px; border-radius: 12px; background: var(--bg-2); border: 2px dashed var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; font-size: 1.8rem; color: var(--text-3); margin: 0 auto;">📸</div>
+            <input type="file" id="cliFotoDepoisInput" accept="image/*" style="display:none" onchange="lerFoto(event, 'cliFotoDepois')">
+            <input type="hidden" id="cliFotoDepois">
+            <button type="button" onclick="limparFoto('cliFotoDepois')" id="cliFotoDepoisLimpar" style="display:none; margin-top: 6px; background: none; border: 1px solid var(--border); color: var(--text-3); padding: 3px 8px; font-size: 0.7rem; border-radius: 6px; cursor: pointer;">remover</button>
+          </div>
+        </div>
+
+        <div class="field-grid" style="grid-template-columns: 2fr 1fr 1fr 1fr;">
           <div class="field">
-            <label>Nome do Aluno</label>
+            <label>Nome do Aluno *</label>
             <input type="text" id="cliNome" placeholder="ex: João Silva">
           </div>
           <div class="field">
@@ -1306,8 +1446,28 @@
             <input type="number" id="cliIdade" placeholder="anos" min="1" max="120">
           </div>
           <div class="field">
+            <label>Sexo</label>
+            <select id="cliSexo">
+              <option value="">—</option>
+              <option>Masculino</option>
+              <option>Feminino</option>
+              <option>Outro</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Data Nasc.</label>
+            <input type="date" id="cliNasc">
+          </div>
+        </div>
+
+        <div class="field-grid" style="margin-top: 12px; grid-template-columns: 1fr 1fr;">
+          <div class="field">
             <label>Telefone</label>
             <input type="text" id="cliTel" placeholder="(00) 00000-0000">
+          </div>
+          <div class="field">
+            <label>E-mail</label>
+            <input type="email" id="cliEmail" placeholder="email@exemplo.com">
           </div>
         </div>
         
@@ -1321,7 +1481,18 @@
             <input type="number" id="cliAltura" placeholder="cm">
           </div>
           <div class="field">
-            <label>Objetivo</label>
+            <label>% Gordura</label>
+            <input type="number" id="cliGordura" placeholder="%" step="0.1">
+          </div>
+          <div class="field">
+            <label>Massa Magra (kg)</label>
+            <input type="number" id="cliMassaMagra" placeholder="kg" step="0.1">
+          </div>
+        </div>
+        
+        <div class="field-grid" style="margin-top: 12px; grid-template-columns: 1fr 1fr 1fr;">
+          <div class="field">
+            <label>Objetivo Principal</label>
             <select id="cliObjetivo">
               <option value="">—</option>
               <option>Hipertrofia</option>
@@ -1343,6 +1514,33 @@
               <option>Avançado</option>
             </select>
           </div>
+          <div class="field">
+            <label>Frequência Semanal</label>
+            <select id="cliFreq">
+              <option value="">—</option>
+              <option>2x por semana</option>
+              <option>3x por semana</option>
+              <option>4x por semana</option>
+              <option>5x por semana</option>
+              <option>6x por semana</option>
+              <option>7x por semana</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-grid" style="margin-top: 12px; grid-template-columns: 1fr 1fr 1fr;">
+          <div class="field">
+            <label>Profissão / Rotina</label>
+            <input type="text" id="cliProfissao" placeholder="ex: Engenheiro, sentado o dia todo">
+          </div>
+          <div class="field">
+            <label>Data de Início</label>
+            <input type="date" id="cliInicio">
+          </div>
+          <div class="field">
+            <label>Periodização (semanas)</label>
+            <input type="number" id="cliPeriodizacao" placeholder="ex: 8" min="1" max="52">
+          </div>
         </div>
         
         <div class="field-grid" style="margin-top: 12px; grid-template-columns: 1fr 1fr;">
@@ -1351,20 +1549,30 @@
             <input type="text" id="profNome" placeholder="ex: Prof. Matheus — CREF X-00000">
           </div>
           <div class="field">
-            <label>Data do Plano</label>
+            <label>Data do Plano (deste treino)</label>
             <input type="date" id="planData">
           </div>
         </div>
         
         <div class="field" style="margin-top: 12px;">
-          <label>Restrições / Lesões / Observações</label>
-          <textarea id="cliObs" rows="3" placeholder="ex: Lesão no ombro direito; evitar exercícios de impacto..."></textarea>
+          <label>Histórico Médico / Lesões / Cirurgias</label>
+          <textarea id="cliHistMedico" rows="2" placeholder="ex: Hérnia de disco L4-L5; cirurgia de menisco em 2020..."></textarea>
+        </div>
+        
+        <div class="field" style="margin-top: 12px;">
+          <label>Restrições / Observações Importantes</label>
+          <textarea id="cliObs" rows="3" placeholder="ex: Evitar exercícios de impacto; preferência por cadência lenta..."></textarea>
+        </div>
+
+        <div class="field" style="margin-top: 12px;">
+          <label>Anamnese / Notas Particulares</label>
+          <textarea id="cliAnamnese" rows="3" placeholder="Anotações pessoais, dificuldades observadas, preferências de exercícios, motivações..."></textarea>
         </div>
       </div>
     </div>
     
     <div class="info-card">
-      Esses dados aparecerão no PDF do treino enviado ao aluno. Preencha com cuidado para passar credibilidade profissional.
+      Os dados marcados com * são obrigatórios. Os demais aparecerão no PDF do treino enviado ao aluno conforme preenchidos. Para salvar este aluno, use a aba <strong>👥 Alunos</strong> ou clique em "💾 Salvar" no topo se já houver um aluno selecionado.
     </div>
   </div>
 
@@ -1489,7 +1697,7 @@
   </div>
 
   <p class="footer-note">
-    <strong>TRAIN.FUEL · v2.8</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
+    <strong>TRAIN.FUEL · v2.9</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
   </p>
   
   <!-- Área PDF (oculta em tela) -->
@@ -3242,17 +3450,29 @@ function limparTudo() {
 // COLETAR DADOS DO ALUNO
 // ============================================================
 function coletarCliente() {
+  const get = (id) => document.getElementById(id)?.value || '';
   return {
-    nome: document.getElementById('cliNome').value || '—',
-    idade: document.getElementById('cliIdade').value,
-    tel: document.getElementById('cliTel').value,
-    peso: document.getElementById('cliPeso').value,
-    altura: document.getElementById('cliAltura').value,
-    objetivo: document.getElementById('cliObjetivo').value,
-    nivel: document.getElementById('cliNivel').value,
-    obs: document.getElementById('cliObs').value,
-    profNome: document.getElementById('profNome').value,
-    planData: document.getElementById('planData').value
+    nome: get('cliNome') || '—',
+    idade: get('cliIdade'),
+    sexo: get('cliSexo'),
+    nasc: get('cliNasc'),
+    tel: get('cliTel'),
+    email: get('cliEmail'),
+    peso: get('cliPeso'),
+    altura: get('cliAltura'),
+    gordura: get('cliGordura'),
+    massaMagra: get('cliMassaMagra'),
+    objetivo: get('cliObjetivo'),
+    nivel: get('cliNivel'),
+    freq: get('cliFreq'),
+    profissao: get('cliProfissao'),
+    inicio: get('cliInicio'),
+    periodizacao: get('cliPeriodizacao'),
+    obs: get('cliObs'),
+    histMedico: get('cliHistMedico'),
+    anamnese: get('cliAnamnese'),
+    profNome: get('profNome'),
+    planData: get('planData')
   };
 }
 
@@ -4357,7 +4577,7 @@ async function exportarHTML() {
 // ============================================================
 function exportarJSON() {
   const data = {
-    versao: '2.8',
+    versao: '2.9',
     treino,
     cliente: coletarCliente(),
     dataCriacao: new Date().toISOString()
@@ -4382,16 +4602,28 @@ function importarJSON(e) {
       if (data.treino) treino = data.treino;
       if (data.cliente) {
         const c = data.cliente;
-        if (c.nome && c.nome !== '—') document.getElementById('cliNome').value = c.nome;
-        if (c.idade) document.getElementById('cliIdade').value = c.idade;
-        if (c.tel) document.getElementById('cliTel').value = c.tel;
-        if (c.peso) document.getElementById('cliPeso').value = c.peso;
-        if (c.altura) document.getElementById('cliAltura').value = c.altura;
-        if (c.objetivo) document.getElementById('cliObjetivo').value = c.objetivo;
-        if (c.nivel) document.getElementById('cliNivel').value = c.nivel;
-        if (c.obs) document.getElementById('cliObs').value = c.obs;
-        if (c.profNome) document.getElementById('profNome').value = c.profNome;
-        if (c.planData) document.getElementById('planData').value = c.planData;
+        const set = (id, v) => { if (v && v !== '—') { const el = document.getElementById(id); if (el) el.value = v; } };
+        set('cliNome', c.nome);
+        set('cliIdade', c.idade);
+        set('cliSexo', c.sexo);
+        set('cliNasc', c.nasc);
+        set('cliTel', c.tel);
+        set('cliEmail', c.email);
+        set('cliPeso', c.peso);
+        set('cliAltura', c.altura);
+        set('cliGordura', c.gordura);
+        set('cliMassaMagra', c.massaMagra);
+        set('cliObjetivo', c.objetivo);
+        set('cliNivel', c.nivel);
+        set('cliFreq', c.freq);
+        set('cliProfissao', c.profissao);
+        set('cliInicio', c.inicio);
+        set('cliPeriodizacao', c.periodizacao);
+        set('cliObs', c.obs);
+        set('cliHistMedico', c.histMedico);
+        set('cliAnamnese', c.anamnese);
+        set('profNome', c.profNome);
+        set('planData', c.planData);
       }
       // Atualiza foco do dia atual
       document.getElementById('dayFocus').value = treino[diaAtivo].focus || '';
@@ -4420,7 +4652,766 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
   console.log('📱 TRAIN.FUEL rodando como PWA');
 }
 
-console.log(`💪 TRAIN.FUEL v2.8 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
+console.log(`💪 TRAIN.FUEL v2.9 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
+
+// =================================================================
+// 👥 MÓDULO DE ALUNOS — IndexedDB + Histórico de Versões (v2.9)
+// =================================================================
+
+const DB_NAME = 'trainfuel_db';
+const DB_VERSION = 1;
+const STORE_ALUNOS = 'alunos';
+const STORE_VERSOES = 'versoes';
+
+let db = null;
+let alunoAtivoId = null;
+let alunosCache = [];
+
+// Abrir/criar banco IndexedDB
+function abrirDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onerror = () => reject(req.error);
+    req.onsuccess = () => { db = req.result; resolve(db); };
+    req.onupgradeneeded = (e) => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains(STORE_ALUNOS)) {
+        const s = d.createObjectStore(STORE_ALUNOS, { keyPath: 'id' });
+        s.createIndex('nome', 'dados.nome', { unique: false });
+        s.createIndex('atualizadoEm', 'atualizadoEm', { unique: false });
+      }
+      if (!d.objectStoreNames.contains(STORE_VERSOES)) {
+        const v = d.createObjectStore(STORE_VERSOES, { keyPath: 'id', autoIncrement: true });
+        v.createIndex('alunoId', 'alunoId', { unique: false });
+        v.createIndex('criadoEm', 'criadoEm', { unique: false });
+      }
+    };
+  });
+}
+
+// Helpers IndexedDB
+function dbGet(store, key) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, 'readonly');
+    const req = tx.objectStore(store).get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbGetAll(store) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, 'readonly');
+    const req = tx.objectStore(store).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbPut(store, value) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, 'readwrite');
+    const req = tx.objectStore(store).put(value);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbAdd(store, value) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, 'readwrite');
+    const req = tx.objectStore(store).add(value);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbDelete(store, key) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, 'readwrite');
+    const req = tx.objectStore(store).delete(key);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbGetAllByIndex(store, indexName, value) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, 'readonly');
+    const idx = tx.objectStore(store).index(indexName);
+    const req = idx.getAll(value);
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// Toast de notificação
+function toast(msg, tipo = 'sucesso') {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.style.display = 'block';
+  if (tipo === 'erro') {
+    t.style.background = 'linear-gradient(135deg, #c0392b, #e74c3c)';
+  } else if (tipo === 'aviso') {
+    t.style.background = 'linear-gradient(135deg, #d4730a, #f39c12)';
+  } else {
+    t.style.background = 'linear-gradient(135deg, var(--orange), var(--orange-2))';
+  }
+  setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+
+// Gerar ID único
+function gerarId() {
+  return 'a_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 6);
+}
+
+// Coletar TODOS os dados do formulário de aluno (campos pessoais)
+function coletarDadosAluno() {
+  return {
+    nome: (document.getElementById('cliNome')?.value || '').trim(),
+    idade: document.getElementById('cliIdade')?.value || '',
+    sexo: document.getElementById('cliSexo')?.value || '',
+    nasc: document.getElementById('cliNasc')?.value || '',
+    tel: document.getElementById('cliTel')?.value || '',
+    email: document.getElementById('cliEmail')?.value || '',
+    peso: document.getElementById('cliPeso')?.value || '',
+    altura: document.getElementById('cliAltura')?.value || '',
+    gordura: document.getElementById('cliGordura')?.value || '',
+    massaMagra: document.getElementById('cliMassaMagra')?.value || '',
+    objetivo: document.getElementById('cliObjetivo')?.value || '',
+    nivel: document.getElementById('cliNivel')?.value || '',
+    freq: document.getElementById('cliFreq')?.value || '',
+    profissao: document.getElementById('cliProfissao')?.value || '',
+    inicio: document.getElementById('cliInicio')?.value || '',
+    periodizacao: document.getElementById('cliPeriodizacao')?.value || '',
+    profNome: document.getElementById('profNome')?.value || '',
+    planData: document.getElementById('planData')?.value || '',
+    histMedico: document.getElementById('cliHistMedico')?.value || '',
+    obs: document.getElementById('cliObs')?.value || '',
+    anamnese: document.getElementById('cliAnamnese')?.value || '',
+    foto: document.getElementById('cliFoto')?.value || '',
+    fotoAntes: document.getElementById('cliFotoAntes')?.value || '',
+    fotoDepois: document.getElementById('cliFotoDepois')?.value || ''
+  };
+}
+
+// Aplicar dados ao formulário
+function aplicarDadosAluno(d) {
+  d = d || {};
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+  set('cliNome', d.nome);
+  set('cliIdade', d.idade);
+  set('cliSexo', d.sexo);
+  set('cliNasc', d.nasc);
+  set('cliTel', d.tel);
+  set('cliEmail', d.email);
+  set('cliPeso', d.peso);
+  set('cliAltura', d.altura);
+  set('cliGordura', d.gordura);
+  set('cliMassaMagra', d.massaMagra);
+  set('cliObjetivo', d.objetivo);
+  set('cliNivel', d.nivel);
+  set('cliFreq', d.freq);
+  set('cliProfissao', d.profissao);
+  set('cliInicio', d.inicio);
+  set('cliPeriodizacao', d.periodizacao);
+  set('profNome', d.profNome);
+  set('planData', d.planData);
+  set('cliHistMedico', d.histMedico);
+  set('cliObs', d.obs);
+  set('cliAnamnese', d.anamnese);
+  
+  // Fotos
+  aplicarFoto('cliFoto', d.foto);
+  aplicarFoto('cliFotoAntes', d.fotoAntes);
+  aplicarFoto('cliFotoDepois', d.fotoDepois);
+}
+
+function aplicarFoto(id, dataUrl) {
+  const hidden = document.getElementById(id);
+  const preview = document.getElementById(id + 'Preview');
+  const limpar = document.getElementById(id + 'Limpar');
+  if (!hidden || !preview) return;
+  hidden.value = dataUrl || '';
+  if (dataUrl) {
+    preview.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;">`;
+    preview.style.border = '2px solid var(--orange)';
+    if (limpar) limpar.style.display = 'inline-block';
+  } else {
+    const emojis = { cliFoto: '📷', cliFotoAntes: '📸', cliFotoDepois: '📸' };
+    preview.innerHTML = emojis[id] || '📷';
+    preview.style.border = '2px dashed var(--border)';
+    if (limpar) limpar.style.display = 'none';
+  }
+}
+
+function lerFoto(event, hiddenId) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) {
+    toast('Imagem muito grande (máx 5MB). Reduza antes de enviar.', 'erro');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    // Comprimir imagem para max 600px
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const maxW = 600;
+      let w = img.width, h = img.height;
+      if (w > maxW) { h = h * maxW / w; w = maxW; }
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      const compressed = canvas.toDataURL('image/jpeg', 0.75);
+      aplicarFoto(hiddenId, compressed);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function limparFoto(hiddenId) {
+  aplicarFoto(hiddenId, '');
+  const input = document.getElementById(hiddenId + 'Input');
+  if (input) input.value = '';
+}
+
+// Coletar dados do TREINO completo (programação semanal)
+function coletarTreinoCompleto() {
+  // 'treino' é a variável global que o app usa para o treino semanal
+  return JSON.parse(JSON.stringify(treino || {}));
+}
+
+// Aplicar treino completo
+function aplicarTreinoCompleto(treino) {
+  if (typeof treino !== 'undefined' && treino) {
+    Object.keys(treino).forEach(d => delete treino[d]);
+    Object.assign(treino, JSON.parse(JSON.stringify(treino)));
+    // Re-renderizar
+    if (typeof renderDia === 'function') renderDia();
+    if (typeof atualizarContadores === 'function') atualizarContadores();
+  }
+}
+
+// Limpar formulário inteiro (novo aluno) - renomeado para evitar conflito
+function limparAlunoCompleto() {
+  aplicarDadosAluno({});
+  if (typeof treino !== 'undefined') {
+    Object.keys(treino).forEach(d => {
+      treino[d] = { focus: '', exercicios: [] };
+    });
+    const dayFocusEl = document.getElementById('dayFocus');
+    if (dayFocusEl) dayFocusEl.value = '';
+    document.querySelectorAll('.focus-label').forEach(el => el.textContent = '—');
+    if (typeof renderDia === 'function') renderDia();
+    if (typeof atualizarContadores === 'function') atualizarContadores();
+  }
+}
+
+// ===================== CRUD de Alunos =====================
+
+async function listarAlunos() {
+  alunosCache = await dbGetAll(STORE_ALUNOS);
+  alunosCache.sort((a, b) => (b.atualizadoEm || 0) - (a.atualizadoEm || 0));
+  return alunosCache;
+}
+
+async function buscarAluno(id) {
+  return await dbGet(STORE_ALUNOS, id);
+}
+
+async function salvarAluno(aluno, criarVersao = true) {
+  aluno.atualizadoEm = Date.now();
+  if (!aluno.criadoEm) aluno.criadoEm = aluno.atualizadoEm;
+  await dbPut(STORE_ALUNOS, aluno);
+  if (criarVersao) {
+    await dbAdd(STORE_VERSOES, {
+      alunoId: aluno.id,
+      criadoEm: Date.now(),
+      dados: JSON.parse(JSON.stringify(aluno.dados)),
+      treino: JSON.parse(JSON.stringify(aluno.treino || {})),
+      nota: aluno._notaVersao || ''
+    });
+  }
+  return aluno;
+}
+
+async function excluirAluno(id) {
+  await dbDelete(STORE_ALUNOS, id);
+  // Excluir versões do aluno
+  const versoes = await dbGetAllByIndex(STORE_VERSOES, 'alunoId', id);
+  for (const v of versoes) {
+    await dbDelete(STORE_VERSOES, v.id);
+  }
+}
+
+async function listarVersoes(alunoId) {
+  const versoes = await dbGetAllByIndex(STORE_VERSOES, 'alunoId', alunoId);
+  versoes.sort((a, b) => b.criadoEm - a.criadoEm);
+  return versoes;
+}
+
+// ===================== Renderização =====================
+
+async function renderListaAlunos() {
+  await listarAlunos();
+  
+  const search = (document.getElementById('alunoSearch')?.value || '').toLowerCase();
+  const filtroObj = document.getElementById('alunoFilterObjetivo')?.value || '';
+  
+  let lista = alunosCache.filter(a => {
+    const nome = (a.dados?.nome || '').toLowerCase();
+    if (search && !nome.includes(search)) return false;
+    if (filtroObj && a.dados?.objetivo !== filtroObj) return false;
+    return true;
+  });
+  
+  const container = document.getElementById('alunosList');
+  const empty = document.getElementById('alunosEmpty');
+  
+  if (alunosCache.length === 0) {
+    container.innerHTML = '';
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+    container.innerHTML = lista.map(a => criarCardAluno(a)).join('');
+  }
+  
+  // Atualizar estatísticas
+  document.getElementById('statTotalAlunos').textContent = alunosCache.length;
+  document.getElementById('metaTotalAlunos').textContent = alunosCache.length;
+  
+  const trintaDias = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  const ativos = alunosCache.filter(a => (a.atualizadoEm || 0) > trintaDias).length;
+  document.getElementById('statAtivosAlunos').textContent = ativos;
+  
+  // Total de versões
+  const totalV = await dbGetAll(STORE_VERSOES);
+  document.getElementById('statTreinosVersoes').textContent = totalV.length;
+}
+
+function criarCardAluno(a) {
+  const d = a.dados || {};
+  const nome = d.nome || 'Sem nome';
+  const iniciais = nome.split(' ').slice(0, 2).map(p => p[0] || '').join('').toUpperCase();
+  const foto = d.foto;
+  const obj = d.objetivo || '—';
+  const nivel = d.nivel || '';
+  const idade = d.idade ? `${d.idade}a` : '';
+  const peso = d.peso ? `${d.peso}kg` : '';
+  const tel = d.tel || '';
+  const ultimaEd = a.atualizadoEm ? new Date(a.atualizadoEm).toLocaleDateString('pt-BR') : '—';
+  
+  const exsCount = a.treino ? Object.values(a.treino).reduce((s, dia) => s + (dia.exercicios?.length || 0), 0) : 0;
+  
+  const fotoHtml = foto 
+    ? `<img src="${foto}" style="width:100%;height:100%;object-fit:cover;">`
+    : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--orange),var(--orange-2));color:#fff;font-weight:700;font-size:1.4rem;">${iniciais || '👤'}</div>`;
+  
+  return `
+    <div onclick="abrirAluno('${a.id}')" 
+         style="background: var(--bg-2); border: 1px solid var(--border); border-radius: 14px; padding: 14px; cursor: pointer; transition: all .2s; display: flex; gap: 12px; align-items: flex-start;"
+         onmouseover="this.style.borderColor='var(--orange)';this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(255,107,26,.2)'"
+         onmouseout="this.style.borderColor='var(--border)';this.style.transform='';this.style.boxShadow=''">
+      <div style="width: 56px; height: 56px; border-radius: 12px; overflow: hidden; flex-shrink: 0;">
+        ${fotoHtml}
+      </div>
+      <div style="flex: 1; min-width: 0;">
+        <div style="font-weight: 700; color: var(--text); font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;">${nome}</div>
+        <div style="font-size: 0.75rem; color: var(--text-3); margin-bottom: 6px;">
+          ${[idade, peso, nivel].filter(x => x).join(' · ') || '<em>sem dados</em>'}
+        </div>
+        <div style="display: inline-block; background: rgba(255,107,26,.15); color: var(--orange); padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; margin-bottom: 6px;">
+          ${obj}
+        </div>
+        <div style="font-size: 0.7rem; color: var(--text-3);">
+          ${exsCount > 0 ? `🏋️ ${exsCount} exercícios` : '⚠️ Sem treino'} · 📅 ${ultimaEd}
+        </div>
+      </div>
+      <div onclick="event.stopPropagation();menuAluno('${a.id}', event)" 
+           style="background: var(--bg-3); border: 1px solid var(--border); border-radius: 8px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">⋮</div>
+    </div>
+  `;
+}
+
+function filtrarAlunos() {
+  renderListaAlunos();
+}
+
+// ===================== Ações =====================
+
+function novoAluno() {
+  alunoAtivoId = null;
+  limparAlunoCompleto();
+  // Pré-preencher data de hoje
+  const hoje = new Date().toISOString().split('T')[0];
+  document.getElementById('planData').value = hoje;
+  document.getElementById('cliInicio').value = hoje;
+  
+  atualizarBarraAlunoAtivo(null);
+  
+  // Mudar pra aba Ficha
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector('[data-panel="aluno"]').classList.add('active');
+  document.getElementById('panel-aluno').classList.add('active');
+  
+  // Focar nome
+  setTimeout(() => document.getElementById('cliNome')?.focus(), 100);
+  toast('📝 Preencha os dados e clique em Salvar');
+}
+
+async function abrirAluno(id) {
+  const aluno = await buscarAluno(id);
+  if (!aluno) { toast('Aluno não encontrado', 'erro'); return; }
+  
+  alunoAtivoId = id;
+  aplicarDadosAluno(aluno.dados);
+  aplicarTreinoCompleto(aluno.treino || {});
+  atualizarBarraAlunoAtivo(aluno);
+  
+  // Mudar pra aba Ficha
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector('[data-panel="aluno"]').classList.add('active');
+  document.getElementById('panel-aluno').classList.add('active');
+  
+  toast(`📂 ${aluno.dados.nome || 'Aluno'} carregado`);
+}
+
+function atualizarBarraAlunoAtivo(aluno) {
+  const bar = document.getElementById('alunoAtivoBar');
+  if (!bar) return;
+  
+  if (!aluno) {
+    bar.style.display = 'none';
+    return;
+  }
+  
+  bar.style.display = 'flex';
+  document.getElementById('alunoAtivoNome').textContent = aluno.dados?.nome || 'Sem nome';
+  
+  const fotoEl = document.getElementById('alunoAtivoFoto');
+  if (aluno.dados?.foto) {
+    fotoEl.innerHTML = `<img src="${aluno.dados.foto}" style="width:100%;height:100%;object-fit:cover;">`;
+  } else {
+    const iniciais = (aluno.dados?.nome || '').split(' ').slice(0, 2).map(p => p[0] || '').join('').toUpperCase();
+    fotoEl.innerHTML = iniciais ? `<span style="font-size: 0.95rem; font-weight: 700; color: var(--orange);">${iniciais}</span>` : '👤';
+  }
+}
+
+async function salvarAlunoAtivo() {
+  const dados = coletarDadosAluno();
+  if (!dados.nome) {
+    toast('⚠️ Nome do aluno é obrigatório', 'aviso');
+    document.getElementById('cliNome')?.focus();
+    return;
+  }
+  
+  const treino = coletarTreinoCompleto();
+  
+  let aluno;
+  if (alunoAtivoId) {
+    aluno = await buscarAluno(alunoAtivoId);
+    if (!aluno) {
+      // Aluno foi excluído, criar novo
+      alunoAtivoId = gerarId();
+      aluno = { id: alunoAtivoId };
+    }
+  } else {
+    alunoAtivoId = gerarId();
+    aluno = { id: alunoAtivoId };
+  }
+  
+  aluno.dados = dados;
+  aluno.treino = treino;
+  
+  await salvarAluno(aluno, true);
+  atualizarBarraAlunoAtivo(aluno);
+  await renderListaAlunos();
+  
+  const exsCount = Object.values(treino).reduce((s, d) => s + (d.exercicios?.length || 0), 0);
+  toast(`✅ ${dados.nome} salvo (${exsCount} exercícios) — versão #${(await listarVersoes(aluno.id)).length}`);
+}
+
+function fecharAlunoAtivo() {
+  if (!confirm('Fechar este aluno? Mudanças não salvas serão perdidas.')) return;
+  alunoAtivoId = null;
+  limparAlunoCompleto();
+  atualizarBarraAlunoAtivo(null);
+  
+  // Voltar pra aba Alunos
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector('[data-panel="alunos"]').classList.add('active');
+  document.getElementById('panel-alunos').classList.add('active');
+}
+
+async function menuAluno(id, evt) {
+  const aluno = await buscarAluno(id);
+  if (!aluno) return;
+  const nome = aluno.dados?.nome || 'Aluno';
+  
+  const acao = prompt(
+    `Ações para "${nome}":\n\n` +
+    `1 - Abrir / Editar\n` +
+    `2 - Ver Histórico de Versões\n` +
+    `3 - Exportar Ficha (JSON)\n` +
+    `4 - Duplicar\n` +
+    `5 - Excluir\n\n` +
+    `Digite o número da ação:`
+  );
+  
+  if (acao === '1') abrirAluno(id);
+  else if (acao === '2') verHistorico(id);
+  else if (acao === '3') exportarAluno(id);
+  else if (acao === '4') duplicarAluno(id);
+  else if (acao === '5') confirmarExcluirAluno(id);
+}
+
+async function verHistorico(id) {
+  const aluno = await buscarAluno(id);
+  if (!aluno) return;
+  const versoes = await listarVersoes(id);
+  const modal = document.getElementById('historicoModal');
+  const lista = document.getElementById('historicoLista');
+  
+  if (versoes.length === 0) {
+    lista.innerHTML = '<p style="color: var(--text-3); text-align: center; padding: 30px;">Nenhuma versão salva ainda.</p>';
+  } else {
+    lista.innerHTML = `
+      <p style="color: var(--text-2); margin: 0 0 14px; font-size: 0.85rem;">
+        <strong>${aluno.dados?.nome || 'Aluno'}</strong> — ${versoes.length} versão(ões) salva(s)
+      </p>
+    ` + versoes.map((v, i) => {
+      const isAtual = i === 0;
+      const data = new Date(v.criadoEm).toLocaleString('pt-BR');
+      const exs = v.treino ? Object.values(v.treino).reduce((s, d) => s + (d.exercicios?.length || 0), 0) : 0;
+      return `
+        <div style="background: var(--bg-2); border: 1px solid ${isAtual ? 'var(--orange)' : 'var(--border)'}; border-radius: 10px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-weight: 700; color: var(--text); margin-bottom: 4px;">
+              v${versoes.length - i} ${isAtual ? '<span style="background: var(--orange); color: #fff; padding: 2px 8px; border-radius: 6px; font-size: 0.65rem; margin-left: 6px;">ATUAL</span>' : ''}
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-3);">📅 ${data}</div>
+            <div style="font-size: 0.8rem; color: var(--text-3);">🏋️ ${exs} exercícios — ${v.dados?.peso || '?'}kg</div>
+          </div>
+          ${!isAtual ? `<button onclick="restaurarVersao(${v.id}, '${id}')" style="background: var(--orange); color: #fff; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.8rem;">↩ Restaurar</button>` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+  
+  modal.style.display = 'flex';
+}
+
+function fecharHistorico() {
+  document.getElementById('historicoModal').style.display = 'none';
+}
+
+async function restaurarVersao(versaoId, alunoId) {
+  if (!confirm('Restaurar esta versão? Uma nova versão atual será criada com esses dados (a versão atual não será perdida).')) return;
+  const versao = await dbGet(STORE_VERSOES, versaoId);
+  const aluno = await buscarAluno(alunoId);
+  if (!versao || !aluno) { toast('Versão não encontrada', 'erro'); return; }
+  
+  aluno.dados = JSON.parse(JSON.stringify(versao.dados));
+  aluno.treino = JSON.parse(JSON.stringify(versao.treino));
+  aluno._notaVersao = `Restaurado da versão de ${new Date(versao.criadoEm).toLocaleString('pt-BR')}`;
+  
+  await salvarAluno(aluno, true);
+  delete aluno._notaVersao;
+  
+  fecharHistorico();
+  toast('↩ Versão restaurada');
+  
+  if (alunoAtivoId === alunoId) {
+    aplicarDadosAluno(aluno.dados);
+    aplicarTreinoCompleto(aluno.treino);
+  }
+  await renderListaAlunos();
+}
+
+async function duplicarAluno(id) {
+  const aluno = await buscarAluno(id);
+  if (!aluno) return;
+  const novo = {
+    id: gerarId(),
+    dados: JSON.parse(JSON.stringify(aluno.dados)),
+    treino: JSON.parse(JSON.stringify(aluno.treino || {})),
+    criadoEm: Date.now(),
+    atualizadoEm: Date.now()
+  };
+  novo.dados.nome = (novo.dados.nome || 'Aluno') + ' (cópia)';
+  novo._notaVersao = `Duplicado de ${aluno.dados?.nome || 'aluno'}`;
+  await salvarAluno(novo, true);
+  await renderListaAlunos();
+  toast('📋 Aluno duplicado');
+}
+
+async function confirmarExcluirAluno(id) {
+  const aluno = await buscarAluno(id);
+  if (!aluno) return;
+  const nome = aluno.dados?.nome || 'este aluno';
+  if (!confirm(`Tem CERTEZA que quer excluir "${nome}" e TODO o histórico de versões?\n\nEsta ação NÃO pode ser desfeita.`)) return;
+  await excluirAluno(id);
+  if (alunoAtivoId === id) {
+    alunoAtivoId = null;
+    limparAlunoCompleto();
+    atualizarBarraAlunoAtivo(null);
+  }
+  await renderListaAlunos();
+  toast(`🗑️ ${nome} excluído`);
+}
+
+// ===================== Backup / Import / Export =====================
+
+async function exportarAluno(id) {
+  const aluno = await buscarAluno(id);
+  if (!aluno) return;
+  const versoes = await listarVersoes(id);
+  const pacote = {
+    tipo: 'trainfuel_aluno',
+    versaoApp: '2.9',
+    exportadoEm: new Date().toISOString(),
+    aluno: aluno,
+    versoes: versoes
+  };
+  const nome = (aluno.dados?.nome || 'aluno').replace(/[^\w\s-]/g, '').replace(/\s+/g, '_');
+  baixarJSON(pacote, `aluno_${nome}_${new Date().toISOString().split('T')[0]}.json`);
+  toast('📥 Ficha exportada');
+}
+
+async function exportarTodosAlunos() {
+  const alunos = await dbGetAll(STORE_ALUNOS);
+  const versoes = await dbGetAll(STORE_VERSOES);
+  if (alunos.length === 0) {
+    toast('Nenhum aluno cadastrado para exportar', 'aviso');
+    return;
+  }
+  const pacote = {
+    tipo: 'trainfuel_backup_completo',
+    versaoApp: '2.9',
+    exportadoEm: new Date().toISOString(),
+    totalAlunos: alunos.length,
+    totalVersoes: versoes.length,
+    alunos: alunos,
+    versoes: versoes
+  };
+  baixarJSON(pacote, `trainfuel_backup_${new Date().toISOString().split('T')[0]}.json`);
+  toast(`📥 Backup exportado (${alunos.length} alunos)`);
+}
+
+function baixarJSON(obj, filename) {
+  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function importarAlunos(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  try {
+    const text = await file.text();
+    const pacote = JSON.parse(text);
+    
+    let alunosImp = [];
+    let versoesImp = [];
+    
+    if (pacote.tipo === 'trainfuel_aluno' && pacote.aluno) {
+      alunosImp = [pacote.aluno];
+      versoesImp = pacote.versoes || [];
+    } else if (pacote.tipo === 'trainfuel_backup_completo') {
+      alunosImp = pacote.alunos || [];
+      versoesImp = pacote.versoes || [];
+    } else {
+      toast('Arquivo inválido — não é um backup TRAIN.FUEL', 'erro');
+      return;
+    }
+    
+    if (alunosImp.length === 0) {
+      toast('Nenhum aluno encontrado no arquivo', 'aviso');
+      return;
+    }
+    
+    const resp = confirm(
+      `Importar ${alunosImp.length} aluno(s) e ${versoesImp.length} versão(ões)?\n\n` +
+      `• OK = importar (substitui alunos com mesmo ID)\n` +
+      `• Cancelar = não importar`
+    );
+    if (!resp) return;
+    
+    let importados = 0;
+    for (const a of alunosImp) {
+      // Verificar se já existe
+      const existente = await dbGet(STORE_ALUNOS, a.id);
+      if (existente) {
+        // Manter o mais recente
+        if ((a.atualizadoEm || 0) >= (existente.atualizadoEm || 0)) {
+          await dbPut(STORE_ALUNOS, a);
+          importados++;
+        }
+      } else {
+        await dbPut(STORE_ALUNOS, a);
+        importados++;
+      }
+    }
+    
+    let versoesImp2 = 0;
+    for (const v of versoesImp) {
+      try {
+        // Remover ID antigo pra criar nova entrada
+        const v2 = { ...v };
+        delete v2.id;
+        await dbAdd(STORE_VERSOES, v2);
+        versoesImp2++;
+      } catch (e) { /* ignorar duplicatas */ }
+    }
+    
+    await renderListaAlunos();
+    toast(`✅ ${importados} aluno(s) e ${versoesImp2} versão(ões) importados`);
+    event.target.value = '';
+  } catch (e) {
+    console.error(e);
+    toast('Erro ao importar: ' + e.message, 'erro');
+  }
+}
+
+// ===================== Inicialização =====================
+
+(async function inicializarAlunos() {
+  try {
+    await abrirDB();
+    await renderListaAlunos();
+    console.log('👥 Sistema de Alunos v2.9 inicializado');
+  } catch (e) {
+    console.error('Erro ao inicializar IndexedDB:', e);
+    toast('Erro ao carregar banco de alunos: ' + e.message, 'erro');
+  }
+})();
+
+// Auto-save no localStorage como fallback (caso navegador feche)
+window.addEventListener('beforeunload', () => {
+  if (alunoAtivoId) {
+    try {
+      const dados = coletarDadosAluno();
+      const treino = coletarTreinoCompleto();
+      localStorage.setItem('trainfuel_unsaved', JSON.stringify({
+        alunoId: alunoAtivoId,
+        dados, treino,
+        timestamp: Date.now()
+      }));
+    } catch(e) {}
+  }
+});
 
 </script>
 </body>
