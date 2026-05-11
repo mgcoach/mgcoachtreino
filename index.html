@@ -1282,7 +1282,7 @@
         </div>
         <div class="brand-meta-item">
           <span>Versão</span>
-          <strong>2.9</strong>
+          <strong>2.9.1</strong>
         </div>
       </div>
     </div>
@@ -1393,20 +1393,22 @@
   <!-- ============== PAINEL ALUNO (Ficha) ============== -->
   <div class="panel" id="panel-aluno">
     
-    <!-- Indicador de aluno ativo -->
-    <div id="alunoAtivoBar" style="display:none; background: linear-gradient(135deg, rgba(255,107,26,.15), rgba(255,140,66,.05)); border: 1px solid rgba(255,107,26,.4); border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+    <!-- Barra de ação SEMPRE visível (salvar funciona com ou sem aluno ativo) -->
+    <div style="background: linear-gradient(135deg, rgba(255,107,26,.15), rgba(255,140,66,.05)); border: 1px solid rgba(255,107,26,.4); border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
       <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;">
         <div id="alunoAtivoFoto" style="width: 48px; height: 48px; border-radius: 50%; background: var(--bg-2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 1.5rem;">👤</div>
         <div style="flex: 1; min-width: 0;">
-          <div style="font-size: 0.7rem; color: var(--orange); text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Editando aluno</div>
-          <div id="alunoAtivoNome" style="font-size: 1.1rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">—</div>
+          <div id="alunoAtivoLabel" style="font-size: 0.7rem; color: var(--orange); text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Novo aluno</div>
+          <div id="alunoAtivoNome" style="font-size: 1.1rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Preencha os dados e clique em Salvar</div>
         </div>
       </div>
       <div style="display: flex; gap: 8px; flex-shrink: 0;">
-        <button onclick="salvarAlunoAtivo()" class="btn-export" style="background: var(--orange); color: #fff; border: none; padding: 8px 14px; font-size: 0.85rem;">💾 Salvar</button>
-        <button onclick="fecharAlunoAtivo()" style="background: var(--bg-2); color: var(--text-2); border: 1px solid var(--border); padding: 8px 14px; font-size: 0.85rem; border-radius: 8px; cursor: pointer;">✕ Fechar</button>
+        <button onclick="salvarAlunoAtivo()" class="btn-export" style="background: var(--orange); color: #fff; border: none; padding: 10px 18px; font-size: 0.9rem; font-weight: 700;">💾 Salvar Aluno</button>
+        <button id="btnFecharAluno" onclick="fecharAlunoAtivo()" style="display:none; background: var(--bg-2); color: var(--text-2); border: 1px solid var(--border); padding: 8px 14px; font-size: 0.85rem; border-radius: 8px; cursor: pointer;">✕ Fechar</button>
       </div>
     </div>
+    <!-- Referência mantida pra não quebrar código antigo -->
+    <div id="alunoAtivoBar" style="display:none;"></div>
     
     <div class="client-form">
       <div style="margin-top: 8px;">
@@ -1572,7 +1574,7 @@
     </div>
     
     <div class="info-card">
-      Os dados marcados com * são obrigatórios. Os demais aparecerão no PDF do treino enviado ao aluno conforme preenchidos. Para salvar este aluno, use a aba <strong>👥 Alunos</strong> ou clique em "💾 Salvar" no topo se já houver um aluno selecionado.
+      Os dados marcados com * são obrigatórios. Os demais aparecerão no PDF do treino enviado ao aluno conforme preenchidos. Preencha a ficha e clique em <strong>💾 Salvar Aluno</strong> no topo desta aba.
     </div>
   </div>
 
@@ -1697,7 +1699,7 @@
   </div>
 
   <p class="footer-note">
-    <strong>TRAIN.FUEL · v2.9</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
+    <strong>TRAIN.FUEL · v2.9.1</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
   </p>
   
   <!-- Área PDF (oculta em tela) -->
@@ -4577,7 +4579,7 @@ async function exportarHTML() {
 // ============================================================
 function exportarJSON() {
   const data = {
-    versao: '2.9',
+    versao: '2.9.1',
     treino,
     cliente: coletarCliente(),
     dataCriacao: new Date().toISOString()
@@ -4652,7 +4654,7 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
   console.log('📱 TRAIN.FUEL rodando como PWA');
 }
 
-console.log(`💪 TRAIN.FUEL v2.9 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
+console.log(`💪 TRAIN.FUEL v2.9.1 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
 
 // =================================================================
 // 👥 MÓDULO DE ALUNOS — IndexedDB + Histórico de Versões (v2.9)
@@ -5083,23 +5085,33 @@ async function abrirAluno(id) {
 }
 
 function atualizarBarraAlunoAtivo(aluno) {
-  const bar = document.getElementById('alunoAtivoBar');
-  if (!bar) return;
+  const label = document.getElementById('alunoAtivoLabel');
+  const nomeEl = document.getElementById('alunoAtivoNome');
+  const fotoEl = document.getElementById('alunoAtivoFoto');
+  const btnFechar = document.getElementById('btnFecharAluno');
+  if (!nomeEl) return;
   
   if (!aluno) {
-    bar.style.display = 'none';
+    // Modo "novo aluno" — barra ainda visível, só muda o texto
+    if (label) label.textContent = 'Novo aluno';
+    nomeEl.textContent = 'Preencha os dados e clique em Salvar';
+    if (fotoEl) fotoEl.innerHTML = '👤';
+    if (btnFechar) btnFechar.style.display = 'none';
     return;
   }
   
-  bar.style.display = 'flex';
-  document.getElementById('alunoAtivoNome').textContent = aluno.dados?.nome || 'Sem nome';
+  // Modo "editando aluno existente"
+  if (label) label.textContent = 'Editando aluno';
+  nomeEl.textContent = aluno.dados?.nome || 'Sem nome';
+  if (btnFechar) btnFechar.style.display = 'inline-block';
   
-  const fotoEl = document.getElementById('alunoAtivoFoto');
-  if (aluno.dados?.foto) {
-    fotoEl.innerHTML = `<img src="${aluno.dados.foto}" style="width:100%;height:100%;object-fit:cover;">`;
-  } else {
-    const iniciais = (aluno.dados?.nome || '').split(' ').slice(0, 2).map(p => p[0] || '').join('').toUpperCase();
-    fotoEl.innerHTML = iniciais ? `<span style="font-size: 0.95rem; font-weight: 700; color: var(--orange);">${iniciais}</span>` : '👤';
+  if (fotoEl) {
+    if (aluno.dados?.foto) {
+      fotoEl.innerHTML = `<img src="${aluno.dados.foto}" style="width:100%;height:100%;object-fit:cover;">`;
+    } else {
+      const iniciais = (aluno.dados?.nome || '').split(' ').slice(0, 2).map(p => p[0] || '').join('').toUpperCase();
+      fotoEl.innerHTML = iniciais ? `<span style="font-size: 0.95rem; font-weight: 700; color: var(--orange);">${iniciais}</span>` : '👤';
+    }
   }
 }
 
@@ -5325,36 +5337,68 @@ async function importarAlunos(event) {
     
     let alunosImp = [];
     let versoesImp = [];
+    let formato = '';
     
     if (pacote.tipo === 'trainfuel_aluno' && pacote.aluno) {
+      // Formato novo: ficha de aluno única
       alunosImp = [pacote.aluno];
       versoesImp = pacote.versoes || [];
+      formato = 'ficha';
     } else if (pacote.tipo === 'trainfuel_backup_completo') {
+      // Formato novo: backup completo
       alunosImp = pacote.alunos || [];
       versoesImp = pacote.versoes || [];
+      formato = 'backup';
+    } else if (pacote.treino && (pacote.cliente || pacote.versao)) {
+      // Formato ANTIGO: { versao, treino, cliente } — vindo da aba 📄 Exportar
+      const cli = pacote.cliente || {};
+      const nome = cli.nome || prompt('Este arquivo não tem nome do aluno. Digite um nome para criar a ficha:', 'Aluno importado');
+      if (!nome) {
+        toast('Importação cancelada', 'aviso');
+        event.target.value = '';
+        return;
+      }
+      const agora = Date.now();
+      const novoAluno = {
+        id: gerarId(),
+        dados: { ...cli, nome: nome },
+        treino: pacote.treino,
+        criadoEm: agora,
+        atualizadoEm: agora
+      };
+      alunosImp = [novoAluno];
+      formato = 'antigo';
     } else {
-      toast('Arquivo inválido — não é um backup TRAIN.FUEL', 'erro');
+      toast('❌ Arquivo não reconhecido — não é um JSON do TRAIN.FUEL', 'erro');
+      event.target.value = '';
       return;
     }
     
     if (alunosImp.length === 0) {
       toast('Nenhum aluno encontrado no arquivo', 'aviso');
+      event.target.value = '';
       return;
     }
     
-    const resp = confirm(
-      `Importar ${alunosImp.length} aluno(s) e ${versoesImp.length} versão(ões)?\n\n` +
-      `• OK = importar (substitui alunos com mesmo ID)\n` +
-      `• Cancelar = não importar`
-    );
-    if (!resp) return;
+    // Mensagem clara por tipo
+    let msg = '';
+    if (formato === 'ficha') {
+      msg = `Importar a ficha de "${alunosImp[0].dados?.nome || 'Aluno'}" (${versoesImp.length} versão(ões) de treino)?`;
+    } else if (formato === 'backup') {
+      msg = `Importar backup completo: ${alunosImp.length} aluno(s) e ${versoesImp.length} versão(ões)?\n\nAlunos com mesmo ID serão substituídos.`;
+    } else {
+      msg = `Criar novo aluno "${alunosImp[0].dados?.nome}" a partir deste arquivo de treino?`;
+    }
+    
+    if (!confirm(msg)) {
+      event.target.value = '';
+      return;
+    }
     
     let importados = 0;
     for (const a of alunosImp) {
-      // Verificar se já existe
       const existente = await dbGet(STORE_ALUNOS, a.id);
       if (existente) {
-        // Manter o mais recente
         if ((a.atualizadoEm || 0) >= (existente.atualizadoEm || 0)) {
           await dbPut(STORE_ALUNOS, a);
           importados++;
@@ -5368,7 +5412,6 @@ async function importarAlunos(event) {
     let versoesImp2 = 0;
     for (const v of versoesImp) {
       try {
-        // Remover ID antigo pra criar nova entrada
         const v2 = { ...v };
         delete v2.id;
         await dbAdd(STORE_VERSOES, v2);
@@ -5377,11 +5420,18 @@ async function importarAlunos(event) {
     }
     
     await renderListaAlunos();
-    toast(`✅ ${importados} aluno(s) e ${versoesImp2} versão(ões) importados`);
+    
+    if (formato === 'antigo') {
+      toast(`✅ Aluno "${alunosImp[0].dados?.nome}" criado a partir do JSON de treino`);
+    } else {
+      toast(`✅ ${importados} aluno(s) importado(s)${versoesImp2 ? ' e ' + versoesImp2 + ' versão(ões)' : ''}`);
+    }
+    
     event.target.value = '';
   } catch (e) {
     console.error(e);
     toast('Erro ao importar: ' + e.message, 'erro');
+    event.target.value = '';
   }
 }
 

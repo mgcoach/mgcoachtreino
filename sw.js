@@ -1,95 +1,39 @@
-// TRAIN.FUEL - Service Worker v2.8.0
-const CACHE_NAME = 'trainfuel-v2-9-0';
+// TRAIN.FUEL Service Worker v2.9.1
+const CACHE_NAME = 'trainfuel-v2-9-1-0';
 const ASSETS = [
   './',
   './index.html',
-  './manifest.json',
-  './icon-152.png',
-  './icon-167.png',
-  './icon-180.png',
-  './icon-192.png',
-  './icon-512.png',
-  './icon-maskable-512.png',
-  './favicon.png',
-  // CDNs externos
-  'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap',
-  'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'
+  './manifest.json'
 ];
 
-// Install — cacheia recursos críticos
-self.addEventListener('install', event => {
-  console.log('[TrainFuel SW] Instalando...');
+self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('[TrainFuel SW] Cacheando assets');
-        // Cache individual com fallback (não falha se 1 url externa falhar)
-        return Promise.all(
-          ASSETS.map(url => 
-            cache.add(url).catch(err => console.warn('[SW] Falhou ao cachear:', url, err))
-          )
-        );
-      })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
       .then(() => self.skipWaiting())
   );
 });
 
-// Activate — limpa caches antigos
-self.addEventListener('activate', event => {
-  console.log('[TrainFuel SW] Ativando...');
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => {
-          console.log('[TrainFuel SW] Removendo cache antigo:', k);
-          return caches.delete(k);
-        })
-      );
-    }).then(() => self.clients.claim())
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+    ).then(() => self.clients.claim())
   );
 });
 
-// Fetch — estratégia cache-first com fallback de rede
-self.addEventListener('fetch', event => {
-  // Só GET
+self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
   if (event.request.method !== 'GET') return;
   
-  // Imagens dos exercícios (GitHub Raw): network-first com cache de fallback
-  if (event.request.url.includes('raw.githubusercontent.com/yuhonas')) {
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          // Cacheia se sucesso
-          if (response.ok) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-          }
-          return response;
-        })
-        .catch(() => caches.match(event.request))
-    );
-    return;
-  }
-  
-  // Outros: cache-first
   event.respondWith(
-    caches.match(event.request)
-      .then(cached => {
-        if (cached) return cached;
-        return fetch(event.request).then(response => {
-          // Cacheia respostas válidas
-          if (response.ok && response.type === 'basic') {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-          }
-          return response;
-        });
-      })
-      .catch(() => {
-        // Fallback offline
-        if (event.request.destination === 'document') {
-          return caches.match('./index.html');
-        }
-      })
+    caches.match(event.request).then((cached) => {
+      if (cached) return cached;
+      return fetch(event.request).then((resp) => {
+        if (!resp || resp.status !== 200 || resp.type !== 'basic') return resp;
+        const respClone = resp.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, respClone));
+        return resp;
+      }).catch(() => cached);
+    })
   );
 });
