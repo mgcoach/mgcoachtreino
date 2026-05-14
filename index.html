@@ -1282,7 +1282,7 @@
         </div>
         <div class="brand-meta-item">
           <span>Versão</span>
-          <strong>2.9.1</strong>
+          <strong>2.9.2</strong>
         </div>
       </div>
     </div>
@@ -1699,7 +1699,7 @@
   </div>
 
   <p class="footer-note">
-    <strong>TRAIN.FUEL · v2.9.1</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
+    <strong>TRAIN.FUEL · v2.9.2</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
   </p>
   
   <!-- Área PDF (oculta em tela) -->
@@ -2877,6 +2877,7 @@ document.getElementById('dayFocus').addEventListener('input', (e) => {
     const txt = e.target.value.trim();
     focusLabel.textContent = txt.length > 0 ? (txt.length > 16 ? txt.substring(0, 16) + '…' : txt) : '—';
   }
+  if (typeof _markDirty === 'function') _markDirty();
 });
 
 // ============================================================
@@ -3278,6 +3279,7 @@ function adicionarAoDia() {
   };
   
   treino[diaAtivo].exercicios.push(item);
+  if (typeof _markDirty === 'function') _markDirty();
   
   // Feedback
   const btn = document.getElementById('addToDayBtn');
@@ -3404,12 +3406,14 @@ function escapeHtml(str) {
 
 function atualizarCampo(idx, campo, valor) {
   treino[diaAtivo].exercicios[idx][campo] = valor;
+  if (typeof _markDirty === 'function') _markDirty();
 }
 
 function removerEx(idx) {
   treino[diaAtivo].exercicios.splice(idx, 1);
   renderDia();
   atualizarContadores();
+  if (typeof _markDirty === 'function') _markDirty();
 }
 
 function moverEx(idx, delta) {
@@ -3418,6 +3422,7 @@ function moverEx(idx, delta) {
   const arr = treino[diaAtivo].exercicios;
   [arr[idx], arr[novoIdx]] = [arr[novoIdx], arr[idx]];
   renderDia();
+  if (typeof _markDirty === 'function') _markDirty();
 }
 
 function atualizarContadores() {
@@ -4579,7 +4584,7 @@ async function exportarHTML() {
 // ============================================================
 function exportarJSON() {
   const data = {
-    versao: '2.9.1',
+    versao: '2.9.2',
     treino,
     cliente: coletarCliente(),
     dataCriacao: new Date().toISOString()
@@ -4654,7 +4659,7 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
   console.log('📱 TRAIN.FUEL rodando como PWA');
 }
 
-console.log(`💪 TRAIN.FUEL v2.9.1 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
+console.log(`💪 TRAIN.FUEL v2.9.2 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
 
 // =================================================================
 // 👥 MÓDULO DE ALUNOS — IndexedDB + Histórico de Versões (v2.9)
@@ -4887,14 +4892,112 @@ function coletarTreinoCompleto() {
   return JSON.parse(JSON.stringify(treino || {}));
 }
 
+// ============================================================
+// AUTO-SAVE EM BACKGROUND (v2.9.2 — fix bug do treino não persistir)
+// ============================================================
+let _autoSaveTimer = null;
+let _autoSaveStatus = 'salvo'; // 'salvo' | 'salvando' | 'pendente' | 'erro'
+
+function marcarComoPendente() {
+  // Só faz sentido marcar se tem aluno ativo
+  if (!alunoAtivoId) {
+    atualizarIndicadorSave('novo');
+    return;
+  }
+  _autoSaveStatus = 'pendente';
+  atualizarIndicadorSave('pendente');
+  
+  // Debounce: agenda salvamento 1.2s após última mudança
+  clearTimeout(_autoSaveTimer);
+  _autoSaveTimer = setTimeout(executarAutoSave, 1200);
+}
+
+async function executarAutoSave() {
+  if (!alunoAtivoId) return;
+  try {
+    _autoSaveStatus = 'salvando';
+    atualizarIndicadorSave('salvando');
+    
+    const aluno = await buscarAluno(alunoAtivoId);
+    if (!aluno) return; // aluno foi excluído
+    
+    aluno.dados = coletarDadosAluno();
+    aluno.treino = coletarTreinoCompleto();
+    
+    // Salva SEM criar nova versão (autosave não polui histórico)
+    await salvarAluno(aluno, false);
+    
+    _autoSaveStatus = 'salvo';
+    atualizarIndicadorSave('salvo');
+  } catch (e) {
+    console.error('Auto-save falhou:', e);
+    _autoSaveStatus = 'erro';
+    atualizarIndicadorSave('erro');
+  }
+}
+
+function atualizarIndicadorSave(status) {
+  // Cria ou atualiza indicador visual ao lado do botão "Salvar"
+  let el = document.getElementById('autoSaveIndicador');
+  if (!el) {
+    el = document.createElement('span');
+    el.id = 'autoSaveIndicador';
+    el.style.cssText = 'display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:600;margin-right:8px;transition:all 0.2s;';
+    const barra = document.querySelector('#alunoAtivoBar') || document.querySelector('[onclick*="salvarAlunoAtivo"]')?.parentElement;
+    if (barra) {
+      const btnSalvar = barra.querySelector('[onclick*="salvarAlunoAtivo"]');
+      if (btnSalvar) btnSalvar.parentElement.insertBefore(el, btnSalvar);
+    }
+  }
+  if (!el) return;
+  
+  const cfg = {
+    novo:     { txt: '',                       cor: 'transparent', dot: '' },
+    pendente: { txt: 'mudanças não salvas',    cor: '#f59e0b',     dot: '●' },
+    salvando: { txt: 'salvando...',            cor: '#3b82f6',     dot: '●' },
+    salvo:    { txt: 'tudo salvo',             cor: '#10b981',     dot: '●' },
+    erro:     { txt: 'erro ao salvar',         cor: '#ef4444',     dot: '⚠' }
+  };
+  const c = cfg[status] || cfg.novo;
+  el.innerHTML = c.dot ? `<span style="color:${c.cor};font-size:0.9rem;">${c.dot}</span><span style="color:${c.cor};">${c.txt}</span>` : '';
+}
+
+// Wrappers que disparam o auto-save quando o treino muda
+// (chamados pelos pontos críticos: adicionar/remover/editar exercício, focus, etc)
+window._markDirty = marcarComoPendente;
+
 // Aplicar treino completo
-function aplicarTreinoCompleto(treino) {
-  if (typeof treino !== 'undefined' && treino) {
-    Object.keys(treino).forEach(d => delete treino[d]);
-    Object.assign(treino, JSON.parse(JSON.stringify(treino)));
-    // Re-renderizar
-    if (typeof renderDia === 'function') renderDia();
-    if (typeof atualizarContadores === 'function') atualizarContadores();
+function aplicarTreinoCompleto(novoTreino) {
+  if (typeof treino === 'undefined' || !novoTreino) return;
+  
+  // Limpa estado atual da variável GLOBAL 'treino'
+  Object.keys(treino).forEach(d => delete treino[d]);
+  
+  // Copia profundamente o novo treino pra global
+  // Garante que TODOS os dias existam, mesmo que faltem no novoTreino
+  const diasPadrao = ['seg','ter','qua','qui','sex','sab','dom'];
+  diasPadrao.forEach(d => {
+    if (novoTreino[d]) {
+      treino[d] = JSON.parse(JSON.stringify(novoTreino[d]));
+    } else {
+      treino[d] = { focus: '', exercicios: [] };
+    }
+  });
+  
+  // Re-renderiza tudo
+  try { if (typeof renderDia === 'function') renderDia(); } catch(e) { console.warn('renderDia:', e); }
+  try { if (typeof atualizarContadores === 'function') atualizarContadores(); } catch(e) { console.warn('atualizarContadores:', e); }
+  
+  // Atualiza labels de foco de cada dia
+  diasPadrao.forEach(d => {
+    const labelEl = document.querySelector(`.focus-label[data-dia="${d}"]`);
+    if (labelEl) labelEl.textContent = treino[d].focus || '—';
+  });
+  
+  // Atualiza input dayFocus do dia ativo
+  const dayFocusEl = document.getElementById('dayFocus');
+  if (dayFocusEl && typeof diaAtivo !== 'undefined') {
+    dayFocusEl.value = treino[diaAtivo]?.focus || '';
   }
 }
 
@@ -5123,7 +5226,7 @@ async function salvarAlunoAtivo() {
     return;
   }
   
-  const treino = coletarTreinoCompleto();
+  const treinoSnapshot = coletarTreinoCompleto();
   
   let aluno;
   if (alunoAtivoId) {
@@ -5139,13 +5242,13 @@ async function salvarAlunoAtivo() {
   }
   
   aluno.dados = dados;
-  aluno.treino = treino;
+  aluno.treino = treinoSnapshot;
   
   await salvarAluno(aluno, true);
   atualizarBarraAlunoAtivo(aluno);
   await renderListaAlunos();
   
-  const exsCount = Object.values(treino).reduce((s, d) => s + (d.exercicios?.length || 0), 0);
+  const exsCount = Object.values(treinoSnapshot).reduce((s, d) => s + (d.exercicios?.length || 0), 0);
   toast(`✅ ${dados.nome} salvo (${exsCount} exercícios) — versão #${(await listarVersoes(aluno.id)).length}`);
 }
 
@@ -5441,7 +5544,31 @@ async function importarAlunos(event) {
   try {
     await abrirDB();
     await renderListaAlunos();
-    console.log('👥 Sistema de Alunos v2.9 inicializado');
+    
+    // Auto-save: listener para todos os campos da ficha
+    document.querySelectorAll('[id^="cli"], #profNome, #planData').forEach(el => {
+      el.addEventListener('input', () => {
+        if (typeof _markDirty === 'function') _markDirty();
+      });
+      el.addEventListener('change', () => {
+        if (typeof _markDirty === 'function') _markDirty();
+      });
+    });
+    
+    // Avisar ao trocar de aba se houver mudanças pendentes (sem bloquear)
+    window.addEventListener('beforeunload', (e) => {
+      if (_autoSaveStatus === 'pendente' || _autoSaveStatus === 'salvando') {
+        // Tenta salvar antes de fechar (sync impossível, mas o setTimeout do auto-save pode pegar)
+        if (alunoAtivoId) {
+          try {
+            const aluno = { id: alunoAtivoId, dados: coletarDadosAluno(), treino: coletarTreinoCompleto() };
+            localStorage.setItem('trainfuel_emergency_save', JSON.stringify(aluno));
+          } catch(err) {}
+        }
+      }
+    });
+    
+    console.log('👥 Sistema de Alunos v2.9.2 inicializado (com auto-save)');
   } catch (e) {
     console.error('Erro ao inicializar IndexedDB:', e);
     toast('Erro ao carregar banco de alunos: ' + e.message, 'erro');

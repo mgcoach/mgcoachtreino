@@ -1,10 +1,6 @@
-// TRAIN.FUEL Service Worker v2.9.1
-const CACHE_NAME = 'trainfuel-v2-9-1-0';
-const ASSETS = [
-  './',
-  './index.html',
-  './manifest.json'
-];
+// TRAIN.FUEL Service Worker v2.9.2
+const CACHE_NAME = 'trainfuel-v2-9-2-0';
+const ASSETS = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -12,7 +8,6 @@ self.addEventListener('install', (event) => {
       .then(() => self.skipWaiting())
   );
 });
-
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -20,18 +15,15 @@ self.addEventListener('activate', (event) => {
     ).then(() => self.clients.claim())
   );
 });
-
 self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
   if (event.request.method !== 'GET') return;
-  
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
       return fetch(event.request).then((resp) => {
         if (!resp || resp.status !== 200 || resp.type !== 'basic') return resp;
         const respClone = resp.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, respClone));
+        caches.open(CACHE_NAME).then((c) => c.put(event.request, respClone));
         return resp;
       }).catch(() => cached);
     })
