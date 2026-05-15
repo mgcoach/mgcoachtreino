@@ -1,5 +1,5 @@
-// TRAIN.FUEL Service Worker v2.9.3
-const CACHE_NAME = 'trainfuel-v2-9-3-0';
+// TRAIN.FUEL Service Worker v2.9.4
+const CACHE_NAME = 'trainfuel-v2-9-4-0';
 const ASSETS = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', (event) => {

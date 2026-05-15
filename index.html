@@ -1420,7 +1420,7 @@
         </div>
         <div class="brand-meta-item">
           <span>Versão</span>
-          <strong>2.9.3</strong>
+          <strong>2.9.4</strong>
         </div>
       </div>
     </div>
@@ -1837,7 +1837,7 @@
   </div>
 
   <p class="footer-note">
-    <strong>TRAIN.FUEL · v2.9.3</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
+    <strong>TRAIN.FUEL · v2.9.4</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
   </p>
   
   <!-- Área PDF (oculta em tela) -->
@@ -3578,12 +3578,41 @@ function removerSerie(tipo, idx) {
   else renderFdSeries();
 }
 
+// Helper: converte segundos pra label amigável ("60s", "1m 30s", "2m")
+function fmtDescanso(seg) {
+  if (!seg || seg <= 0) return '';
+  const s = parseInt(seg);
+  if (s < 60) return `${s}s`;
+  const min = Math.floor(s / 60);
+  const rest = s % 60;
+  return rest === 0 ? `${min}m` : `${min}m ${rest}s`;
+}
+
 // Formata séries no padrão pedido:
-// 1 série → "1x 10 repetições (40% da carga)"
-// Múltiplas → "1x 3 repetições (70% da carga) + 1x 2 repetições (80% da carga)"
+// 1 série → "1x 10 repetições (40% da carga, descanso 60s)"
+// Múltiplas séries com MESMO descanso → "1x 3 reps (70%) + 1x 2 reps (80%) — descanso 90s"
+// Múltiplas séries com descansos DIFERENTES → "1x 3 reps (70%, 90s) + 1x 2 reps (80%, 60s)"
 function formatarSeries(arr) {
   if (!arr || arr.length === 0) return '';
-  return arr.map(s => `1x ${s.reps} repetições (${s.carga}% da carga)`).join(' + ');
+  
+  // Verifica se todos os descansos são iguais (e existem)
+  const descansos = arr.map(s => s.descanso).filter(d => d != null && d > 0);
+  const todosIguais = descansos.length === arr.length 
+                       && descansos.every(d => d === descansos[0]);
+  const semDescanso = descansos.length === 0;
+  
+  if (todosIguais || semDescanso) {
+    // Descanso uniforme ou sem descanso: simplifica
+    const partes = arr.map(s => `1x ${s.reps} repetições (${s.carga}% da carga)`).join(' + ');
+    if (semDescanso || arr[0].descanso == null) return partes;
+    return `${partes} — descanso ${fmtDescanso(arr[0].descanso)}`;
+  } else {
+    // Descansos diferentes: cada um leva o seu
+    return arr.map(s => {
+      const desc = s.descanso ? `, descanso ${fmtDescanso(s.descanso)}` : '';
+      return `1x ${s.reps} repetições (${s.carga}% da carga${desc})`;
+    }).join(' + ');
+  }
 }
 
 // Reset dos campos ao fechar / abrir o modal
@@ -4945,7 +4974,7 @@ async function exportarHTML() {
 // ============================================================
 function exportarJSON() {
   const data = {
-    versao: '2.9.3',
+    versao: '2.9.4',
     treino,
     cliente: coletarCliente(),
     dataCriacao: new Date().toISOString()
@@ -5537,6 +5566,10 @@ async function abrirAluno(id) {
   alunoAtivoId = id;
   aplicarDadosAluno(aluno.dados);
   aplicarTreinoCompleto(aluno.treino || {});
+  
+  // v2.9.4: migrar strings antigas sem descanso (regera a partir de _aqSeries/_fdSeries)
+  migrarStringsComDescanso();
+  
   atualizarBarraAlunoAtivo(aluno);
   
   // Mudar pra aba Ficha
@@ -5546,6 +5579,36 @@ async function abrirAluno(id) {
   document.getElementById('panel-aluno').classList.add('active');
   
   toast(`📂 ${aluno.dados.nome || 'Aluno'} carregado`);
+}
+
+// v2.9.4: regera as strings de aquecimento/feeder a partir das séries estruturadas
+// (usado pra atualizar exercícios salvos antes que tinham descanso ignorado)
+function migrarStringsComDescanso() {
+  if (typeof treino !== 'object' || !treino) return;
+  let alterados = 0;
+  Object.keys(treino).forEach(dia => {
+    const exs = treino[dia]?.exercicios || [];
+    exs.forEach(ex => {
+      if (Array.isArray(ex._aqSeries) && ex._aqSeries.length > 0) {
+        const nova = formatarSeries(ex._aqSeries);
+        if (nova && nova !== ex.aquecimento) {
+          ex.aquecimento = nova;
+          alterados++;
+        }
+      }
+      if (Array.isArray(ex._fdSeries) && ex._fdSeries.length > 0) {
+        const nova = formatarSeries(ex._fdSeries);
+        if (nova && nova !== ex.feeder) {
+          ex.feeder = nova;
+          alterados++;
+        }
+      }
+    });
+  });
+  if (alterados > 0) {
+    console.log(`v2.9.4: ${alterados} strings de aquecimento/feeder regeneradas com descanso`);
+    if (typeof renderDia === 'function') renderDia();
+  }
 }
 
 function atualizarBarraAlunoAtivo(aluno) {
@@ -5929,7 +5992,7 @@ async function importarAlunos(event) {
       }
     });
     
-    console.log('👥 Sistema de Alunos v2.9.3 inicializado (com auto-save)');
+    console.log('👥 Sistema de Alunos v2.9.4 inicializado (com auto-save)');
   } catch (e) {
     console.error('Erro ao inicializar IndexedDB:', e);
     toast('Erro ao carregar banco de alunos: ' + e.message, 'erro');
