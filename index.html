@@ -569,6 +569,144 @@
     grid-column: 1 / -1;
   }
   
+  /* ============== AQUECIMENTO / FEEDER PRESETS (v2.9.3) ============== */
+  .preset-block {
+    background: var(--bg-2, #161616);
+    border: 1px solid var(--border, #2a2a2a);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+  }
+  .preset-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+    font-weight: 600;
+    color: var(--text, #f5f5f5);
+    font-size: 0.92rem;
+    margin: 0;
+  }
+  .preset-toggle input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--orange);
+    flex-shrink: 0;
+  }
+  .preset-toggle span { font-weight: 700; }
+  .preset-box {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border, #2a2a2a);
+  }
+  .serie-row {
+    display: grid;
+    grid-template-columns: auto 1fr 1fr 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px dashed rgba(255,255,255,0.05);
+  }
+  .serie-row:last-of-type { border-bottom: none; }
+  .serie-row .serie-num {
+    background: var(--orange);
+    color: #fff;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .serie-row .serie-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .serie-row .serie-field label {
+    font-size: 0.65rem;
+    color: var(--text-3, #707070);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .serie-row .serie-field select,
+  .serie-row .serie-field input {
+    background: var(--bg-3, #1f1f1f);
+    border: 1px solid var(--border, #2a2a2a);
+    border-radius: 6px;
+    color: var(--text, #f5f5f5);
+    padding: 6px 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    outline: none;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .serie-row .serie-field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23ff6b1a' d='M1 1l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+    padding-right: 22px;
+  }
+  .serie-row .serie-field select:focus,
+  .serie-row .serie-field input:focus {
+    border-color: var(--orange);
+  }
+  .serie-row .btn-remove-serie {
+    background: transparent;
+    border: 1px solid var(--border, #2a2a2a);
+    color: var(--text-3, #707070);
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .serie-row .btn-remove-serie:hover {
+    color: #ef4444;
+    border-color: #ef4444;
+  }
+  .btn-add-serie {
+    margin-top: 10px;
+    background: transparent;
+    border: 1px dashed var(--border, #2a2a2a);
+    color: var(--orange);
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 700;
+    width: 100%;
+    transition: all 0.15s;
+  }
+  .btn-add-serie:hover {
+    background: rgba(255, 107, 26, 0.08);
+    border-color: var(--orange);
+  }
+  .custom-toggle summary { list-style: none; }
+  .custom-toggle summary::-webkit-details-marker { display: none; }
+  .custom-toggle summary::before { content: '▸ '; transition: transform 0.2s; display: inline-block; }
+  .custom-toggle[open] summary::before { transform: rotate(90deg); }
+  
+  @media (max-width: 480px) {
+    .serie-row {
+      grid-template-columns: auto 1fr 1fr auto;
+    }
+    .serie-row .serie-field:nth-child(4) { display: none; } /* esconde descanso em telas pequenas */
+  }
+  
   .add-to-day-btn {
     width: 100%;
     padding: 13px;
@@ -1282,7 +1420,7 @@
         </div>
         <div class="brand-meta-item">
           <span>Versão</span>
-          <strong>2.9.2</strong>
+          <strong>2.9.3</strong>
         </div>
       </div>
     </div>
@@ -1699,7 +1837,7 @@
   </div>
 
   <p class="footer-note">
-    <strong>TRAIN.FUEL · v2.9.2</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
+    <strong>TRAIN.FUEL · v2.9.3</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). Animações alternam entre 2 frames simulando GIF. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
   </p>
   
   <!-- Área PDF (oculta em tela) -->
@@ -1724,16 +1862,50 @@
     <div class="detail-section" id="prescriptionSection">
       <div class="detail-section-title">⚙️ Prescrever para o dia</div>
       <div class="prescription-form">
-        <div class="field">
-          <label>Aquecimento</label>
-          <input type="text" id="prescAquecimento" placeholder="ex: 2x12 c/ 50%">
+        
+        <!-- ====== AQUECIMENTO (v2.9.3) ====== -->
+        <div class="field full preset-block">
+          <label class="preset-toggle">
+            <input type="checkbox" id="chkAquecimento" onchange="toggleAquecimento()">
+            <span>🔥 Adicionar aquecimento</span>
+          </label>
+          <div id="boxAquecimento" class="preset-box" style="display:none;">
+            <div id="aqSeries"></div>
+            <button type="button" class="btn-add-serie" onclick="addAquecimentoSerie()">+ Adicionar série de aquecimento</button>
+          </div>
         </div>
-        <div class="field">
-          <label>Feeder Sets</label>
-          <input type="text" id="prescFeeder" placeholder="ex: 1x8 c/ 70%">
+        
+        <!-- ====== FEEDER SETS (v2.9.3) ====== -->
+        <div class="field full preset-block">
+          <label class="preset-toggle">
+            <input type="checkbox" id="chkFeeder" onchange="toggleFeeder()">
+            <span>⚡ Adicionar feeder sets</span>
+          </label>
+          <div id="boxFeeder" class="preset-box" style="display:none;">
+            <div id="fdSeries"></div>
+            <button type="button" class="btn-add-serie" onclick="addFeederSerie()">+ Adicionar feeder set</button>
+          </div>
         </div>
+        
+        <!-- ====== Campos manuais (mantidos para edição livre) ====== -->
+        <details class="custom-toggle" style="margin: 4px 0 12px;">
+          <summary style="cursor:pointer; color: var(--text-3); font-size: 0.85rem; padding: 6px 0;">✏️ Ou escrever manualmente (aquecimento / feeder customizado)</summary>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px;">
+            <div class="field">
+              <label>Aquecimento (livre)</label>
+              <input type="text" id="prescAquecimento" placeholder="ex: 2x12 c/ 50%">
+            </div>
+            <div class="field">
+              <label>Feeder Sets (livre)</label>
+              <input type="text" id="prescFeeder" placeholder="ex: 1x8 c/ 70%">
+            </div>
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-3); margin-top: 4px;">💡 Use estes campos só se quiser sobrepor os seletores acima com texto personalizado.</div>
+        </details>
+        
+        <!-- ====== TRABALHO PRINCIPAL ====== -->
         <div class="field">
-          <label>Séries</label>
+          <label>💪 Séries de trabalho</label>
           <input type="text" id="prescSeries" placeholder="ex: 4">
         </div>
         <div class="field">
@@ -3139,6 +3311,9 @@ function abrirModalEx(exId) {
     document.getElementById(id).value = '';
   });
   
+  // v2.9.3: reseta presets de aquecimento/feeder
+  if (typeof resetarPresetsExercicio === 'function') resetarPresetsExercicio();
+  
   // Atualiza label do botão com o dia atual
   document.getElementById('addToDayBtn').textContent = `+ Adicionar à ${DIAS[diaAtivo]}`;
   
@@ -3261,8 +3436,190 @@ document.getElementById('gifModal').addEventListener('click', (e) => {
 // ============================================================
 // ADICIONAR EXERCÍCIO AO DIA
 // ============================================================
+// ============================================================
+// AQUECIMENTO / FEEDER SETS — UI Interativa (v2.9.3)
+// ============================================================
+
+// Valores padrão das séries (carrega rápido pra você só ajustar o que precisar)
+const AQ_DEFAULTS  = { reps: 10, carga: 40, descanso: 60 };
+const FD_DEFAULTS1 = { reps: 3, carga: 70, descanso: 90 };
+const FD_DEFAULTS2 = { reps: 2, carga: 80, descanso: 90 };
+
+// Estado em memória das séries enquanto o modal está aberto
+let _aqSeriesData = [];
+let _fdSeriesData = [];
+
+function toggleAquecimento() {
+  const chk = document.getElementById('chkAquecimento');
+  const box = document.getElementById('boxAquecimento');
+  if (chk.checked) {
+    box.style.display = 'block';
+    if (_aqSeriesData.length === 0) {
+      _aqSeriesData = [{ ...AQ_DEFAULTS }];
+    }
+    renderAqSeries();
+  } else {
+    box.style.display = 'none';
+    _aqSeriesData = [];
+  }
+}
+
+function toggleFeeder() {
+  const chk = document.getElementById('chkFeeder');
+  const box = document.getElementById('boxFeeder');
+  if (chk.checked) {
+    box.style.display = 'block';
+    if (_fdSeriesData.length === 0) {
+      _fdSeriesData = [{ ...FD_DEFAULTS1 }];
+    }
+    renderFdSeries();
+  } else {
+    box.style.display = 'none';
+    _fdSeriesData = [];
+  }
+}
+
+function renderAqSeries() {
+  const wrap = document.getElementById('aqSeries');
+  if (!wrap) return;
+  wrap.innerHTML = _aqSeriesData.map((s, i) => serieRowHTML('aq', i, s)).join('');
+  bindSerieEvents('aq');
+}
+
+function renderFdSeries() {
+  const wrap = document.getElementById('fdSeries');
+  if (!wrap) return;
+  wrap.innerHTML = _fdSeriesData.map((s, i) => serieRowHTML('fd', i, s)).join('');
+  bindSerieEvents('fd');
+}
+
+function serieRowHTML(tipo, idx, dados) {
+  const repsOptions = [1,2,3,4,5,6,7,8,9,10,12,15,20,25,30].map(n => 
+    `<option value="${n}" ${n == dados.reps ? 'selected':''}>${n}</option>`).join('');
+  const cargaOptions = [20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100].map(n => 
+    `<option value="${n}" ${n == dados.carga ? 'selected':''}>${n}%</option>`).join('');
+  const descOptions = [30,45,60,90,120,150,180].map(n => {
+    const label = n >= 60 ? `${Math.floor(n/60)}m${n%60 ? ' ' + (n%60) + 's' : ''}` : `${n}s`;
+    return `<option value="${n}" ${n == dados.descanso ? 'selected':''}>${label}</option>`;
+  }).join('');
+  
+  return `
+    <div class="serie-row" data-idx="${idx}">
+      <span class="serie-num">${idx + 1}</span>
+      <div class="serie-field">
+        <label>Reps</label>
+        <select data-campo="reps">${repsOptions}</select>
+      </div>
+      <div class="serie-field">
+        <label>% Carga</label>
+        <select data-campo="carga">${cargaOptions}</select>
+      </div>
+      <div class="serie-field">
+        <label>Descanso</label>
+        <select data-campo="descanso">${descOptions}</select>
+      </div>
+      <button type="button" class="btn-remove-serie" onclick="removerSerie('${tipo}', ${idx})" title="Remover série">×</button>
+    </div>
+  `;
+}
+
+function bindSerieEvents(tipo) {
+  const wrap = document.getElementById(tipo === 'aq' ? 'aqSeries' : 'fdSeries');
+  if (!wrap) return;
+  wrap.querySelectorAll('.serie-row').forEach(row => {
+    const idx = parseInt(row.dataset.idx);
+    row.querySelectorAll('select[data-campo]').forEach(sel => {
+      sel.addEventListener('change', () => {
+        const arr = tipo === 'aq' ? _aqSeriesData : _fdSeriesData;
+        const campo = sel.dataset.campo;
+        arr[idx][campo] = parseInt(sel.value);
+      });
+    });
+  });
+}
+
+function addAquecimentoSerie() {
+  const ultima = _aqSeriesData[_aqSeriesData.length - 1] || AQ_DEFAULTS;
+  _aqSeriesData.push({ ...ultima });
+  renderAqSeries();
+}
+
+function addFeederSerie() {
+  // Pra feeder set, a 2ª série segue um padrão diferente (menos reps, mais carga)
+  let nova;
+  if (_fdSeriesData.length === 0) {
+    nova = { ...FD_DEFAULTS1 };
+  } else if (_fdSeriesData.length === 1) {
+    nova = { ...FD_DEFAULTS2 };
+  } else {
+    // Continua o padrão: a cada nova série, +5% carga e -1 rep (mínimo 1)
+    const ultima = _fdSeriesData[_fdSeriesData.length - 1];
+    nova = {
+      reps: Math.max(1, ultima.reps - 1),
+      carga: Math.min(100, ultima.carga + 5),
+      descanso: ultima.descanso
+    };
+  }
+  _fdSeriesData.push(nova);
+  renderFdSeries();
+}
+
+function removerSerie(tipo, idx) {
+  const arr = tipo === 'aq' ? _aqSeriesData : _fdSeriesData;
+  arr.splice(idx, 1);
+  if (arr.length === 0) {
+    // Se removeu a última, desativa o checkbox e esconde o bloco
+    const chkId = tipo === 'aq' ? 'chkAquecimento' : 'chkFeeder';
+    document.getElementById(chkId).checked = false;
+    document.getElementById(tipo === 'aq' ? 'boxAquecimento' : 'boxFeeder').style.display = 'none';
+    return;
+  }
+  if (tipo === 'aq') renderAqSeries();
+  else renderFdSeries();
+}
+
+// Formata séries no padrão pedido:
+// 1 série → "1x 10 repetições (40% da carga)"
+// Múltiplas → "1x 3 repetições (70% da carga) + 1x 2 repetições (80% da carga)"
+function formatarSeries(arr) {
+  if (!arr || arr.length === 0) return '';
+  return arr.map(s => `1x ${s.reps} repetições (${s.carga}% da carga)`).join(' + ');
+}
+
+// Reset dos campos ao fechar / abrir o modal
+function resetarPresetsExercicio() {
+  _aqSeriesData = [];
+  _fdSeriesData = [];
+  const chkAq = document.getElementById('chkAquecimento');
+  const chkFd = document.getElementById('chkFeeder');
+  if (chkAq) chkAq.checked = false;
+  if (chkFd) chkFd.checked = false;
+  const boxAq = document.getElementById('boxAquecimento');
+  const boxFd = document.getElementById('boxFeeder');
+  if (boxAq) boxAq.style.display = 'none';
+  if (boxFd) boxFd.style.display = 'none';
+}
+
+// Expor pro escopo global
+window.toggleAquecimento = toggleAquecimento;
+window.toggleFeeder = toggleFeeder;
+window.addAquecimentoSerie = addAquecimentoSerie;
+window.addFeederSerie = addFeederSerie;
+window.removerSerie = removerSerie;
+window.resetarPresetsExercicio = resetarPresetsExercicio;
+
 function adicionarAoDia() {
   if (!exercicioAtivo) return;
+  
+  // Monta texto de aquecimento: prioriza séries selecionadas, fallback pro campo livre
+  const aquecimentoLivre = document.getElementById('prescAquecimento').value.trim();
+  const feederLivre = document.getElementById('prescFeeder').value.trim();
+  const aquecimentoFormatado = formatarSeries(_aqSeriesData);
+  const feederFormatado = formatarSeries(_fdSeriesData);
+  
+  // Se há séries marcadas E texto livre, concatena (livre tem prioridade pra ficar primeiro como "override")
+  const aquecimentoFinal = aquecimentoLivre || aquecimentoFormatado;
+  const feederFinal = feederLivre || feederFormatado;
   
   const item = {
     id: exercicioAtivo.id,
@@ -3270,8 +3627,11 @@ function adicionarAoDia() {
     nameEn: exercicioAtivo.nameEn,
     pm: exercicioAtivo.pm,
     eq: exercicioAtivo.eq,
-    aquecimento: document.getElementById('prescAquecimento').value || '',
-    feeder: document.getElementById('prescFeeder').value || '',
+    aquecimento: aquecimentoFinal,
+    feeder: feederFinal,
+    // v2.9.3: salva também o dado estruturado pra editar depois
+    _aqSeries: [..._aqSeriesData],
+    _fdSeries: [..._fdSeriesData],
     series: document.getElementById('prescSeries').value || '',
     reps: document.getElementById('prescReps').value || '',
     descanso: document.getElementById('prescDescanso').value || '',
@@ -3289,6 +3649,7 @@ function adicionarAoDia() {
   setTimeout(() => {
     btn.textContent = original;
     btn.style.background = '';
+    resetarPresetsExercicio();
     fecharModalEx();
     renderDia();
     atualizarContadores();
@@ -4584,7 +4945,7 @@ async function exportarHTML() {
 // ============================================================
 function exportarJSON() {
   const data = {
-    versao: '2.9.2',
+    versao: '2.9.3',
     treino,
     cliente: coletarCliente(),
     dataCriacao: new Date().toISOString()
@@ -5568,7 +5929,7 @@ async function importarAlunos(event) {
       }
     });
     
-    console.log('👥 Sistema de Alunos v2.9.2 inicializado (com auto-save)');
+    console.log('👥 Sistema de Alunos v2.9.3 inicializado (com auto-save)');
   } catch (e) {
     console.error('Erro ao inicializar IndexedDB:', e);
     toast('Erro ao carregar banco de alunos: ' + e.message, 'erro');
