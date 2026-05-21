@@ -1420,7 +1420,7 @@
         </div>
         <div class="brand-meta-item">
           <span>Versão</span>
-          <strong>2.10.2</strong>
+          <strong>2.10.3</strong>
         </div>
       </div>
     </div>
@@ -1837,7 +1837,7 @@
   </div>
 
   <p class="footer-note">
-    <strong>TRAIN.FUEL · v2.10.2</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). GIFs customizados servidos como arquivos reais. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
+    <strong>TRAIN.FUEL · v2.10.3</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). GIFs customizados servidos como arquivos reais. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
   </p>
   
   <!-- Área PDF (oculta em tela) -->
@@ -4482,17 +4482,24 @@ async function exportarHTML() {
   }
   
   try {
-    // ETAPA 1: Coletar URLs únicas DOS DOIS FRAMES (0 e 1)
+    // ETAPA 1: Coletar URLs únicas das imagens dos exercícios.
+    // - GIF custom  → caminho relativo "gifs/exercicio-NNN.gif" (precisa virar base64
+    //   pra funcionar OFFLINE no arquivo do aluno, que não tem a pasta /gifs/)
+    // - Sem custom  → frame 0.jpg do free-exercise-db (imagem estática)
     const urlsParaConverter = new Set();
     const urlToEx = {};
     Object.keys(DIAS).forEach(d => {
       treino[d].exercicios.forEach(ex => {
-        const url0 = `${GIF_BASE}${gifIdFor(ex)}/0.jpg`;
-        const url1 = `${GIF_BASE}${gifIdFor(ex)}/1.jpg`;
-        urlsParaConverter.add(url0);
-        urlsParaConverter.add(url1);
-        urlToEx[url0] = ex;
-        urlToEx[url1] = ex;
+        const customGif = getGifCustomFrames(ex);
+        if (customGif && customGif.gif) {
+          // Embutir só os GIFs custom DESTE treino (mantém o arquivo em poucos MB)
+          urlsParaConverter.add(customGif.gif);
+          urlToEx[customGif.gif] = ex;
+        } else {
+          const url0 = `${GIF_BASE}${gifIdFor(ex)}/0.jpg`;
+          urlsParaConverter.add(url0);
+          urlToEx[url0] = ex;
+        }
       });
     });
     
@@ -4502,7 +4509,7 @@ async function exportarHTML() {
     let progress = 0;
     
     await Promise.all([...urlsParaConverter].map(async url => {
-      const base64 = await urlToBase64(url, 5000);
+      const base64 = await urlToBase64(url, 8000);
       if (base64) {
         urlToBase64Map[url] = base64;
       } else {
@@ -4513,7 +4520,7 @@ async function exportarHTML() {
       if (btn) btn.textContent = `⏳ Baixando imagens (${progress}/${urlsParaConverter.size})...`;
     }));
     
-    // ETAPA 3: Construir HTML embutindo os 2 frames em cada exercício
+    // ETAPA 3: Construir HTML embutindo a imagem base64 de cada exercício
     if (btn) btn.textContent = '⏳ Montando arquivo...';
     
     const dataF = c.planData
@@ -4521,7 +4528,7 @@ async function exportarHTML() {
       : new Date().toLocaleDateString('pt-BR');
     const tituloAluno = (c.nome && c.nome !== '—') ? c.nome : 'Aluno';
     
-    // Construir conteúdo manualmente pra incluir os 2 frames
+    // Construir conteúdo manualmente pra embutir a imagem base64
     let conteudo = `
       <div class="pdf-header">
         <div class="pdf-brand-row">
@@ -4576,11 +4583,12 @@ async function exportarHTML() {
         const muscPm = ex.pm.map(m => MUSC[m] || m).join(', ');
         const eqLabel = EQUIP[ex.eq] || ex.eq;
         
-        // GIF customizado tem prioridade
+        // GIF customizado tem prioridade — usar o base64 embutido na ETAPA 2
+        // (NÃO o caminho relativo "gifs/...", que não existe no arquivo do aluno).
         const customGif = getGifCustomFrames(ex);
         let gifSrc;
-        if (customGif) {
-          gifSrc = customGif.gif || '';
+        if (customGif && customGif.gif) {
+          gifSrc = urlToBase64Map[customGif.gif] || '';
         } else {
           const url0 = `${GIF_BASE}${gifIdFor(ex)}/0.jpg`;
           gifSrc = urlToBase64Map[url0] || '';
@@ -5168,7 +5176,7 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
   console.log('📱 TRAIN.FUEL rodando como PWA');
 }
 
-console.log(`💪 TRAIN.FUEL v2.10.2 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
+console.log(`💪 TRAIN.FUEL v2.10.3 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
 
 // =================================================================
 // 👥 MÓDULO DE ALUNOS — IndexedDB + Histórico de Versões (v2.9)
