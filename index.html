@@ -1420,7 +1420,7 @@
         </div>
         <div class="brand-meta-item">
           <span>Versão</span>
-          <strong>2.10.3</strong>
+          <strong>2.10.4</strong>
         </div>
       </div>
     </div>
@@ -1837,7 +1837,7 @@
   </div>
 
   <p class="footer-note">
-    <strong>TRAIN.FUEL · v2.10.3</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). GIFs customizados servidos como arquivos reais. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
+    <strong>TRAIN.FUEL · v2.10.4</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). GIFs customizados servidos como arquivos reais. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
   </p>
   
   <!-- Área PDF (oculta em tela) -->
@@ -4483,38 +4483,48 @@ async function exportarHTML() {
   
   try {
     // ETAPA 1: Coletar URLs únicas das imagens dos exercícios.
-    // - GIF custom  → caminho relativo "gifs/exercicio-NNN.gif" (precisa virar base64
-    //   pra funcionar OFFLINE no arquivo do aluno, que não tem a pasta /gifs/)
-    // - Sem custom  → frame 0.jpg do free-exercise-db (imagem estática)
+    // - GIF custom  → caminho relativo "gifs/exercicio-NNN.gif" (vira base64; o .gif
+    //   real já anima sozinho)
+    // - Sem custom  → frames 0.jpg E 1.jpg do free-exercise-db. Esses NÃO são GIFs:
+    //   são duas fotos estáticas. A animação é feita por CSS puro no arquivo do
+    //   aluno (duas <img> sobrepostas alternando opacidade) — por isso precisamos
+    //   dos dois frames embutidos.
     const urlsParaConverter = new Set();
     const urlToEx = {};
     Object.keys(DIAS).forEach(d => {
       treino[d].exercicios.forEach(ex => {
         const customGif = getGifCustomFrames(ex);
         if (customGif && customGif.gif) {
-          // Embutir só os GIFs custom DESTE treino (mantém o arquivo em poucos MB)
           urlsParaConverter.add(customGif.gif);
           urlToEx[customGif.gif] = ex;
         } else {
           const url0 = `${GIF_BASE}${gifIdFor(ex)}/0.jpg`;
+          const url1 = `${GIF_BASE}${gifIdFor(ex)}/1.jpg`;
           urlsParaConverter.add(url0);
+          urlsParaConverter.add(url1);
           urlToEx[url0] = ex;
+          urlToEx[url1] = ex;
         }
       });
     });
     
-    // ETAPA 2: Converter cada URL em base64 (com fallback para SVG placeholder)
+    // ETAPA 2: Converter cada URL em base64 (com fallback para SVG placeholder).
+    // urlOk registra quais carregaram de verdade — usado pra decidir se a
+    // animação CSS de 2 frames vale a pena (precisa dos 2 frames reais).
     if (btn) btn.textContent = `⏳ Baixando imagens (0/${urlsParaConverter.size})...`;
     const urlToBase64Map = {};
+    const urlOk = {};
     let progress = 0;
     
     await Promise.all([...urlsParaConverter].map(async url => {
       const base64 = await urlToBase64(url, 8000);
       if (base64) {
         urlToBase64Map[url] = base64;
+        urlOk[url] = true;
       } else {
         const ex = urlToEx[url];
         urlToBase64Map[url] = ex ? generatePlaceholderSVG(ex) : null;
+        urlOk[url] = false;
       }
       progress++;
       if (btn) btn.textContent = `⏳ Baixando imagens (${progress}/${urlsParaConverter.size})...`;
@@ -4583,16 +4593,32 @@ async function exportarHTML() {
         const muscPm = ex.pm.map(m => MUSC[m] || m).join(', ');
         const eqLabel = EQUIP[ex.eq] || ex.eq;
         
-        // GIF customizado tem prioridade — usar o base64 embutido na ETAPA 2
-        // (NÃO o caminho relativo "gifs/...", que não existe no arquivo do aluno).
+        // Imagens do exercício:
+        //  - GIF custom → 1 arquivo .gif real (anima sozinho)
+        //  - free-exercise-db → 2 fotos estáticas (0.jpg + 1.jpg) animadas via CSS
         const customGif = getGifCustomFrames(ex);
-        let gifSrc;
+        let frame0, frame1, podeAnimar;
         if (customGif && customGif.gif) {
-          gifSrc = urlToBase64Map[customGif.gif] || '';
+          frame0 = urlToBase64Map[customGif.gif] || '';
+          frame1 = frame0;
+          podeAnimar = false; // .gif real já anima sozinho
         } else {
           const url0 = `${GIF_BASE}${gifIdFor(ex)}/0.jpg`;
-          gifSrc = urlToBase64Map[url0] || '';
+          const url1 = `${GIF_BASE}${gifIdFor(ex)}/1.jpg`;
+          frame0 = urlToBase64Map[url0] || '';
+          frame1 = urlToBase64Map[url1] || '';
+          // Só anima se os DOIS frames carregaram de verdade (não placeholder).
+          podeAnimar = !!(urlOk[url0] && urlOk[url1] && frame0 && frame1);
+          if (!podeAnimar) frame1 = frame0; // estático: mostra só o frame 0
         }
+        
+        // Bloco de imagem: 2 frames sobrepostos animados por CSS quando possível,
+        // senão 1 frame estático. Sem JS — compatível com webview do WhatsApp.
+        const animClass = podeAnimar ? ' gif-anim' : '';
+        const gifInner = podeAnimar
+          ? `<img class="gif-f gif-f0" src="${frame0}" alt="${escapeHtml(ex.n)}" />`
+            + `<img class="gif-f gif-f1" src="${frame1}" alt="" aria-hidden="true" />`
+          : `<img class="gif-f gif-f0" src="${frame0}" alt="${escapeHtml(ex.n)}" />`;
         
         // Modal individual para esse exercício (CSS :target — sem JS)
         modaisHtml += `
@@ -4600,10 +4626,10 @@ async function exportarHTML() {
             <a href="#ex-${exGlobal}" class="gif-modal-bg"></a>
             <div class="gif-modal-content">
               <div class="gif-modal-name">${escapeHtml(ex.n)}</div>
-              <div class="gif-modal-img-wrapper">
-                <img class="gif-frame" src="${gifSrc}" alt="${escapeHtml(ex.n)}" />
+              <div class="gif-modal-img-wrapper${animClass}">
+                ${gifInner}
               </div>
-              <div class="gif-modal-info">🎬 Animação contínua · Toque em FECHAR para voltar</div>
+              <div class="gif-modal-info">🎬 ${podeAnimar ? 'Animação contínua' : 'Imagem de referência'} · Toque em FECHAR para voltar</div>
               <a href="#ex-${exGlobal}" class="gif-modal-close">FECHAR</a>
             </div>
           </div>
@@ -4612,8 +4638,8 @@ async function exportarHTML() {
         conteudo += `
           <div class="pdf-exercise" id="ex-${exGlobal}" data-ex-num="${exGlobal}">
             <div class="pdf-exercise-thumb-col">
-              <div class="pdf-exercise-thumb">
-                <img src="${gifSrc}" alt="${escapeHtml(ex.n)}" />
+              <div class="pdf-exercise-thumb${animClass}">
+                ${gifInner}
               </div>
               <a href="#modal-${exGlobal}" class="pdf-exercise-link">
                 ▶ VER EXECUÇÃO
@@ -4825,6 +4851,7 @@ async function exportarHTML() {
     background: #fafafa;
     border: 1px solid #e5e5e5;
     overflow: hidden;
+    position: relative;
   }
   .pdf-exercise-thumb img {
     width: 100%; height: 100%;
@@ -4984,13 +5011,28 @@ async function exportarHTML() {
     aspect-ratio: 4/3;
     position: relative;
   }
-  /* v2.10.0: GIF real anima sozinho — não precisa de keyframes alternando frames */
-  .gif-frame {
+  /* Frames do exercício. GIF custom = 1 frame (.gif anima sozinho).
+     free-exercise-db = 2 fotos sobrepostas animadas via @keyframes abaixo. */
+  .gif-f {
     position: absolute;
     top: 0; left: 0;
     width: 100%; height: 100%;
     object-fit: cover;
     display: block;
+  }
+  /* Frame 0 fica sempre visível embaixo. O frame 1 aparece/some por cima:
+     quando visível mostra a posição final, quando some revela o frame 0.
+     Animar só uma camada elimina qualquer flash na troca.
+     Tudo em CSS puro — sem JS, compatível com o webview do WhatsApp. */
+  .gif-f1 { opacity: 0; }
+  .gif-anim .gif-f1 { animation: gifFlip 1.4s linear infinite; }
+  @keyframes gifFlip {
+    0%, 49.9%  { opacity: 0; }
+    50%, 100%  { opacity: 1; }
+  }
+  /* Acessibilidade: respeita quem desativou animações no sistema */
+  @media (prefers-reduced-motion: reduce) {
+    .gif-anim .gif-f1 { animation: none; opacity: 0; }
   }
   .gif-modal-info {
     color: #a0a0a0;
@@ -5176,7 +5218,7 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
   console.log('📱 TRAIN.FUEL rodando como PWA');
 }
 
-console.log(`💪 TRAIN.FUEL v2.10.3 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
+console.log(`💪 TRAIN.FUEL v2.10.4 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
 
 // =================================================================
 // 👥 MÓDULO DE ALUNOS — IndexedDB + Histórico de Versões (v2.9)
