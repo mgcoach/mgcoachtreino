@@ -1,8 +1,8 @@
-// TRAIN.FUEL — Service Worker v2.10.4
+// TRAIN.FUEL — Service Worker v2.10.5
 // Migração base64 → arquivos: pré-cache AGRESSIVO dos 50 GIFs no primeiro load
 // pra manter UX idêntica ao base64 (zero buffering em rede ruim).
 
-const CACHE_NAME = 'trainfuel-v2-10-4';
+const CACHE_NAME = 'trainfuel-v2-10-5';
 
 // Shell da aplicação (carregado on demand, mas cacheado também)
 const APP_SHELL = [
@@ -21,7 +21,7 @@ const GIFS = Array.from({ length: 50 }, (_, i) => {
 // Cacheia o shell SINCRONAMENTE (rápido — KB).
 // Os GIFs são baixados em background, sem bloquear o waitUntil.
 self.addEventListener('install', (event) => {
-  console.log('[SW v2.10.4] install — cacheando shell');
+  console.log('[SW v2.10.5] install — cacheando shell');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(APP_SHELL))
@@ -32,7 +32,7 @@ self.addEventListener('install', (event) => {
 // ============ ACTIVATE ============
 // Limpa caches antigos e dispara pré-cache dos GIFs em background.
 self.addEventListener('activate', (event) => {
-  console.log('[SW v2.10.4] activate — limpando caches antigos');
+  console.log('[SW v2.10.5] activate — limpando caches antigos');
   event.waitUntil(
     caches.keys().then(names => Promise.all(
       names
@@ -52,7 +52,7 @@ self.addEventListener('activate', (event) => {
 async function precacheGifsInBackground() {
   try {
     const cache = await caches.open(CACHE_NAME);
-    console.log(`[SW v2.10.4] iniciando pré-cache de ${GIFS.length} GIFs em background`);
+    console.log(`[SW v2.10.5] iniciando pré-cache de ${GIFS.length} GIFs em background`);
     
     const CHUNK_SIZE = 6;
     let done = 0;
@@ -74,7 +74,7 @@ async function precacheGifsInBackground() {
       }));
     }
     
-    console.log(`[SW v2.10.4] pré-cache concluído: ${done}/${GIFS.length} GIFs`);
+    console.log(`[SW v2.10.5] pré-cache concluído: ${done}/${GIFS.length} GIFs`);
   } catch (err) {
     console.error('[SW] erro no pré-cache:', err);
   }

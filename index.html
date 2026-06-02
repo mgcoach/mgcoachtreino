@@ -1420,7 +1420,7 @@
         </div>
         <div class="brand-meta-item">
           <span>Versão</span>
-          <strong>2.10.4</strong>
+          <strong>2.10.5</strong>
         </div>
       </div>
     </div>
@@ -1837,7 +1837,7 @@
   </div>
 
   <p class="footer-note">
-    <strong>TRAIN.FUEL · v2.10.4</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). GIFs customizados servidos como arquivos reais. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
+    <strong>TRAIN.FUEL · v2.10.5</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). GIFs customizados servidos como arquivos reais. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
   </p>
   
   <!-- Área PDF (oculta em tela) -->
@@ -4574,12 +4574,40 @@ async function exportarHTML() {
     let exGlobal = 0;
     let modaisHtml = ''; // Acumula modais individuais (CSS :target)
     
+    // Lista os dias que têm pelo menos 1 exercício — usado pra montar os tabs
+    // de navegação no topo do arquivo do aluno e marcar o primeiro como ativo.
+    const DIAS_ABREV = { seg:'SEG', ter:'TER', qua:'QUA', qui:'QUI', sex:'SEX', sab:'SÁB', dom:'DOM' };
+    const diasAtivos = Object.entries(DIAS).filter(([k]) => treino[k] && treino[k].exercicios.length > 0).map(([k]) => k);
+    
+    // Radios escondidos (1 por dia) — controlam qual conteúdo de dia fica visível
+    // via "#tab-X:checked ~ .container #dia-X { display: block }" (CSS puro).
+    // Ficam ANTES do .container pra que o seletor irmão (~) funcione.
+    let tabsRadios = '';
+    diasAtivos.forEach((k, i) => {
+      tabsRadios += `<input type="radio" name="dia" id="tab-${k}" class="dia-radio"${i === 0 ? ' checked' : ''}>\n`;
+    });
+    
+    // Botões visuais (labels) — gerados dentro do container, antes dos dias
+    let tabsHtml = '';
+    if (diasAtivos.length > 0) {
+      tabsHtml = `<div class="dia-tabs" role="tablist" aria-label="Selecione o dia de treino">`;
+      diasAtivos.forEach(k => {
+        const foco = (treino[k].focus || '').trim();
+        tabsHtml += `
+          <label for="tab-${k}" class="dia-tab" role="tab">
+            <span class="dia-tab-abrev">${DIAS_ABREV[k]}</span>
+            ${foco ? `<span class="dia-tab-foco">${escapeHtml(foco)}</span>` : ''}
+          </label>`;
+      });
+      tabsHtml += `</div>`;
+    }
+    
     Object.entries(DIAS).forEach(([key, label]) => {
       const dia = treino[key];
       if (!dia || !dia.exercicios.length) return;
       
       conteudo += `
-        <div class="pdf-day">
+        <div class="pdf-day" id="dia-${key}">
           <div class="pdf-day-header">
             <span class="pdf-day-name">${escapeHtml(label.toUpperCase())}</span>
             ${dia.focus ? `<span class="pdf-day-focus">${escapeHtml(dia.focus)}</span>` : ''}
@@ -4693,6 +4721,69 @@ async function exportarHTML() {
         ${c.profissional !== '—' ? `<br>Profissional Responsável: ${escapeHtml(c.profissional)}` : ''}
       </div>
     `;
+    
+    // CSS dinâmico das tabs: para cada dia ativo, gera 2 regras —
+    //  1) #tab-K:checked ~ .container #dia-K { display: block }   (mostra o dia)
+    //  2) #tab-K:checked ~ .dia-tabs label[for="tab-K"]            (estilo ativo)
+    // Tanto .container quanto .dia-tabs são irmãos posteriores dos radios.
+    let tabsCSS = '';
+    if (diasAtivos.length > 0) {
+      const showRules = diasAtivos.map(k => `#tab-${k}:checked ~ .container #dia-${k}`).join(',\n  ');
+      const activeRules = diasAtivos.map(k => `#tab-${k}:checked ~ .dia-tabs label[for="tab-${k}"]`).join(',\n  ');
+      const activeFocoRules = diasAtivos.map(k => `#tab-${k}:checked ~ .dia-tabs label[for="tab-${k}"] .dia-tab-foco`).join(',\n  ');
+      tabsCSS = `
+  /* ===== Navegação por dia (radio hack, sem JS) ===== */
+  .dia-radio { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+  .dia-tabs {
+    position: sticky; top: 0; z-index: 50;
+    /* Cancela o padding do body pra grudar na borda da tela */
+    margin: -16px -16px 16px -16px;
+    padding: 14px 16px;
+    background: #000;
+    border-bottom: 2px solid #ff6b1a;
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .dia-tab {
+    flex: 1 1 auto; min-width: 72px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 2px; padding: 10px 12px;
+    background: #1a1a1a; color: #fff;
+    border: 2px solid #333; border-radius: 8px;
+    cursor: pointer; user-select: none;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    font-family: 'Inter', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .dia-tab:active { transform: scale(0.97); }
+  .dia-tab-abrev {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.25rem; font-weight: 700; letter-spacing: 0.06em;
+    line-height: 1;
+  }
+  .dia-tab-foco {
+    font-size: 0.65rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    color: #b0b0b0; text-align: center;
+    max-width: 110px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  /* Esconde TODOS os dias por padrão */
+  .pdf-day { display: none; }
+  /* Mostra apenas o dia do radio que está :checked */
+  ${showRules} { display: block; }
+  /* Estilo do tab ativo */
+  ${activeRules} {
+    background: #ff6b1a; border-color: #ff6b1a; color: #fff;
+  }
+  ${activeFocoRules} { color: #fff; }
+  /* Mobile: encolhe um pouco */
+  @media (max-width: 480px) {
+    .dia-tabs { padding: 10px 12px; gap: 6px; }
+    .dia-tab { padding: 8px 10px; min-width: 60px; }
+    .dia-tab-abrev { font-size: 1.1rem; }
+    .dia-tab-foco { font-size: 0.6rem; max-width: 80px; }
+  }`;
+    }
     
     // ETAPA 4: HTML completo standalone com modal de execução animado
     const htmlCompleto = `<!DOCTYPE html>
@@ -5095,9 +5186,12 @@ async function exportarHTML() {
       font-size: 1.4rem;
     }
   }
+  ${tabsCSS}
 </style>
 </head>
 <body>
+  ${tabsRadios}
+  ${tabsHtml}
   <div class="container">
     ${conteudo}
   </div>
@@ -5218,7 +5312,7 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
   console.log('📱 TRAIN.FUEL rodando como PWA');
 }
 
-console.log(`💪 TRAIN.FUEL v2.10.4 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
+console.log(`💪 TRAIN.FUEL v2.10.5 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
 
 // =================================================================
 // 👥 MÓDULO DE ALUNOS — IndexedDB + Histórico de Versões (v2.9)
