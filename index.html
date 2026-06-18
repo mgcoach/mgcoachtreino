@@ -1420,7 +1420,7 @@
         </div>
         <div class="brand-meta-item">
           <span>Versão</span>
-          <strong>2.10.5</strong>
+          <strong>2.11.0</strong>
         </div>
       </div>
     </div>
@@ -1574,6 +1574,17 @@
             <input type="hidden" id="cliFotoDepois">
             <button type="button" onclick="limparFoto('cliFotoDepois')" id="cliFotoDepoisLimpar" style="display:none; margin-top: 6px; background: none; border: 1px solid var(--border); color: var(--text-3); padding: 3px 8px; font-size: 0.7rem; border-radius: 6px; cursor: pointer;">remover</button>
           </div>
+        </div>
+
+        <div class="field" style="border:1px solid var(--orange);border-radius:12px;padding:12px;background:rgba(255,107,26,0.08);margin-bottom:14px;">
+          <label style="color:var(--orange);font-weight:700;font-size:0.74rem;text-transform:uppercase;letter-spacing:0.04em;">★ Aluno (compartilhado entre os 3 apps)</label>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:6px;">
+            <select id="comumSeletor" onchange="aoEscolherPessoa()" style="flex:1;">
+              <option value="">— Escolher aluno cadastrado / criar novo abaixo —</option>
+            </select>
+            <button type="button" onclick="vincularPessoaAtual()" style="flex:0 0 auto;background:var(--orange);color:#1a1a1a;border:none;border-radius:8px;padding:9px 12px;font-weight:700;cursor:pointer;white-space:nowrap;">💾 Salvar aluno</button>
+          </div>
+          <div style="font-size:0.7rem;color:var(--text-3);margin-top:6px;">Escolha um aluno já cadastrado (preenche os dados básicos) ou preencha abaixo e toque em "Salvar aluno" para compartilhar com NUTRI e Organizer.</div>
         </div>
 
         <div class="field-grid" style="grid-template-columns: 2fr 1fr 1fr 1fr;">
@@ -1837,7 +1848,7 @@
   </div>
 
   <p class="footer-note">
-    <strong>TRAIN.FUEL · v2.10.5</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). GIFs customizados servidos como arquivos reais. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
+    <strong>TRAIN.FUEL · v2.11.0</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). GIFs customizados servidos como arquivos reais. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
   </p>
   
   <!-- Área PDF (oculta em tela) -->
@@ -5349,6 +5360,93 @@ function abrirDB() {
   });
 }
 
+// ============================================================
+// CADASTRO COMPARTILHADO (v2.11) — banco comum entre os 3 apps
+// ============================================================
+const COMUM_DB = 'mgcoach_comum';
+const COMUM_STORE = 'pessoas';
+let _comumDB = null;
+function comumDB() {
+  if (_comumDB) return Promise.resolve(_comumDB);
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(COMUM_DB, 1);
+    req.onupgradeneeded = (ev) => {
+      const d = ev.target.result;
+      if (!d.objectStoreNames.contains(COMUM_STORE)) d.createObjectStore(COMUM_STORE, { keyPath: 'id' });
+    };
+    req.onsuccess = (ev) => { _comumDB = ev.target.result; resolve(_comumDB); };
+    req.onerror = () => reject(req.error);
+  });
+}
+async function comumOp(mode, fn) {
+  const cdb = await comumDB();
+  return new Promise((resolve, reject) => {
+    const tx = cdb.transaction(COMUM_STORE, mode);
+    const r = fn(tx.objectStore(COMUM_STORE));
+    r.onsuccess = () => resolve(r.result);
+    r.onerror = () => reject(r.error);
+  });
+}
+async function listarPessoas() { try { return await comumOp('readonly', s => s.getAll()) || []; } catch (e) { return []; } }
+async function getPessoa(id) { try { return await comumOp('readonly', s => s.get(id)); } catch (e) { return null; } }
+async function salvarPessoa(p) {
+  if (!p.id) p.id = 'pessoa_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+  p.atualizadoEm = new Date().toISOString();
+  await comumOp('readwrite', s => s.put(p));
+  return p;
+}
+function idadeDeNascimento(nascimento) {
+  if (!nascimento) return '';
+  const d = new Date(nascimento);
+  if (isNaN(d)) return '';
+  const hoje = new Date();
+  let idade = hoje.getFullYear() - d.getFullYear();
+  const m = hoje.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && hoje.getDate() < d.getDate())) idade--;
+  return idade >= 0 && idade < 130 ? idade : '';
+}
+async function popularSeletorPessoas() {
+  const sel = document.getElementById('comumSeletor');
+  if (!sel) return;
+  const pessoas = await listarPessoas();
+  const atual = sel.value;
+  sel.innerHTML = '<option value="">— Escolher aluno cadastrado / criar novo abaixo —</option>';
+  pessoas.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+  pessoas.forEach(p => { const o = document.createElement('option'); o.value = p.id; o.textContent = p.nome || '(sem nome)'; sel.appendChild(o); });
+  if (atual) sel.value = atual;
+}
+async function aoEscolherPessoa() {
+  const sel = document.getElementById('comumSeletor');
+  if (!sel || !sel.value) return;
+  const p = await getPessoa(sel.value);
+  if (!p) return;
+  const set = (id, v) => { const el = document.getElementById(id); if (el != null && v != null) el.value = v; };
+  set('cliNome', p.nome || '');
+  set('cliSexo', p.sexo || '');
+  set('cliTel', p.contato || '');
+  set('cliAltura', p.altura || '');
+  if (p.nascimento) {
+    const el = document.getElementById('cliNasc'); if (el) el.value = p.nascimento;
+    const idade = idadeDeNascimento(p.nascimento); if (idade !== '') set('cliIdade', idade);
+  } else if (p.idade) { set('cliIdade', p.idade); }
+  if (typeof toast === 'function') toast('✓ Dados básicos preenchidos de ' + (p.nome || 'aluno'));
+}
+async function vincularPessoaAtual() {
+  const g = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  const nome = g('cliNome');
+  if (!nome) { if (typeof toast === 'function') toast('Preencha o nome antes de salvar o aluno'); return; }
+  const sel = document.getElementById('comumSeletor');
+  const pessoa = {
+    id: (sel && sel.value) ? sel.value : null,
+    nome, sexo: g('cliSexo'), contato: g('cliTel'), altura: g('cliAltura'),
+    nascimento: g('cliNasc') || null, idade: g('cliIdade') || null
+  };
+  const salva = await salvarPessoa(pessoa);
+  await popularSeletorPessoas();
+  if (sel) sel.value = salva.id;
+  if (typeof toast === 'function') toast('★ Aluno salvo no cadastro compartilhado — aparece no NUTRI e Organizer');
+}
+
 // Helpers IndexedDB
 function dbGet(store, key) {
   return new Promise((resolve, reject) => {
@@ -6231,6 +6329,7 @@ async function importarAlunos(event) {
   try {
     await abrirDB();
     await renderListaAlunos();
+    try { await popularSeletorPessoas(); } catch (e) { console.warn('seletor pessoas:', e); }
     
     // Auto-save: listener para todos os campos da ficha
     document.querySelectorAll('[id^="cli"], #profNome, #planData').forEach(el => {
@@ -6255,7 +6354,7 @@ async function importarAlunos(event) {
       }
     });
     
-    console.log('👥 Sistema de Alunos v2.9.4 inicializado (com auto-save)');
+    console.log('👥 Sistema de Alunos v2.11.0 inicializado (auto-save + cadastro compartilhado)');
   } catch (e) {
     console.error('Erro ao inicializar IndexedDB:', e);
     toast('Erro ao carregar banco de alunos: ' + e.message, 'erro');
