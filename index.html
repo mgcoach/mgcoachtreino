@@ -1420,7 +1420,7 @@
         </div>
         <div class="brand-meta-item">
           <span>Versão</span>
-          <strong>2.11.0</strong>
+          <strong>2.11.2</strong>
         </div>
       </div>
     </div>
@@ -1582,9 +1582,10 @@
             <select id="comumSeletor" onchange="aoEscolherPessoa()" style="flex:1;">
               <option value="">— Escolher aluno cadastrado / criar novo abaixo —</option>
             </select>
-            <button type="button" onclick="vincularPessoaAtual()" style="flex:0 0 auto;background:var(--orange);color:#1a1a1a;border:none;border-radius:8px;padding:9px 12px;font-weight:700;cursor:pointer;white-space:nowrap;">💾 Salvar aluno</button>
+            <button type="button" onclick="vincularPessoaAtual()" title="Compartilha só os dados básicos com NUTRI/Organizer (não cria a ficha)" style="flex:0 0 auto;background:var(--orange);color:#1a1a1a;border:none;border-radius:8px;padding:9px 12px;font-weight:700;cursor:pointer;white-space:nowrap;">📇 Compartilhar</button>
+            <button type="button" onclick="excluirPessoaComum()" title="Remover o contato selecionado do cadastro compartilhado" style="flex:0 0 auto;background:transparent;color:#ef4444;border:1px solid #ef4444;border-radius:8px;padding:9px 11px;font-weight:700;cursor:pointer;">🗑</button>
           </div>
-          <div style="font-size:0.7rem;color:var(--text-3);margin-top:6px;">Escolha um aluno já cadastrado (preenche os dados básicos) ou preencha abaixo e toque em "Salvar aluno" para compartilhar com NUTRI e Organizer.</div>
+          <div style="font-size:0.7rem;color:var(--text-3);margin-top:6px;">Escolha um aluno já cadastrado para <strong>preencher os dados básicos</strong>. Para criar a ficha de verdade, use o <strong>💾 Salvar Aluno</strong> no topo — ele salva o aluno E já compartilha o contato com NUTRI e Organizer. O 🗑 remove um contato de teste do compartilhado.</div>
         </div>
 
         <div class="field-grid" style="grid-template-columns: 2fr 1fr 1fr 1fr;">
@@ -1848,7 +1849,7 @@
   </div>
 
   <p class="footer-note">
-    <strong>TRAIN.FUEL · v2.11.0</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). GIFs customizados servidos como arquivos reais. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
+    <strong>TRAIN.FUEL · v2.11.2</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). GIFs customizados servidos como arquivos reais. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
   </p>
   
   <!-- Área PDF (oculta em tela) -->
@@ -3981,8 +3982,8 @@ function atualizarContadores() {
 renderDia();
 atualizarContadores();
 
-function limparTudo() {
-  if (!confirm('Limpar todos os exercícios de TODOS os dias da semana?')) return;
+async function limparTudo() {
+  if (!(await uiConfirm('Limpar todos os exercícios de TODOS os dias da semana?'))) return;
   Object.keys(DIAS).forEach(d => {
     treino[d] = { focus: '', exercicios: [] };
   });
@@ -4193,17 +4194,17 @@ async function gerarPDF() {
   let totalEx = 0;
   Object.keys(DIAS).forEach(d => totalEx += treino[d].exercicios.length);
   if (totalEx === 0) {
-    alert('Adicione pelo menos um exercício antes de gerar o PDF.');
+    toast('Adicione pelo menos um exercício antes de gerar o PDF.');
     return;
   }
   
   const c = coletarCliente();
   if (c.nome === '—' || !c.nome.trim()) {
-    if (!confirm('O nome do aluno não foi preenchido. Deseja continuar mesmo assim?')) return;
+    if (!(await uiConfirm('O nome do aluno não foi preenchido. Deseja continuar mesmo assim?'))) return;
   }
   
   if (typeof html2pdf === 'undefined') {
-    alert('Biblioteca PDF não carregou. Use o botão "Imprimir" como alternativa.');
+    toast('Biblioteca PDF não carregou. Use o botão "Imprimir" como alternativa.');
     return;
   }
   
@@ -4360,7 +4361,7 @@ async function gerarPDF() {
     
   } catch (err) {
     console.error('Erro PDF:', err);
-    alert('Erro ao gerar PDF: ' + (err.message || 'desconhecido') + '\n\nUse o botão "Imprimir" como alternativa.');
+    toast('Erro ao gerar PDF: ' + (err.message || 'desconhecido') + '\n\nUse o botão "Imprimir" como alternativa.');
   } finally {
     const wrap = document.getElementById('pdfRenderWrapper');
     if (wrap) wrap.remove();
@@ -4375,7 +4376,7 @@ async function imprimir() {
   let totalEx = 0;
   Object.keys(DIAS).forEach(d => totalEx += treino[d].exercicios.length);
   if (totalEx === 0) {
-    alert('Adicione pelo menos um exercício antes de imprimir.');
+    toast('Adicione pelo menos um exercício antes de imprimir.');
     return;
   }
   
@@ -4458,7 +4459,7 @@ async function imprimir() {
     
   } catch (err) {
     console.error('Erro ao preparar impressão:', err);
-    alert('Erro ao preparar impressão: ' + (err.message || 'desconhecido'));
+    toast('Erro ao preparar impressão: ' + (err.message || 'desconhecido'));
     if (btn) {
       btn.disabled = false;
       btn.textContent = originalText;
@@ -4475,13 +4476,13 @@ async function exportarHTML() {
   let totalEx = 0;
   Object.keys(DIAS).forEach(d => totalEx += treino[d].exercicios.length);
   if (totalEx === 0) {
-    alert('Adicione pelo menos um exercício antes de exportar.');
+    toast('Adicione pelo menos um exercício antes de exportar.');
     return;
   }
   
   const c = coletarCliente();
   if (c.nome === '—' || !c.nome.trim()) {
-    if (!confirm('O nome do aluno não foi preenchido. Deseja continuar mesmo assim?')) return;
+    if (!(await uiConfirm('O nome do aluno não foi preenchido. Deseja continuar mesmo assim?'))) return;
   }
   
   const btn = event && event.target ? event.target : null;
@@ -5235,7 +5236,7 @@ async function exportarHTML() {
     
   } catch (err) {
     console.error('Erro ao exportar HTML:', err);
-    alert('Erro ao exportar: ' + (err.message || 'desconhecido'));
+    toast('Erro ao exportar: ' + (err.message || 'desconhecido'));
     if (btn) {
       btn.disabled = false;
       btn.textContent = originalText;
@@ -5300,9 +5301,9 @@ function importarJSON(e) {
       document.getElementById('dayFocus').value = treino[diaAtivo].focus || '';
       renderDia();
       atualizarContadores();
-      alert('Treino importado com sucesso!');
+      toast('Treino importado com sucesso!');
     } catch (err) {
-      alert('Erro ao importar: ' + err.message);
+      toast('Erro ao importar: ' + err.message);
     }
   };
   reader.readAsText(file);
@@ -5323,7 +5324,7 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
   console.log('📱 TRAIN.FUEL rodando como PWA');
 }
 
-console.log(`💪 TRAIN.FUEL v2.10.5 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
+console.log(`💪 TRAIN.FUEL v2.11.2 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
 
 // =================================================================
 // 👥 MÓDULO DE ALUNOS — IndexedDB + Histórico de Versões (v2.9)
@@ -5446,6 +5447,21 @@ async function vincularPessoaAtual() {
   if (sel) sel.value = salva.id;
   if (typeof toast === 'function') toast('★ Aluno salvo no cadastro compartilhado — aparece no NUTRI e Organizer');
 }
+async function excluirPessoaComum() {
+  const sel = document.getElementById('comumSeletor');
+  if (!sel || !sel.value) { if (typeof toast === 'function') toast('Escolha um contato no seletor primeiro'); return; }
+  const p = await getPessoa(sel.value);
+  const nome = (p && p.nome) ? p.nome : 'este contato';
+  if (!(await uiConfirm(`Remover "${nome}" do cadastro compartilhado?\n\n(NÃO apaga a ficha de treino — só o contato compartilhado entre os apps.)`))) return;
+  try {
+    await comumOp('readwrite', s => s.delete(sel.value));
+    await popularSeletorPessoas();
+    sel.value = '';
+    if (typeof toast === 'function') toast('🗑 Contato removido do compartilhado');
+  } catch (e) {
+    if (typeof toast === 'function') toast('Erro ao remover: ' + (e && e.message ? e.message : e), 'erro');
+  }
+}
 
 // Helpers IndexedDB
 function dbGet(store, key) {
@@ -5504,6 +5520,53 @@ function dbGetAllByIndex(store, indexName, value) {
 }
 
 // Toast de notificação
+
+// ===== Modais próprios — funcionam DENTRO do iframe (a casca), onde os
+//       diálogos nativos confirm/prompt/alert do Android não abrem. (casca-fix) =====
+function _uiEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function _uiModal(inner){
+  return new Promise(function(resolve){
+    var ov=document.createElement('div');
+    ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:20px;font-family:inherit;';
+    ov.innerHTML='<div style="background:#1a1a1a;border:1px solid #2e2e2e;border-radius:14px;max-width:430px;width:100%;padding:20px;color:#e5e5e5;box-shadow:0 12px 40px rgba(0,0,0,.5);">'+inner+'</div>';
+    function close(v){try{ov.remove();}catch(e){} resolve(v);}
+    ov.addEventListener('click',function(e){if(e.target===ov)close(null);});
+    document.body.appendChild(ov);
+    ov.querySelectorAll('[data-val]').forEach(function(b){b.addEventListener('click',function(){
+      var dv=b.getAttribute('data-val');
+      if(dv==='__input__'){var el=ov.querySelector('input,textarea');close(el?el.value:'');}
+      else close(dv);
+    });});
+    setTimeout(function(){var el=ov.querySelector('input,textarea');if(el)el.focus();},60);
+  });
+}
+async function uiConfirm(msg,okTxt,cancelTxt){
+  okTxt=okTxt||'OK';cancelTxt=cancelTxt||'Cancelar';
+  var r=await _uiModal(
+    '<div style="white-space:pre-wrap;line-height:1.5;margin-bottom:16px;font-size:0.92rem;">'+_uiEsc(msg)+'</div>'+
+    '<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">'+
+    '<button data-val="0" style="background:transparent;border:1px solid #2e2e2e;color:#e5e5e5;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer;">'+_uiEsc(cancelTxt)+'</button>'+
+    '<button data-val="1" style="background:#ff6b1a;border:none;color:#1a1a1a;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer;">'+_uiEsc(okTxt)+'</button></div>');
+  return r==='1';
+}
+async function uiAlert(msg){
+  await _uiModal('<div style="white-space:pre-wrap;line-height:1.5;margin-bottom:16px;font-size:0.92rem;">'+_uiEsc(msg)+'</div><div style="display:flex;justify-content:flex-end;"><button data-val="1" style="background:#ff6b1a;border:none;color:#1a1a1a;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer;">OK</button></div>');
+}
+async function uiPrompt(msg,def){
+  var r=await _uiModal(
+    '<div style="white-space:pre-wrap;line-height:1.5;margin-bottom:12px;font-size:0.92rem;">'+_uiEsc(msg)+'</div>'+
+    '<input type="text" value="'+_uiEsc(def||'')+'" style="width:100%;box-sizing:border-box;background:#0a0a0a;border:1px solid #2e2e2e;color:#e5e5e5;border-radius:8px;padding:10px;margin-bottom:14px;font-size:0.95rem;">'+
+    '<div style="display:flex;gap:8px;justify-content:flex-end;">'+
+    '<button data-val="__cancel__" style="background:transparent;border:1px solid #2e2e2e;color:#e5e5e5;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer;">Cancelar</button>'+
+    '<button data-val="__input__" style="background:#ff6b1a;border:none;color:#1a1a1a;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer;">OK</button></div>');
+  return (r==='__cancel__'||r===null)?null:r;
+}
+async function uiMenu(titulo,opcoes){
+  var botoes=opcoes.map(function(o){return '<button data-val="'+_uiEsc(o.val)+'" style="display:block;width:100%;text-align:left;background:#0a0a0a;border:1px solid #2e2e2e;color:#e5e5e5;border-radius:8px;padding:12px 14px;margin-bottom:8px;font-weight:600;cursor:pointer;font-size:0.92rem;">'+_uiEsc(o.label)+'</button>';}).join('');
+  var r=await _uiModal('<div style="font-weight:700;color:#ff6b1a;margin-bottom:14px;font-size:0.95rem;">'+_uiEsc(titulo)+'</div>'+botoes+'<button data-val="__cancel__" style="display:block;width:100%;background:transparent;border:none;color:#999;padding:8px;margin-top:4px;cursor:pointer;">Cancelar</button>');
+  return r==='__cancel__'?null:r;
+}
+
 function toast(msg, tipo = 'sucesso') {
   const t = document.getElementById('toast');
   if (!t) return;
@@ -6004,6 +6067,7 @@ function atualizarBarraAlunoAtivo(aluno) {
 }
 
 async function salvarAlunoAtivo() {
+ try {
   const dados = coletarDadosAluno();
   if (!dados.nome) {
     toast('⚠️ Nome do aluno é obrigatório', 'aviso');
@@ -6030,15 +6094,36 @@ async function salvarAlunoAtivo() {
   aluno.treino = treinoSnapshot;
   
   await salvarAluno(aluno, true);
+
+  // Propaga o contato pro cadastro compartilhado (aparece no NUTRI/Organizer)
+  try {
+    const sel = document.getElementById('comumSeletor');
+    const salvaP = await salvarPessoa({
+      id: aluno.pessoaId || (sel && sel.value) || null,
+      nome: dados.nome, sexo: dados.sexo || '', contato: dados.tel || '',
+      altura: dados.altura || '', nascimento: dados.nasc || null, idade: dados.idade || null
+    });
+    if (salvaP && salvaP.id && aluno.pessoaId !== salvaP.id) {
+      aluno.pessoaId = salvaP.id;
+      await salvarAluno(aluno, false); // grava o vínculo sem criar nova versão
+    }
+    await popularSeletorPessoas();
+    if (sel) sel.value = aluno.pessoaId || '';
+  } catch (e) { console.warn('sync contato comum:', e); }
+
   atualizarBarraAlunoAtivo(aluno);
   await renderListaAlunos();
   
   const exsCount = Object.values(treinoSnapshot).reduce((s, d) => s + (d.exercicios?.length || 0), 0);
   toast(`✅ ${dados.nome} salvo (${exsCount} exercícios) — versão #${(await listarVersoes(aluno.id)).length}`);
+ } catch (e) {
+  console.error('salvarAlunoAtivo falhou:', e);
+  toast('❌ Erro ao salvar: ' + (e && e.message ? e.message : e), 'erro');
+ }
 }
 
-function fecharAlunoAtivo() {
-  if (!confirm('Fechar este aluno? Mudanças não salvas serão perdidas.')) return;
+async function fecharAlunoAtivo() {
+  if (!(await uiConfirm('Fechar este aluno? Mudanças não salvas serão perdidas.'))) return;
   alunoAtivoId = null;
   limparAlunoCompleto();
   atualizarBarraAlunoAtivo(null);
@@ -6055,15 +6140,13 @@ async function menuAluno(id, evt) {
   if (!aluno) return;
   const nome = aluno.dados?.nome || 'Aluno';
   
-  const acao = prompt(
-    `Ações para "${nome}":\n\n` +
-    `1 - Abrir / Editar\n` +
-    `2 - Ver Histórico de Versões\n` +
-    `3 - Exportar Ficha (JSON)\n` +
-    `4 - Duplicar\n` +
-    `5 - Excluir\n\n` +
-    `Digite o número da ação:`
-  );
+  const acao = await uiMenu(`Ações para "${nome}"`, [
+    {val:'1', label:'✏️ Abrir / Editar'},
+    {val:'2', label:'🕑 Ver histórico de versões'},
+    {val:'3', label:'📤 Exportar ficha (JSON)'},
+    {val:'4', label:'📋 Duplicar'},
+    {val:'5', label:'🗑️ Excluir'}
+  ]);
   
   if (acao === '1') abrirAluno(id);
   else if (acao === '2') verHistorico(id);
@@ -6113,7 +6196,7 @@ function fecharHistorico() {
 }
 
 async function restaurarVersao(versaoId, alunoId) {
-  if (!confirm('Restaurar esta versão? Uma nova versão atual será criada com esses dados (a versão atual não será perdida).')) return;
+  if (!(await uiConfirm('Restaurar esta versão? Uma nova versão atual será criada com esses dados (a versão atual não será perdida).'))) return;
   const versao = await dbGet(STORE_VERSOES, versaoId);
   const aluno = await buscarAluno(alunoId);
   if (!versao || !aluno) { toast('Versão não encontrada', 'erro'); return; }
@@ -6156,7 +6239,7 @@ async function confirmarExcluirAluno(id) {
   const aluno = await buscarAluno(id);
   if (!aluno) return;
   const nome = aluno.dados?.nome || 'este aluno';
-  if (!confirm(`Tem CERTEZA que quer excluir "${nome}" e TODO o histórico de versões?\n\nEsta ação NÃO pode ser desfeita.`)) return;
+  if (!(await uiConfirm(`Tem CERTEZA que quer excluir "${nome}" e TODO o histórico de versões?\n\nEsta ação NÃO pode ser desfeita.`))) return;
   await excluirAluno(id);
   if (alunoAtivoId === id) {
     alunoAtivoId = null;
@@ -6240,7 +6323,7 @@ async function importarAlunos(event) {
     } else if (pacote.treino && (pacote.cliente || pacote.versao)) {
       // Formato ANTIGO: { versao, treino, cliente } — vindo da aba 📄 Exportar
       const cli = pacote.cliente || {};
-      const nome = cli.nome || prompt('Este arquivo não tem nome do aluno. Digite um nome para criar a ficha:', 'Aluno importado');
+      const nome = cli.nome || await uiPrompt('Este arquivo não tem nome do aluno. Digite um nome para criar a ficha:', 'Aluno importado');
       if (!nome) {
         toast('Importação cancelada', 'aviso');
         event.target.value = '';
@@ -6278,7 +6361,7 @@ async function importarAlunos(event) {
       msg = `Criar novo aluno "${alunosImp[0].dados?.nome}" a partir deste arquivo de treino?`;
     }
     
-    if (!confirm(msg)) {
+    if (!(await uiConfirm(msg))) {
       event.target.value = '';
       return;
     }

@@ -2,7 +2,7 @@
 // Migração base64 → arquivos: pré-cache AGRESSIVO dos 50 GIFs no primeiro load
 // pra manter UX idêntica ao base64 (zero buffering em rede ruim).
 
-const CACHE_NAME = 'trainfuel-v2-10-5';
+const CACHE_NAME = 'trainfuel-v2-11-2';
 
 // Shell da aplicação (carregado on demand, mas cacheado também)
 const APP_SHELL = [
