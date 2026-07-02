@@ -1420,7 +1420,7 @@
         </div>
         <div class="brand-meta-item">
           <span>Versão</span>
-          <strong>2.11.2</strong>
+          <strong>2.12.0</strong>
         </div>
       </div>
     </div>
@@ -1431,6 +1431,7 @@
     <button class="nav-tab active" data-panel="alunos">👥 Alunos</button>
     <button class="nav-tab" data-panel="aluno">👤 Ficha</button>
     <button class="nav-tab" data-panel="treino">🏋️ Treino</button>
+    <button class="nav-tab" data-panel="modelos">📋 Modelos</button>
     <button class="nav-tab" data-panel="export">📄 Exportar</button>
   </div>
 
@@ -1541,6 +1542,7 @@
         </div>
       </div>
       <div style="display: flex; gap: 8px; flex-shrink: 0;">
+        <button onclick="escolherModeloParaAplicar()" style="background: var(--bg-2); color: var(--orange); border: 1px solid rgba(255,107,26,.5); padding: 10px 14px; font-size: 0.9rem; font-weight: 700; border-radius: 8px; cursor: pointer;">📋 Aplicar modelo</button>
         <button onclick="salvarAlunoAtivo()" class="btn-export" style="background: var(--orange); color: #fff; border: none; padding: 10px 18px; font-size: 0.9rem; font-weight: 700;">💾 Salvar Aluno</button>
         <button id="btnFecharAluno" onclick="fecharAlunoAtivo()" style="display:none; background: var(--bg-2); color: var(--text-2); border: 1px solid var(--border); padding: 8px 14px; font-size: 0.85rem; border-radius: 8px; cursor: pointer;">✕ Fechar</button>
       </div>
@@ -1731,6 +1733,14 @@
   <!-- ============== PAINEL TREINO ============== -->
   <div class="panel" id="panel-treino">
     
+    <div id="modeloBanner" style="display:none; background: var(--orange); color:#1a1a1a; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+      <div style="font-weight:700;">📋 Editando modelo: <span id="modeloBannerNome"></span></div>
+      <div style="display:flex; gap:8px;">
+        <button onclick="salvarModeloAtivo()" style="background:#1a1a1a; color:var(--orange); border:none; border-radius:8px; padding:9px 14px; font-weight:700; cursor:pointer;">💾 Salvar modelo</button>
+        <button onclick="sairModoModelo()" style="background:transparent; color:#1a1a1a; border:1px solid #1a1a1a; border-radius:8px; padding:9px 12px; font-weight:700; cursor:pointer;">✖ Sair</button>
+      </div>
+    </div>
+    
     <div class="section">
       <div class="section-title">Programação Semanal</div>
       
@@ -1848,8 +1858,26 @@
     </div>
   </div>
 
+  <div class="panel" id="panel-modelos">
+    <div class="section">
+      <div class="section-title">📋 Modelos de Treino</div>
+      <div style="color: var(--text-3); font-size: 0.82rem; margin-bottom: 14px;">
+        Crie treinos padrão (ex.: Feminino Iniciante, Feminino Avançado) e aplique em qualquer aluno com 2 toques.
+        Ao aplicar, o aluno fica com uma <strong>cópia própria</strong> — editar o modelo depois não mexe nas alunas que já receberam.
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+        <button class="action-btn primary" onclick="novoModeloDoZero()" style="flex:1; min-width:180px;">➕ Novo modelo (do zero)</button>
+        <button class="action-btn" onclick="salvarTreinoAtualComoModelo()" style="flex:1; min-width:180px;">💾 Salvar treino atual como modelo</button>
+      </div>
+      <div id="modelosList"></div>
+      <div id="modelosEmpty" style="text-align:center; color: var(--text-3); padding: 30px 10px; font-size: 0.9rem;">
+        Nenhum modelo salvo ainda.<br>Monte um treino na aba 🏋️ Treino e toque em "Salvar treino atual como modelo", ou crie um do zero.
+      </div>
+    </div>
+  </div>
+
   <p class="footer-note">
-    <strong>TRAIN.FUEL · v2.11.2</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). GIFs customizados servidos como arquivos reais. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
+    <strong>TRAIN.FUEL · v2.12.0</strong> — Banco de exercícios baseado em <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" style="color: var(--orange);">free-exercise-db</a> (domínio público). GIFs customizados servidos como arquivos reais. Use sempre o bom senso clínico — esta ferramenta é auxiliar à prescrição profissional.
   </p>
   
   <!-- Área PDF (oculta em tela) -->
@@ -5324,16 +5352,17 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
   console.log('📱 TRAIN.FUEL rodando como PWA');
 }
 
-console.log(`💪 TRAIN.FUEL v2.11.2 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
+console.log(`💪 TRAIN.FUEL v2.12.0 carregado · ${EXERCICIOS.length} exercícios disponíveis`);
 
 // =================================================================
 // 👥 MÓDULO DE ALUNOS — IndexedDB + Histórico de Versões (v2.9)
 // =================================================================
 
 const DB_NAME = 'trainfuel_db';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_ALUNOS = 'alunos';
 const STORE_VERSOES = 'versoes';
+const STORE_MODELOS = 'modelos';
 
 let db = null;
 let alunoAtivoId = null;
@@ -5356,6 +5385,11 @@ function abrirDB() {
         const v = d.createObjectStore(STORE_VERSOES, { keyPath: 'id', autoIncrement: true });
         v.createIndex('alunoId', 'alunoId', { unique: false });
         v.createIndex('criadoEm', 'criadoEm', { unique: false });
+      }
+      if (!d.objectStoreNames.contains(STORE_MODELOS)) {
+        const m = d.createObjectStore(STORE_MODELOS, { keyPath: 'id' });
+        m.createIndex('nome', 'nome', { unique: false });
+        m.createIndex('atualizadoEm', 'atualizadoEm', { unique: false });
       }
     };
   });
@@ -5828,6 +5862,159 @@ function limparAlunoCompleto() {
     if (typeof renderDia === 'function') renderDia();
     if (typeof atualizarContadores === 'function') atualizarContadores();
   }
+}
+
+// ===================== MODELOS DE TREINO (v2.12) =====================
+let modeloAtivoId = null;
+let modelosCache = [];
+
+function contarExsTreino(t) {
+  if (!t) return 0;
+  return Object.values(t).reduce((s, d) => s + ((d && d.exercicios) ? d.exercicios.length : 0), 0);
+}
+async function listarModelos() {
+  modelosCache = await dbGetAll(STORE_MODELOS);
+  modelosCache.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+  return modelosCache;
+}
+async function salvarModeloObj(m) {
+  m.atualizadoEm = Date.now();
+  if (!m.criadoEm) m.criadoEm = Date.now();
+  await dbPut(STORE_MODELOS, m);
+  return m;
+}
+function irParaAba(panel) {
+  const tab = document.querySelector(`.nav-tab[data-panel="${panel}"]`);
+  if (tab) tab.click();
+}
+async function renderListaModelos() {
+  const lista = document.getElementById('modelosList');
+  const vazio = document.getElementById('modelosEmpty');
+  if (!lista) return;
+  const modelos = await listarModelos();
+  if (!modelos.length) {
+    lista.innerHTML = '';
+    if (vazio) vazio.style.display = 'block';
+    return;
+  }
+  if (vazio) vazio.style.display = 'none';
+  lista.innerHTML = modelos.map(m => {
+    const n = contarExsTreino(m.treino);
+    const dias = m.treino ? Object.keys(m.treino).filter(d => m.treino[d] && m.treino[d].exercicios && m.treino[d].exercicios.length).length : 0;
+    return `<div style="background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 10px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">
+        <div style="min-width:0;">
+          <div style="font-weight:700; font-size:1rem; color:var(--text);">${_uiEsc(m.nome || 'Sem nome')}</div>
+          <div style="font-size:0.75rem; color:var(--text-3); margin-top:2px;">${n} exercício(s) · ${dias} dia(s) com treino</div>
+        </div>
+        <button onclick="aplicarModeloNoAlunoAtivo('${m.id}')" style="background:var(--orange); color:#fff; border:none; border-radius:8px; padding:9px 14px; font-weight:700; cursor:pointer; white-space:nowrap;">📋 Aplicar no aluno</button>
+      </div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:12px;">
+        <button onclick="editarModelo('${m.id}')" style="flex:1; min-width:70px; background:var(--bg-3,#222); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:8px; font-weight:600; cursor:pointer; font-size:0.82rem;">✏️ Editar</button>
+        <button onclick="renomearModelo('${m.id}')" style="flex:1; min-width:70px; background:var(--bg-3,#222); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:8px; font-weight:600; cursor:pointer; font-size:0.82rem;">✎ Renomear</button>
+        <button onclick="duplicarModelo('${m.id}')" style="flex:1; min-width:70px; background:var(--bg-3,#222); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:8px; font-weight:600; cursor:pointer; font-size:0.82rem;">📄 Duplicar</button>
+        <button onclick="excluirModelo('${m.id}')" style="flex:1; min-width:70px; background:transparent; color:#ef4444; border:1px solid #ef4444; border-radius:8px; padding:8px; font-weight:600; cursor:pointer; font-size:0.82rem;">🗑 Excluir</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function novoModeloDoZero() {
+  const nome = await uiPrompt('Nome do novo modelo (ex.: Feminino Iniciante):', '');
+  if (!nome || !nome.trim()) return;
+  const id = gerarId();
+  const treinoVazio = {};
+  ['seg','ter','qua','qui','sex','sab','dom'].forEach(d => treinoVazio[d] = { focus:'', exercicios:[] });
+  await salvarModeloObj({ id, nome: nome.trim(), treino: treinoVazio });
+  await renderListaModelos();
+  editarModelo(id);
+}
+async function salvarTreinoAtualComoModelo() {
+  const t = coletarTreinoCompleto();
+  if (contarExsTreino(t) === 0) { toast('O treino da tela está vazio — monte na aba 🏋️ Treino primeiro', 'aviso'); return; }
+  const nome = await uiPrompt('Nome do modelo (ex.: Feminino Iniciante):', '');
+  if (!nome || !nome.trim()) return;
+  const id = gerarId();
+  await salvarModeloObj({ id, nome: nome.trim(), treino: t });
+  await renderListaModelos();
+  toast(`✅ Modelo "${nome.trim()}" salvo (${contarExsTreino(t)} exercícios)`);
+}
+async function editarModelo(id) {
+  const m = await dbGet(STORE_MODELOS, id);
+  if (!m) { toast('Modelo não encontrado', 'erro'); return; }
+  modeloAtivoId = id;
+  aplicarTreinoCompleto(m.treino || {});
+  const banner = document.getElementById('modeloBanner');
+  const nomeEl = document.getElementById('modeloBannerNome');
+  if (nomeEl) nomeEl.textContent = m.nome || 'Sem nome';
+  if (banner) banner.style.display = 'flex';
+  irParaAba('treino');
+  toast(`Editando "${m.nome}". Altere e toque em 💾 Salvar modelo.`);
+}
+async function salvarModeloAtivo() {
+  if (!modeloAtivoId) { toast('Nenhum modelo em edição', 'aviso'); return; }
+  const m = await dbGet(STORE_MODELOS, modeloAtivoId);
+  if (!m) { toast('Modelo não encontrado', 'erro'); modeloAtivoId = null; return; }
+  m.treino = coletarTreinoCompleto();
+  await salvarModeloObj(m);
+  await renderListaModelos();
+  toast(`✅ Modelo "${m.nome}" atualizado (${contarExsTreino(m.treino)} exercícios)`);
+}
+function sairModoModelo() {
+  modeloAtivoId = null;
+  const banner = document.getElementById('modeloBanner');
+  if (banner) banner.style.display = 'none';
+  toast('Saiu do modo modelo');
+}
+async function excluirModelo(id) {
+  const m = await dbGet(STORE_MODELOS, id);
+  const nome = m ? m.nome : 'este modelo';
+  if (!(await uiConfirm(`Excluir o modelo "${nome}"?\n\n(NÃO afeta as alunas que já receberam esse treino — cada uma tem cópia própria.)`))) return;
+  await dbDelete(STORE_MODELOS, id);
+  if (modeloAtivoId === id) sairModoModelo();
+  await renderListaModelos();
+  toast('🗑 Modelo excluído');
+}
+async function renomearModelo(id) {
+  const m = await dbGet(STORE_MODELOS, id);
+  if (!m) return;
+  const novo = await uiPrompt('Novo nome do modelo:', m.nome || '');
+  if (!novo || !novo.trim()) return;
+  m.nome = novo.trim();
+  await salvarModeloObj(m);
+  await renderListaModelos();
+  if (modeloAtivoId === id) { const el = document.getElementById('modeloBannerNome'); if (el) el.textContent = m.nome; }
+  toast('✅ Modelo renomeado');
+}
+async function duplicarModelo(id) {
+  const m = await dbGet(STORE_MODELOS, id);
+  if (!m) return;
+  const novo = { id: gerarId(), nome: (m.nome || 'Modelo') + ' (cópia)', treino: JSON.parse(JSON.stringify(m.treino || {})) };
+  await salvarModeloObj(novo);
+  await renderListaModelos();
+  toast('📄 Modelo duplicado');
+}
+async function aplicarModeloTreino(m) {
+  const atual = coletarTreinoCompleto();
+  if (contarExsTreino(atual) > 0) {
+    if (!(await uiConfirm(`O treino da tela será SUBSTITUÍDO pelo modelo "${m.nome}".\n\nContinuar? (depois é só clicar em 💾 Salvar Aluno)`))) return false;
+  }
+  aplicarTreinoCompleto(m.treino || {});
+  if (typeof _markDirty === 'function') _markDirty();
+  return true;
+}
+async function escolherModeloParaAplicar() {
+  const modelos = await listarModelos();
+  if (!modelos.length) { toast('Você ainda não tem modelos. Crie um na aba 📋 Modelos.', 'aviso'); irParaAba('modelos'); return; }
+  const escolha = await uiMenu('Aplicar qual modelo?', modelos.map(m => ({ val: m.id, label: `📋 ${m.nome} (${contarExsTreino(m.treino)} exs)` })));
+  if (!escolha) return;
+  const m = await dbGet(STORE_MODELOS, escolha);
+  if (!m) return;
+  if (await aplicarModeloTreino(m)) { irParaAba('treino'); toast(`Modelo "${m.nome}" aplicado. Ajuste e clique em 💾 Salvar Aluno.`); }
+}
+async function aplicarModeloNoAlunoAtivo(id) {
+  const m = await dbGet(STORE_MODELOS, id);
+  if (!m) return;
+  if (await aplicarModeloTreino(m)) { irParaAba('treino'); toast(`Modelo "${m.nome}" aplicado. Vá na 👤 Ficha e clique em 💾 Salvar Aluno.`); }
 }
 
 // ===================== CRUD de Alunos =====================
@@ -6412,6 +6599,7 @@ async function importarAlunos(event) {
   try {
     await abrirDB();
     await renderListaAlunos();
+    try { await renderListaModelos(); } catch (e) { console.warn('lista modelos:', e); }
     try { await popularSeletorPessoas(); } catch (e) { console.warn('seletor pessoas:', e); }
     
     // Auto-save: listener para todos os campos da ficha
